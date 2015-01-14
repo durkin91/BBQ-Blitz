@@ -15,6 +15,7 @@
 		15AB578F1A66695500DFB4D6 /* Level_3.json in Resources */ = {isa = PBXBuildFile; fileRef = 15AB578A1A66695500DFB4D6 /* Level_3.json */; };
 		15AB57901A66695500DFB4D6 /* Level_4.json in Resources */ = {isa = PBXBuildFile; fileRef = 15AB578B1A66695500DFB4D6 /* Level_4.json */; };
 		15AB57931A6669CC00DFB4D6 /* BBQTile.m in Sources */ = {isa = PBXBuildFile; fileRef = 15AB57921A6669CC00DFB4D6 /* BBQTile.m */; };
+		15AB57961A66994B00DFB4D6 /* BBQSwipe.m in Sources */ = {isa = PBXBuildFile; fileRef = 15AB57951A66994B00DFB4D6 /* BBQSwipe.m */; };
 		5B12100C19748281004C1E1D /* BridgeKitV3.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B12100B19748281004C1E1D /* BridgeKitV3.framework */; };
 		5B121029197484DA004C1E1D /* BridgeKitV3.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B12100B19748281004C1E1D /* BridgeKitV3.framework */; };
 		5B12102A197484DD004C1E1D /* BbqBlitzActivity.java in Sources */ = {isa = PBXBuildFile; fileRef = 5B12101B19748413004C1E1D /* BbqBlitzActivity.java */; };
@@ -187,6 +188,8 @@
 		15AB578B1A66695500DFB4D6 /* Level_4.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Level_4.json; sourceTree = "<group>"; };
 		15AB57911A6669CC00DFB4D6 /* BBQTile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQTile.h; path = Source/BBQTile.h; sourceTree = SOURCE_ROOT; };
 		15AB57921A6669CC00DFB4D6 /* BBQTile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQTile.m; path = Source/BBQTile.m; sourceTree = SOURCE_ROOT; };
+		15AB57941A66994B00DFB4D6 /* BBQSwipe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQSwipe.h; path = Source/BBQSwipe.h; sourceTree = "<group>"; };
+		15AB57951A66994B00DFB4D6 /* BBQSwipe.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQSwipe.m; path = Source/BBQSwipe.m; sourceTree = "<group>"; };
 		5B12100919748273004C1E1D /* libEGL.so */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libEGL.so; path = /usr/lib/armv7a/libEGL.so; sourceTree = SDKROOT; };
 		5B12100B19748281004C1E1D /* BridgeKitV3.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BridgeKitV3.framework; path = System/Library/Frameworks/BridgeKitV3.framework; sourceTree = SDKROOT; };
 		5B12100F197483EE004C1E1D /* ic_launcher.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ic_launcher.png; sourceTree = "<group>"; };
@@ -498,6 +501,8 @@
 				15AB57811A661A9F00DFB4D6 /* BBQCookie.m */,
 				15AB57911A6669CC00DFB4D6 /* BBQTile.h */,
 				15AB57921A6669CC00DFB4D6 /* BBQTile.m */,
+				15AB57941A66994B00DFB4D6 /* BBQSwipe.h */,
+				15AB57951A66994B00DFB4D6 /* BBQSwipe.m */,
 				D352B48019EC608A00829775 /* MetalShaders */,
 			);
 			name = Source;
@@ -906,6 +911,7 @@
 			files = (
 				B73789871807631A0076A88C /* main.m in Sources */,
 				15AB57851A66207400DFB4D6 /* BBQLevel.m in Sources */,
+				15AB57961A66994B00DFB4D6 /* BBQSwipe.m in Sources */,
 				15AB57821A661A9F00DFB4D6 /* BBQCookie.m in Sources */,
 				7A046D8C19E8A20E004C4763 /* MainScene.m in Sources */,
 				5B121038197487F2004C1E1D /* AppDelegate.m in Sources */,

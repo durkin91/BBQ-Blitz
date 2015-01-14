@@ -15,6 +15,8 @@ static const NSInteger NumRows = 9;
 
 @interface BBQLevel : NSObject
 
+
+
 - (NSSet *)shuffle;
 
 - (BBQCookie *)cookieAtColumn:(NSInteger)column row:(NSInteger)row;
