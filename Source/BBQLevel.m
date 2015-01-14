@@ -34,7 +34,7 @@
             if (_tiles[column][row] != nil) {
             
             //choose a random cookie number
-            NSUInteger cookieType = arc4random_uniform(NumCookieTypes) + 1;
+            NSUInteger cookieType = arc4random_uniform(NumStartingCookies) + 1;
             
             BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
             

@@ -15,12 +15,38 @@ static const CGFloat TileHeight = 36.0;
 
 @implementation MainScene
 
+#pragma mark - Starting Up
+
 -(void)didLoadFromCCB {
     
     //load the level and begin game
     self.level = [[BBQLevel alloc] initWithFile:@"Level_1"];
     [self addTiles];
     [self beginGame];
+}
+
+- (void)onEnter {
+    [super onEnter];
+    
+    //Swipe Up
+    UISwipeGestureRecognizer *swipeUpGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeUpFrom:)];
+    swipeUpGestureRecognizer.direction = UISwipeGestureRecognizerDirectionUp;
+    [[UIApplication sharedApplication].delegate.window addGestureRecognizer:swipeUpGestureRecognizer];
+    
+    //Swipe Down
+    UISwipeGestureRecognizer *swipeDownGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeDownFrom:)];
+    swipeDownGestureRecognizer.direction = UISwipeGestureRecognizerDirectionDown;
+    [[UIApplication sharedApplication].delegate.window addGestureRecognizer:swipeDownGestureRecognizer];
+    
+    //Swipe Left
+    UISwipeGestureRecognizer *swipeLeftGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeLeftFrom:)];
+    swipeLeftGestureRecognizer.direction = UISwipeGestureRecognizerDirectionLeft;
+    [[UIApplication sharedApplication].delegate.window addGestureRecognizer:swipeLeftGestureRecognizer];
+    
+    //Swipe Right
+    UISwipeGestureRecognizer *swipeRightGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeRightFrom:)];
+    swipeRightGestureRecognizer.direction = UISwipeGestureRecognizerDirectionRight;
+    [[UIApplication sharedApplication].delegate.window addGestureRecognizer:swipeRightGestureRecognizer];
 }
 
 - (void)addTiles {
@@ -58,6 +84,24 @@ static const CGFloat TileHeight = 36.0;
 - (void)shuffle {
     NSSet *newCookies = [self.level shuffle];
     [self addSpritesForCookies:newCookies];
+}
+
+#pragma mark - Gesture Recognizers
+
+- (void)handleSwipeUpFrom:(UIGestureRecognizer *)recognizer {
+    NSLog(@"Swipe Up");
+}
+
+- (void)handleSwipeDownFrom:(UIGestureRecognizer *)recognizer {
+    NSLog(@"Swipe Down");
+}
+
+- (void)handleSwipeLeftFrom:(UIGestureRecognizer *)recognizer {
+    NSLog(@"Swipe Left");
+}
+
+- (void)handleSwipeRightFrom:(UIGestureRecognizer *)recognizer {
+    NSLog(@"Swipe Right");
 }
 
 @end

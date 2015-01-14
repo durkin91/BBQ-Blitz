@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 
 static const NSUInteger NumCookieTypes = 6;
+static const NSUInteger NumStartingCookies = 2;
 
 @interface BBQCookie : NSObject
 
