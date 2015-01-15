@@ -19,24 +19,28 @@
         //UP swipe
         if ([swipeDirection isEqualToString:@"Up"]) {
             for (int column = 0; column < NumColumns ; column++) {
-                for (int row = NumRows; row >= 0; row--) {
+                //starts checking in first column, second row from the top
+                for (int row = NumRows - 2; row >= 0; row--) {
                     BBQTile *tileA = [level tileAtColumn:column row:row];
-                    
-                    if (row < NumRows && tileA != nil) {
+                    if (tileA != nil) {
+                        BBQCookie *cookieA = [level cookieAtColumn:column row:row];
                         BBQTile *tileB = [level tileAtColumn:column row:row + 1];
-                        if (tileB != nil) {
-                            BBQCookie *cookieA = [level cookieAtColumn:column row:row];
+                        if (tileB != nil && cookieA != nil) {
                             BBQCookie *cookieB = [level cookieAtColumn:column row:row + 1];
+                            //[self tryCombineCookieA:cookieA withCookieB:cookieB];
                             
+                            //Check that there is a cookie to combine with
                             if (cookieB == nil) {
-                                cookieA = cookieB;
+                                NSLog(@"moving %@ up one space", cookieA);
+                                [level replaceCookieAtColumn:column row:row+1 withCookie:cookieA];
                             }
                             
-                            else if (cookieA.cookieType == cookieB.cookieType) {
-                                cookieA.cookieType == cookieA.cookieType + 1;
-                                cookieB = nil;
+                            if (cookieA.cookieType == cookieB.cookieType) {
+                                NSLog(@"combining cookie A: %@ with cookie B: %@", cookieA, cookieB);
+                                cookieB.cookieType = cookieB.cookieType + 1;
+                                [level replaceCookieAtColumn:column row:row withCookie:nil];
                             }
-                            
+
                         }
                     }
                 }
@@ -44,6 +48,21 @@
         }
     }
     return self;
+}
+
+- (void)tryCombineCookieA:(BBQCookie *)cookieA withCookieB:(BBQCookie *)cookieB {
+    
+    //Check that there is a cookie to combine with
+    if (cookieB == nil) {
+        NSLog(@"moving %@ up one space", cookieA);
+        cookieA = cookieB;
+    }
+    
+    if (cookieA.cookieType == cookieB.cookieType) {
+        NSLog(@"combining cookie A: %@ with cookie B: %@", cookieA, cookieB);
+        cookieB.cookieType = cookieB.cookieType + 1;
+        cookieA = nil;
+    }
 }
 
 

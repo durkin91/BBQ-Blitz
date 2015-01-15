@@ -1,6 +1,7 @@
 #import "MainScene.h"
 #import "BBQCookie.h"
 #import "BBQLevel.h"
+#import "BBQSwipe.h"
 
 static const CGFloat TileWidth = 32.0;
 static const CGFloat TileHeight = 36.0;
@@ -90,6 +91,7 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)handleSwipeUpFrom:(UIGestureRecognizer *)recognizer {
     NSLog(@"Swipe Up");
+    BBQSwipe *swipe = [[BBQSwipe alloc] initWithDirection:@"Up" forLevel:self.level];
 }
 
 - (void)handleSwipeDownFrom:(UIGestureRecognizer *)recognizer {

@@ -23,5 +23,6 @@ static const NSInteger NumRows = 9;
 
 - (instancetype)initWithFile:(NSString *)filename;
 - (BBQTile *)tileAtColumn:(NSInteger)column row:(NSInteger)row;
+- (void)replaceCookieAtColumn:(int)column row:(int)row withCookie:(BBQCookie *)cookie;
 
 @end

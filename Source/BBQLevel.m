@@ -20,6 +20,10 @@
     return _cookies[column][row];
 }
 
+- (void)replaceCookieAtColumn:(int)column row:(int)row withCookie:(BBQCookie *)cookie {
+    _cookies[column][row] = cookie;
+}
+
 - (NSSet *)shuffle {
     return [self createInitialCookies];
 }
