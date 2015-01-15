@@ -9,8 +9,9 @@
 #import <Foundation/Foundation.h>
 #import "BBQLevel.h"
 
-@interface BBQSwipe : NSObject
+@interface BBQGameLogic : NSObject
 
-- (instancetype)initWithDirection:(NSString *)swipeDirection forLevel:(BBQLevel *)level;
+- (NSMutableArray *)swipe:(NSString *)swipeDirection forLevel:(BBQLevel *)level;
+
 
 @end

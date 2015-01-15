@@ -1,7 +1,8 @@
 #import "MainScene.h"
 #import "BBQCookie.h"
 #import "BBQLevel.h"
-#import "BBQSwipe.h"
+#import "BBQGameLogic.h"
+#import "BBQCombineCookies.h"
 
 static const CGFloat TileWidth = 32.0;
 static const CGFloat TileHeight = 36.0;
@@ -11,24 +12,21 @@ static const CGFloat TileHeight = 36.0;
 @property (strong, nonatomic) CCNode *gameLayer;
 @property (strong, nonatomic) CCNode *cookiesLayer;
 @property (strong, nonatomic) CCNode *tilesLayer;
+@property (strong, nonatomic) BBQGameLogic *gameLogic;
 
 @end
 
 @implementation MainScene
 
-#pragma mark - Starting Up
+#pragma mark - Setting Up
 
 -(void)didLoadFromCCB {
     
-    //load the level and begin game
+    //load the level, setup gameLogic and begin game
     self.level = [[BBQLevel alloc] initWithFile:@"Level_1"];
-    [self addTiles];
-    [self beginGame];
-}
-
-- (void)onEnter {
-    [super onEnter];
+    self.gameLogic = [[BBQGameLogic alloc] init];
     
+    //**** Add Gesture Recognizers ****//
     //Swipe Up
     UISwipeGestureRecognizer *swipeUpGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeUpFrom:)];
     swipeUpGestureRecognizer.direction = UISwipeGestureRecognizerDirectionUp;
@@ -48,6 +46,10 @@ static const CGFloat TileHeight = 36.0;
     UISwipeGestureRecognizer *swipeRightGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeRightFrom:)];
     swipeRightGestureRecognizer.direction = UISwipeGestureRecognizerDirectionRight;
     [[UIApplication sharedApplication].delegate.window addGestureRecognizer:swipeRightGestureRecognizer];
+
+    //Start the game
+    [self addTiles];
+    [self beginGame];
 }
 
 - (void)addTiles {
@@ -91,7 +93,7 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)handleSwipeUpFrom:(UIGestureRecognizer *)recognizer {
     NSLog(@"Swipe Up");
-    BBQSwipe *swipe = [[BBQSwipe alloc] initWithDirection:@"Up" forLevel:self.level];
+    NSMutableArray *animationsToPerform = [self.gameLogic swipe:@"Up" forLevel:self.level];
 }
 
 - (void)handleSwipeDownFrom:(UIGestureRecognizer *)recognizer {
@@ -106,6 +108,30 @@ static const CGFloat TileHeight = 36.0;
     NSLog(@"Swipe Right");
 }
 
-#pragma mark - 
+#pragma mark - Animations
+
+- (void)animateCombos:(NSMutableArray *)combosArray completion:(dispatch_block_t)completion {
+    for (BBQCombineCookies *combo in combosArray) {
+        
+        //Put cookie A on top and move cookie A to cookie B, then remove cookie A
+        combo.cookieA.sprite.zOrder = 100;
+        combo.cookieB.sprite.zOrder = 90;
+        
+        const NSTimeInterval duration = 0.3;
+        CCActionMoveTo *moveA = [CCActionMoveTo actionWithDuration:duration position:combo.cookieB.sprite.position];
+        CCActionRemove *removeA = [CCActionRemove action];
+        
+        //Change sprite texture for cookie B
+        CCActionCallBlock *changeSprite = [CCActionCallBlock actionWithBlock:^{
+            NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [combo.cookieB spriteName]];
+            CCTexture *texture = [CCTexture textureWithFile:directory];
+            combo.cookieB.sprite.texture = texture;
+        }];
+        
+        CCActionSequence *sequenceA = [CCActionSequence actions:moveA, removeA, changeSprite, [CCActionCallBlock actionWithBlock:completion], nil];
+        [combo.cookieA.sprite runAction:sequenceA];
+    }
+}
+
 
 @end
