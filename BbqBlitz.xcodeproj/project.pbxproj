@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		151FBA6B1A69362D00132373 /* BBQMoveCookie.m in Sources */ = {isa = PBXBuildFile; fileRef = 151FBA6A1A69362D00132373 /* BBQMoveCookie.m */; };
 		15AB57821A661A9F00DFB4D6 /* BBQCookie.m in Sources */ = {isa = PBXBuildFile; fileRef = 15AB57811A661A9F00DFB4D6 /* BBQCookie.m */; };
 		15AB57851A66207400DFB4D6 /* BBQLevel.m in Sources */ = {isa = PBXBuildFile; fileRef = 15AB57841A66207400DFB4D6 /* BBQLevel.m */; };
 		15AB578C1A66695500DFB4D6 /* Level_0.json in Resources */ = {isa = PBXBuildFile; fileRef = 15AB57871A66695500DFB4D6 /* Level_0.json */; };
@@ -16,7 +17,7 @@
 		15AB57901A66695500DFB4D6 /* Level_4.json in Resources */ = {isa = PBXBuildFile; fileRef = 15AB578B1A66695500DFB4D6 /* Level_4.json */; };
 		15AB57931A6669CC00DFB4D6 /* BBQTile.m in Sources */ = {isa = PBXBuildFile; fileRef = 15AB57921A6669CC00DFB4D6 /* BBQTile.m */; };
 		15AB57961A66994B00DFB4D6 /* BBQGameLogic.m in Sources */ = {isa = PBXBuildFile; fileRef = 15AB57951A66994B00DFB4D6 /* BBQGameLogic.m */; };
-		15AB57991A6769B900DFB4D6 /* BBQCombineCookies.m in Sources */ = {isa = PBXBuildFile; fileRef = 15AB57981A6769B900DFB4D6 /* BBQCombineCookies.m */; };
+		15AB57991A6769B900DFB4D6 /* BBQCombo.m in Sources */ = {isa = PBXBuildFile; fileRef = 15AB57981A6769B900DFB4D6 /* BBQCombo.m */; };
 		5B12100C19748281004C1E1D /* BridgeKitV3.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B12100B19748281004C1E1D /* BridgeKitV3.framework */; };
 		5B121029197484DA004C1E1D /* BridgeKitV3.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B12100B19748281004C1E1D /* BridgeKitV3.framework */; };
 		5B12102A197484DD004C1E1D /* BbqBlitzActivity.java in Sources */ = {isa = PBXBuildFile; fileRef = 5B12101B19748413004C1E1D /* BbqBlitzActivity.java */; };
@@ -178,6 +179,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		151FBA691A69362D00132373 /* BBQMoveCookie.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQMoveCookie.h; path = Source/BBQMoveCookie.h; sourceTree = "<group>"; };
+		151FBA6A1A69362D00132373 /* BBQMoveCookie.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQMoveCookie.m; path = Source/BBQMoveCookie.m; sourceTree = "<group>"; };
 		15AB57801A661A9F00DFB4D6 /* BBQCookie.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQCookie.h; path = Source/BBQCookie.h; sourceTree = "<group>"; };
 		15AB57811A661A9F00DFB4D6 /* BBQCookie.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQCookie.m; path = Source/BBQCookie.m; sourceTree = "<group>"; };
 		15AB57831A66207400DFB4D6 /* BBQLevel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQLevel.h; path = Source/BBQLevel.h; sourceTree = "<group>"; };
@@ -191,8 +194,8 @@
 		15AB57921A6669CC00DFB4D6 /* BBQTile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQTile.m; path = Source/BBQTile.m; sourceTree = SOURCE_ROOT; };
 		15AB57941A66994B00DFB4D6 /* BBQGameLogic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQGameLogic.h; path = Source/BBQGameLogic.h; sourceTree = "<group>"; };
 		15AB57951A66994B00DFB4D6 /* BBQGameLogic.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQGameLogic.m; path = Source/BBQGameLogic.m; sourceTree = "<group>"; };
-		15AB57971A6769B900DFB4D6 /* BBQCombineCookies.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQCombineCookies.h; path = Source/BBQCombineCookies.h; sourceTree = "<group>"; };
-		15AB57981A6769B900DFB4D6 /* BBQCombineCookies.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQCombineCookies.m; path = Source/BBQCombineCookies.m; sourceTree = "<group>"; };
+		15AB57971A6769B900DFB4D6 /* BBQCombo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQCombo.h; path = Source/BBQCombo.h; sourceTree = "<group>"; };
+		15AB57981A6769B900DFB4D6 /* BBQCombo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQCombo.m; path = Source/BBQCombo.m; sourceTree = "<group>"; };
 		5B12100919748273004C1E1D /* libEGL.so */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libEGL.so; path = /usr/lib/armv7a/libEGL.so; sourceTree = SDKROOT; };
 		5B12100B19748281004C1E1D /* BridgeKitV3.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BridgeKitV3.framework; path = System/Library/Frameworks/BridgeKitV3.framework; sourceTree = SDKROOT; };
 		5B12100F197483EE004C1E1D /* ic_launcher.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ic_launcher.png; sourceTree = "<group>"; };
@@ -506,8 +509,10 @@
 				15AB57921A6669CC00DFB4D6 /* BBQTile.m */,
 				15AB57941A66994B00DFB4D6 /* BBQGameLogic.h */,
 				15AB57951A66994B00DFB4D6 /* BBQGameLogic.m */,
-				15AB57971A6769B900DFB4D6 /* BBQCombineCookies.h */,
-				15AB57981A6769B900DFB4D6 /* BBQCombineCookies.m */,
+				15AB57971A6769B900DFB4D6 /* BBQCombo.h */,
+				15AB57981A6769B900DFB4D6 /* BBQCombo.m */,
+				151FBA691A69362D00132373 /* BBQMoveCookie.h */,
+				151FBA6A1A69362D00132373 /* BBQMoveCookie.m */,
 				D352B48019EC608A00829775 /* MetalShaders */,
 			);
 			name = Source;
@@ -915,11 +920,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				B73789871807631A0076A88C /* main.m in Sources */,
+				151FBA6B1A69362D00132373 /* BBQMoveCookie.m in Sources */,
 				15AB57851A66207400DFB4D6 /* BBQLevel.m in Sources */,
 				15AB57961A66994B00DFB4D6 /* BBQGameLogic.m in Sources */,
 				15AB57821A661A9F00DFB4D6 /* BBQCookie.m in Sources */,
 				7A046D8C19E8A20E004C4763 /* MainScene.m in Sources */,
-				15AB57991A6769B900DFB4D6 /* BBQCombineCookies.m in Sources */,
+				15AB57991A6769B900DFB4D6 /* BBQCombo.m in Sources */,
 				5B121038197487F2004C1E1D /* AppDelegate.m in Sources */,
 				15AB57931A6669CC00DFB4D6 /* BBQTile.m in Sources */,
 			);

@@ -9,7 +9,7 @@
 #import "BBQGameLogic.h"
 #import "BBQCookie.h"
 #import "BBQTile.h"
-#import "BBQCombineCookies.h"
+#import "BBQCombo.h"
 
 @implementation BBQGameLogic
 
@@ -50,8 +50,10 @@
     
     else if (cookieA.cookieType == cookieB.cookieType) {
         NSLog(@"combining cookie A: %@ with cookie B: %@", cookieA, cookieB);
-        BBQCombineCookies *combo = [[BBQCombineCookies alloc] initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB];
-        [level replaceCookieAtColumn:column row:row withCookie:nil];
+        
+        //create the combo object
+        BBQCombo *combo = [[BBQCombo alloc] initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB];
+        [level performCombo:combo];
         [array addObject:combo];
     }
 }

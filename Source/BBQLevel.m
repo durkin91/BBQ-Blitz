@@ -8,6 +8,7 @@
 
 #import "BBQLevel.h"
 
+
 @implementation BBQLevel {
     BBQCookie *_cookies[NumColumns][NumRows];
     BBQTile *_tiles[NumColumns][NumRows];
@@ -22,6 +23,28 @@
 
 - (void)replaceCookieAtColumn:(int)column row:(int)row withCookie:(BBQCookie *)cookie {
     _cookies[column][row] = cookie;
+}
+
+- (void)performCombo:(BBQCombo *)combo {
+    //detect whether it is a horizontal or vertical swipe
+    if (combo.cookieA.column == combo.cookieB.column) {
+        NSInteger column = combo.cookieA.column;
+        NSInteger rowA = combo.cookieA.row;
+        
+        //Upgrade cookie B and set cookie A to nil
+        combo.cookieB.cookieType = combo.cookieB.cookieType + 1;
+        _cookies[column][rowA] = nil;
+        
+        //Move all cookies in that column up one row
+        for (int row = rowA - 1; row >= 0; row -- ) {
+            if ([self tileAtColumn:column row:row + 1] != nil && [self cookieAtColumn:column row:row + 1] == nil) {
+                BBQCookie *cookie = _cookies[column][row];
+                cookie.row = row + 1;
+                _cookies[column][row + 1] = cookie;
+                _cookies[column][row] = nil;
+            }
+        }
+    }
 }
 
 - (NSSet *)shuffle {

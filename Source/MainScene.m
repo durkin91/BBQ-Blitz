@@ -2,7 +2,7 @@
 #import "BBQCookie.h"
 #import "BBQLevel.h"
 #import "BBQGameLogic.h"
-#import "BBQCombineCookies.h"
+#import "BBQCombo.h"
 
 static const CGFloat TileWidth = 32.0;
 static const CGFloat TileHeight = 36.0;
@@ -46,6 +46,9 @@ static const CGFloat TileHeight = 36.0;
     UISwipeGestureRecognizer *swipeRightGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeRightFrom:)];
     swipeRightGestureRecognizer.direction = UISwipeGestureRecognizerDirectionRight;
     [[UIApplication sharedApplication].delegate.window addGestureRecognizer:swipeRightGestureRecognizer];
+    
+    //***load all cookie textures***//
+    
 
     //Start the game
     [self addTiles];
@@ -93,7 +96,11 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)handleSwipeUpFrom:(UIGestureRecognizer *)recognizer {
     NSLog(@"Swipe Up");
-    NSMutableArray *animationsToPerform = [self.gameLogic swipe:@"Up" forLevel:self.level];
+    self.userInteractionEnabled = NO;
+    NSMutableArray *combosToAnimate = [self.gameLogic swipe:@"Up" forLevel:self.level];
+    [self animateCombos:combosToAnimate completion:^{
+        self.userInteractionEnabled = YES;
+    }];
 }
 
 - (void)handleSwipeDownFrom:(UIGestureRecognizer *)recognizer {
@@ -111,21 +118,22 @@ static const CGFloat TileHeight = 36.0;
 #pragma mark - Animations
 
 - (void)animateCombos:(NSMutableArray *)combosArray completion:(dispatch_block_t)completion {
-    for (BBQCombineCookies *combo in combosArray) {
+    for (BBQCombo *combo in combosArray) {
         
         //Put cookie A on top and move cookie A to cookie B, then remove cookie A
         combo.cookieA.sprite.zOrder = 100;
         combo.cookieB.sprite.zOrder = 90;
         
-        const NSTimeInterval duration = 0.3;
+        const NSTimeInterval duration = 0.2;
         CCActionMoveTo *moveA = [CCActionMoveTo actionWithDuration:duration position:combo.cookieB.sprite.position];
         CCActionRemove *removeA = [CCActionRemove action];
         
         //Change sprite texture for cookie B
         CCActionCallBlock *changeSprite = [CCActionCallBlock actionWithBlock:^{
             NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [combo.cookieB spriteName]];
-            CCTexture *texture = [CCTexture textureWithFile:directory];
-            combo.cookieB.sprite.texture = texture;
+            CGPoint position = combo.cookieB.sprite.position;
+            combo.cookieB.sprite = [CCSprite spriteWithImageNamed:directory];
+            combo.cookieB.sprite.position = position;
         }];
         
         CCActionSequence *sequenceA = [CCActionSequence actions:moveA, removeA, changeSprite, [CCActionCallBlock actionWithBlock:completion], nil];
