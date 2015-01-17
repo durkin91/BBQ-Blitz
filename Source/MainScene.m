@@ -106,14 +106,29 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)handleSwipeDownFrom:(UIGestureRecognizer *)recognizer {
     NSLog(@"Swipe Down");
+    self.userInteractionEnabled = NO;
+    NSDictionary *animations = [self.gameLogic swipe:@"Down" forLevel:self.level];
+    [self animateSwipe:animations completion:^{
+        self.userInteractionEnabled = YES;
+    }];
 }
 
 - (void)handleSwipeLeftFrom:(UIGestureRecognizer *)recognizer {
     NSLog(@"Swipe Left");
+    self.userInteractionEnabled = NO;
+    NSDictionary *animations = [self.gameLogic swipe:@"Left" forLevel:self.level];
+    [self animateSwipe:animations completion:^{
+        self.userInteractionEnabled = YES;
+    }];
 }
 
 - (void)handleSwipeRightFrom:(UIGestureRecognizer *)recognizer {
     NSLog(@"Swipe Right");
+    self.userInteractionEnabled = NO;
+    NSDictionary *animations = [self.gameLogic swipe:@"Right" forLevel:self.level];
+    [self animateSwipe:animations completion:^{
+        self.userInteractionEnabled = YES;
+    }];
 }
 
 #pragma mark - Animations
@@ -129,24 +144,22 @@ static const CGFloat TileHeight = 36.0;
         combo.cookieB.sprite.zOrder = 90;
         
         CCActionMoveTo *moveA = [CCActionMoveTo actionWithDuration:duration position:combo.cookieB.sprite.position];
+        CCActionEaseIn *ease = [CCActionEaseIn actionWithAction:moveA];
         CCActionRemove *removeA = [CCActionRemove action];
         
         //Change sprite texture for cookie B
         CCActionCallBlock *changeSprite = [CCActionCallBlock actionWithBlock:^{
             NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [combo.cookieB spriteName]];
-            CGPoint position = combo.cookieB.sprite.position;
-            combo.cookieB.sprite = [CCSprite spriteWithImageNamed:directory];
-            combo.cookieB.sprite.position = position;
+            CCTexture *texture = [CCTexture textureWithFile:directory];
+            combo.cookieB.sprite.texture = texture;
         }];
         
-        CCActionSequence *sequenceA = [CCActionSequence actions:moveA, removeA, changeSprite, [CCActionCallBlock actionWithBlock:completion], nil];
+        CCActionSequence *sequenceA = [CCActionSequence actions:ease, removeA, changeSprite, [CCActionCallBlock actionWithBlock:completion], nil];
         [combo.cookieA.sprite runAction:sequenceA];
         
     }
     
     for (BBQMoveCookie *movement in animations[MOVEMENTS]) {
-        NSInteger column = movement.cookieA.column;
-        NSInteger row = movement.cookieA.row;
         CCActionMoveTo *moveAnimation = [CCActionMoveTo actionWithDuration:duration position:movement.destination];
         [movement.cookieA.sprite runAction:moveAnimation];
     }
