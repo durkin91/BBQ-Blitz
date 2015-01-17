@@ -9,9 +9,12 @@
 #import <Foundation/Foundation.h>
 #import "BBQLevel.h"
 
+#define COMBOS @"Combos"
+#define MOVEMENTS @"Movements"
+
 @interface BBQGameLogic : NSObject
 
-- (NSMutableArray *)swipe:(NSString *)swipeDirection forLevel:(BBQLevel *)level;
+- (NSDictionary *)swipe:(NSString *)swipeDirection forLevel:(BBQLevel *)level;
 
 
 @end

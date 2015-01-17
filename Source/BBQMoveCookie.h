@@ -12,8 +12,8 @@
 @interface BBQMoveCookie : NSObject
 
 @property (strong, nonatomic) BBQCookie *cookieA;
-@property (strong, nonatomic) BBQCookie *cookieB;
+@property (nonatomic) CGPoint destination;
 
-- (instancetype)initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB;
+-(instancetype)initWithCookieA:(BBQCookie *)cookieA destination:(CGPoint)position;
 
 @end

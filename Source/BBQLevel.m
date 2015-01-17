@@ -25,26 +25,35 @@
     _cookies[column][row] = cookie;
 }
 
-- (void)performCombo:(BBQCombo *)combo {
+- (NSMutableArray *)performCombo:(BBQCombo *)combo {
     //detect whether it is a horizontal or vertical swipe
+    NSMutableArray *cookieMovements = [@[] mutableCopy];
     if (combo.cookieA.column == combo.cookieB.column) {
         NSInteger column = combo.cookieA.column;
         NSInteger rowA = combo.cookieA.row;
         
-        //Upgrade cookie B and set cookie A to nil
+        //Upgrade cookie B, get cookie A's position and set cookie A to nil
         combo.cookieB.cookieType = combo.cookieB.cookieType + 1;
+        CGPoint destination = combo.cookieA.sprite.position;
         _cookies[column][rowA] = nil;
         
         //Move all cookies in that column up one row
         for (int row = rowA - 1; row >= 0; row -- ) {
+            BBQCookie *cookieA = _cookies[column][row];
             if ([self tileAtColumn:column row:row + 1] != nil && [self cookieAtColumn:column row:row + 1] == nil) {
-                BBQCookie *cookie = _cookies[column][row];
-                cookie.row = row + 1;
-                _cookies[column][row + 1] = cookie;
+                NSLog(@"destination: %@", NSStringFromCGPoint(destination));
+                BBQMoveCookie *moveCookie = [[BBQMoveCookie alloc] initWithCookieA:cookieA destination:destination];
+                [cookieMovements addObject:moveCookie];
+                
+                cookieA.row = row + 1;
+                _cookies[column][row + 1] = cookieA;
                 _cookies[column][row] = nil;
             }
+            //move down one row
+            destination = cookieA.sprite.position;
         }
     }
+    return cookieMovements;
 }
 
 - (NSSet *)shuffle {

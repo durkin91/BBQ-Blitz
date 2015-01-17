@@ -10,17 +10,17 @@
 
 @implementation BBQMoveCookie
 
--(instancetype)initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB {
+-(instancetype)initWithCookieA:(BBQCookie *)cookieA destination:(CGPoint)position {
     self = [super init];
     if (self) {
         self.cookieA = cookieA;
-        self.cookieB = cookieB;
+        self.destination = position;
     }
     return self;
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"%@ move cookieA: %@ to position of cookieB: %@", [super description], self.cookieA, self.cookieB];
+    return [NSString stringWithFormat:@"%@ move cookieA: %@ to position: %@", [super description], self.cookieA, NSStringFromCGPoint(self.destination)];
 }
 
 

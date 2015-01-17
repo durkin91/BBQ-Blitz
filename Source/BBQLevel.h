@@ -10,6 +10,7 @@
 #import "BBQCookie.h"
 #import "BBQTile.h"
 #import "BBQCombo.h"
+#import "BBQMoveCookie.h"
 
 static const NSInteger NumColumns = 9;
 static const NSInteger NumRows = 9;
@@ -25,6 +26,6 @@ static const NSInteger NumRows = 9;
 - (instancetype)initWithFile:(NSString *)filename;
 - (BBQTile *)tileAtColumn:(NSInteger)column row:(NSInteger)row;
 - (void)replaceCookieAtColumn:(int)column row:(int)row withCookie:(BBQCookie *)cookie;
-- (void)performCombo:(BBQCombo *)combo;
+- (NSMutableArray *)performCombo:(BBQCombo *)combo;
 
 @end

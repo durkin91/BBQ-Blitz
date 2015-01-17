@@ -3,6 +3,7 @@
 #import "BBQLevel.h"
 #import "BBQGameLogic.h"
 #import "BBQCombo.h"
+#import "BBQMoveCookie.h"
 
 static const CGFloat TileWidth = 32.0;
 static const CGFloat TileHeight = 36.0;
@@ -97,8 +98,8 @@ static const CGFloat TileHeight = 36.0;
 - (void)handleSwipeUpFrom:(UIGestureRecognizer *)recognizer {
     NSLog(@"Swipe Up");
     self.userInteractionEnabled = NO;
-    NSMutableArray *combosToAnimate = [self.gameLogic swipe:@"Up" forLevel:self.level];
-    [self animateCombos:combosToAnimate completion:^{
+    NSDictionary *animations = [self.gameLogic swipe:@"Up" forLevel:self.level];
+    [self animateSwipe:animations completion:^{
         self.userInteractionEnabled = YES;
     }];
 }
@@ -117,14 +118,16 @@ static const CGFloat TileHeight = 36.0;
 
 #pragma mark - Animations
 
-- (void)animateCombos:(NSMutableArray *)combosArray completion:(dispatch_block_t)completion {
-    for (BBQCombo *combo in combosArray) {
+- (void)animateSwipe:(NSDictionary *)animations completion:(dispatch_block_t)completion {
+    
+    const NSTimeInterval duration = 0.2;
+    
+    for (BBQCombo *combo in animations[COMBOS]) {
         
         //Put cookie A on top and move cookie A to cookie B, then remove cookie A
         combo.cookieA.sprite.zOrder = 100;
         combo.cookieB.sprite.zOrder = 90;
         
-        const NSTimeInterval duration = 0.2;
         CCActionMoveTo *moveA = [CCActionMoveTo actionWithDuration:duration position:combo.cookieB.sprite.position];
         CCActionRemove *removeA = [CCActionRemove action];
         
@@ -138,6 +141,14 @@ static const CGFloat TileHeight = 36.0;
         
         CCActionSequence *sequenceA = [CCActionSequence actions:moveA, removeA, changeSprite, [CCActionCallBlock actionWithBlock:completion], nil];
         [combo.cookieA.sprite runAction:sequenceA];
+        
+    }
+    
+    for (BBQMoveCookie *movement in animations[MOVEMENTS]) {
+        NSInteger column = movement.cookieA.column;
+        NSInteger row = movement.cookieA.row;
+        CCActionMoveTo *moveAnimation = [CCActionMoveTo actionWithDuration:duration position:movement.destination];
+        [movement.cookieA.sprite runAction:moveAnimation];
     }
 }
 

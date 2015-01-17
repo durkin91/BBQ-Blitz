@@ -13,9 +13,12 @@
 
 @implementation BBQGameLogic
 
-- (NSMutableArray *)swipe:(NSString *)swipeDirection forLevel:(BBQLevel *)level {
+- (NSDictionary *)swipe:(NSString *)swipeDirection forLevel:(BBQLevel *)level {
     
-    NSMutableArray *animationsToPerform = [@[] mutableCopy];
+    NSDictionary *animationsToPerform = @{
+                                                  COMBOS : [@[] mutableCopy],
+                                                  MOVEMENTS : [@[] mutableCopy],
+                                                  };
         
         //UP swipe
         if ([swipeDirection isEqualToString:@"Up"]) {
@@ -28,7 +31,7 @@
                         BBQTile *tileB = [level tileAtColumn:column row:row + 1];
                         if (tileB != nil && cookieA != nil) {
                             BBQCookie *cookieB = [level cookieAtColumn:column row:row + 1];
-                            [self tryCombineCookieA:cookieA withCookieB:cookieB forLevel:level column:column row:row array:animationsToPerform];
+                            [self tryCombineCookieA:cookieA withCookieB:cookieB forLevel:level column:column row:row animations:animationsToPerform];
 
                         }
                     }
@@ -40,21 +43,25 @@
 }
 
 //tries to combine the cookies, and either combines them, does nothing or moves the cookie to the right place.
-- (void)tryCombineCookieA:(BBQCookie *)cookieA withCookieB:(BBQCookie *)cookieB forLevel:(BBQLevel *)level column:(int)column row:(int)row array:(NSMutableArray *)array {
+- (void)tryCombineCookieA:(BBQCookie *)cookieA withCookieB:(BBQCookie *)cookieB forLevel:(BBQLevel *)level column:(int)column row:(int)row animations:(NSDictionary *)animations {
     
-    //Check that there is a cookie to combine with
-    if (cookieB == nil) {
-        NSLog(@"moving %@ up one space", cookieA);
-        [level replaceCookieAtColumn:column row:row+1 withCookie:cookieA];
-    }
+//    //Check that there is a cookie to combine with
+//    if (cookieB == nil) {
+//        NSLog(@"moving %@ up one space", cookieA);
+//        [level replaceCookieAtColumn:column row:row+1 withCookie:cookieA];
+//    }
     
-    else if (cookieA.cookieType == cookieB.cookieType) {
+    if (cookieA.cookieType == cookieB.cookieType) {
         NSLog(@"combining cookie A: %@ with cookie B: %@", cookieA, cookieB);
         
         //create the combo object
         BBQCombo *combo = [[BBQCombo alloc] initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB];
-        [level performCombo:combo];
-        [array addObject:combo];
+        NSMutableArray *combos = animations[COMBOS];
+        [combos addObject:combo];
+        
+        //Perform combo will return the cookie movements that resulted from the combo.
+        NSMutableArray *cookieMovements = [level performCombo:combo];
+        [animations[MOVEMENTS] addObjectsFromArray:cookieMovements];
     }
 }
 
