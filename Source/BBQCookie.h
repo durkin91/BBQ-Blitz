@@ -17,6 +17,7 @@ static const NSUInteger NumStartingCookies = 2;
 @property (assign, nonatomic) NSInteger row;
 @property (assign, nonatomic) NSUInteger cookieType;
 @property (assign, nonatomic) CCSprite *sprite;
+@property (assign, nonatomic) CCSprite *upgradedSprite;
 
 - (NSString *)spriteName;
 - (NSString *)highlightedSpriteName;

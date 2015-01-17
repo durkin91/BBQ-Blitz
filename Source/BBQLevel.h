@@ -27,5 +27,6 @@ static const NSInteger NumRows = 9;
 - (BBQTile *)tileAtColumn:(NSInteger)column row:(NSInteger)row;
 - (void)replaceCookieAtColumn:(int)column row:(int)row withCookie:(BBQCookie *)cookie;
 - (NSMutableArray *)performCombo:(BBQCombo *)combo swipeDirection:(NSString *)direction;
+- (NSSet *)createCookiesInBlankTiles;
 
 @end

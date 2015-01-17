@@ -47,14 +47,13 @@ static const CGFloat TileHeight = 36.0;
     UISwipeGestureRecognizer *swipeRightGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeRightFrom:)];
     swipeRightGestureRecognizer.direction = UISwipeGestureRecognizerDirectionRight;
     [[UIApplication sharedApplication].delegate.window addGestureRecognizer:swipeRightGestureRecognizer];
-    
-    //***load all cookie textures***//
-    
 
     //Start the game
     [self addTiles];
     [self beginGame];
 }
+
+#pragma mark - Helper methods
 
 - (void)addTiles {
     for (NSInteger row = 0; row < NumRows; row ++) {
@@ -75,11 +74,33 @@ static const CGFloat TileHeight = 36.0;
         sprite.position = [self pointForColumn:cookie.column row:cookie.row];
         [self.cookiesLayer addChild:sprite];
         cookie.sprite = sprite;
+        
+        //animate them
+        self.userInteractionEnabled = NO;
+        CCActionScaleTo *startSmall = [CCActionScaleTo actionWithDuration:0.05 scale:0.1];
+        CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:0.4 scale:1.0];
+        CCActionCallBlock *block = [CCActionCallBlock actionWithBlock:^{
+            self.userInteractionEnabled = YES;
+        }];
+        CCActionSequence *sequence = [CCActionSequence actions:startSmall, scaleAction, block, nil];
+        [cookie.sprite runAction:sequence];
+        
     }
 }
 
 - (CGPoint)pointForColumn:(NSInteger)column row:(NSInteger)row {
     return CGPointMake(column*TileWidth + TileWidth/2, row*TileHeight + TileHeight / 2);
+}
+
+- (void)swipeDirection:(NSString *)direction {
+    NSLog(@"Swipe %@", direction);
+    self.userInteractionEnabled = NO;
+    NSDictionary *animations = [self.gameLogic swipe:direction forLevel:self.level];
+    [self animateSwipe:animations completion:^{
+        self.userInteractionEnabled = YES;
+    }];
+    NSSet *newCookies = [self.level createCookiesInBlankTiles];
+    [self addSpritesForCookies:newCookies];
 }
 
 //In the tutorial these are in the View Controller
@@ -96,39 +117,19 @@ static const CGFloat TileHeight = 36.0;
 #pragma mark - Gesture Recognizers
 
 - (void)handleSwipeUpFrom:(UIGestureRecognizer *)recognizer {
-    NSLog(@"Swipe Up");
-    self.userInteractionEnabled = NO;
-    NSDictionary *animations = [self.gameLogic swipe:@"Up" forLevel:self.level];
-    [self animateSwipe:animations completion:^{
-        self.userInteractionEnabled = YES;
-    }];
+    [self swipeDirection:@"Up"];
 }
 
 - (void)handleSwipeDownFrom:(UIGestureRecognizer *)recognizer {
-    NSLog(@"Swipe Down");
-    self.userInteractionEnabled = NO;
-    NSDictionary *animations = [self.gameLogic swipe:@"Down" forLevel:self.level];
-    [self animateSwipe:animations completion:^{
-        self.userInteractionEnabled = YES;
-    }];
+    [self swipeDirection:@"Down"];
 }
 
 - (void)handleSwipeLeftFrom:(UIGestureRecognizer *)recognizer {
-    NSLog(@"Swipe Left");
-    self.userInteractionEnabled = NO;
-    NSDictionary *animations = [self.gameLogic swipe:@"Left" forLevel:self.level];
-    [self animateSwipe:animations completion:^{
-        self.userInteractionEnabled = YES;
-    }];
+    [self swipeDirection:@"Left"];
 }
 
 - (void)handleSwipeRightFrom:(UIGestureRecognizer *)recognizer {
-    NSLog(@"Swipe Right");
-    self.userInteractionEnabled = NO;
-    NSDictionary *animations = [self.gameLogic swipe:@"Right" forLevel:self.level];
-    [self animateSwipe:animations completion:^{
-        self.userInteractionEnabled = YES;
-    }];
+    [self swipeDirection:@"Right"];
 }
 
 #pragma mark - Animations
@@ -148,6 +149,25 @@ static const CGFloat TileHeight = 36.0;
         CCActionRemove *removeA = [CCActionRemove action];
         
         //Change sprite texture for cookie B
+//        NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [combo.cookieB spriteName]];
+//        CCSprite *upgradedSprite = [CCSprite spriteWithImageNamed:directory];
+//        upgradedSprite.visible = NO;
+//        [combo.cookieB.sprite addChild:upgradedSprite];
+//        combo.cookieB.upgradedSprite = upgradedSprite;
+//        
+//        CCActionHide *hideRegularSprite = [CCActionHide action];
+//        
+//        CCActionShow *showUpgradedSprite = [CCActionShow action];
+        //CCActionScaleTo *scaleUpgradedSprite = [CCActionScaleTo actionWithDuration:0.1 scale:1.2];
+        //CCActionScaleTo *scaleBackUpgradedSprite = [CCActionScaleTo actionWithDuration:0.05 scale:1];
+        //CCActionSequence *sequenceB = [CCActionSequence actions:showUpgradedSprite, scaleUpgradedSprite, scaleBackUpgradedSprite, nil];
+        
+//        CCActionCallBlock *runSequenceB = [CCActionCallBlock actionWithBlock:^{
+//            [combo.cookieB.sprite runAction:hideRegularSprite];
+//            NSLog(@"Hid regular sprite: %@", combo.cookieB.sprite);
+//            [combo.cookieB.upgradedSprite runAction:showUpgradedSprite];
+//        }];
+        
         CCActionCallBlock *changeSprite = [CCActionCallBlock actionWithBlock:^{
             NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [combo.cookieB spriteName]];
             CCTexture *texture = [CCTexture textureWithFile:directory];

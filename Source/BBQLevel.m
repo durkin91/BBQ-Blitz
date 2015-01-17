@@ -120,18 +120,20 @@
     return cookieMovements;
 }
 
+
+
 - (NSSet *)shuffle {
-    return [self createInitialCookies];
+    return [self createCookiesInBlankTiles];
 }
 
-- (NSSet *)createInitialCookies {
+- (NSSet *)createCookiesInBlankTiles {
     NSMutableSet *set = [NSMutableSet set];
     
     //loop through rows and columns
     for (NSInteger row = 0; row < NumRows; row++) {
         for (NSInteger column = 0; column < NumColumns; column++) {
             
-            if (_tiles[column][row] != nil) {
+            if (_tiles[column][row] != nil && _cookies[column][row] == nil) {
             
             //choose a random cookie number
             NSUInteger cookieType = arc4random_uniform(NumStartingCookies) + 1;
@@ -146,6 +148,8 @@
     
     return set;
 }
+
+
 
 - (BBQCookie *)createCookieAtColumn:(NSInteger)column row:(NSInteger)row withType:(NSUInteger)cookieType {
     BBQCookie *cookie = [[BBQCookie alloc] init];
