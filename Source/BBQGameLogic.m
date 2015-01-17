@@ -42,8 +42,7 @@
     //DOWN swipe
     if ([swipeDirection isEqualToString:@"Down"]) {
         for (int column = 0; column < NumColumns ; column++) {
-            //starts checking in first column, second row from the bottom
-            for (int row = 1; row <= NumRows - 1; row++) {
+            for (int row = 1; row <= NumRows - 2; row++) {
                 BBQTile *tileA = [level tileAtColumn:column row:row];
                 if (tileA != nil) {
                     BBQCookie *cookieA = [level cookieAtColumn:column row:row];
@@ -51,6 +50,42 @@
                     if (tileB != nil && cookieA != nil) {
                         BBQCookie *cookieB = [level cookieAtColumn:column row:row - 1];
                         [self tryCombineCookieA:cookieA withCookieB:cookieB forLevel:level column:column row:row animations:animationsToPerform swipeDirection:@"Down"];
+                        
+                    }
+                }
+            }
+        }
+    }
+    
+    //LEFT swipe
+    if ([swipeDirection isEqualToString:@"Left"]) {
+        for (int row = 0; row < NumRows ; row++) {
+            for (int column = 1; column <= NumColumns - 2; column++) {
+                BBQTile *tileA = [level tileAtColumn:column row:row];
+                if (tileA != nil) {
+                    BBQCookie *cookieA = [level cookieAtColumn:column row:row];
+                    BBQTile *tileB = [level tileAtColumn:column - 1 row:row];
+                    if (tileB != nil && cookieA != nil) {
+                        BBQCookie *cookieB = [level cookieAtColumn:column - 1 row:row];
+                        [self tryCombineCookieA:cookieA withCookieB:cookieB forLevel:level column:column row:row animations:animationsToPerform swipeDirection:@"Left"];
+                        
+                    }
+                }
+            }
+        }
+    }
+
+    //RIGHT swipe
+    if ([swipeDirection isEqualToString:@"Right"]) {
+        for (int row = 0; row < NumRows ; row++) {
+            for (int column = NumColumns - 2; column >= 0; column--) {
+                BBQTile *tileA = [level tileAtColumn:column row:row];
+                if (tileA != nil) {
+                    BBQCookie *cookieA = [level cookieAtColumn:column row:row];
+                    BBQTile *tileB = [level tileAtColumn:column + 1 row:row];
+                    if (tileB != nil && cookieA != nil) {
+                        BBQCookie *cookieB = [level cookieAtColumn:column + 1 row:row];
+                        [self tryCombineCookieA:cookieA withCookieB:cookieB forLevel:level column:column row:row animations:animationsToPerform swipeDirection:@"Right"];
                         
                     }
                 }
