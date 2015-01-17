@@ -22,6 +22,9 @@
 }
 
 - (void)replaceCookieAtColumn:(int)column row:(int)row withCookie:(BBQCookie *)cookie {
+    NSAssert1(column >= 0 && column < NumColumns, @"Invalid column: %ld", (long)column);
+    NSAssert1(row >= 0 && row < NumRows, @"Invalid row: %ld", (long)row);
+
     _cookies[column][row] = cookie;
 }
 
