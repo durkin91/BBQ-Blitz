@@ -24,7 +24,6 @@ static const CGFloat TileHeight = 36.0;
 -(void)didLoadFromCCB {
     
     //load the level, setup gameLogic and begin game
-    self.level = [[BBQLevel alloc] initWithFile:@"Level_1"];
     self.gameLogic = [[BBQGameLogic alloc] init];
     
     //**** Add Gesture Recognizers ****//
@@ -49,8 +48,9 @@ static const CGFloat TileHeight = 36.0;
     [[UIApplication sharedApplication].delegate.window addGestureRecognizer:swipeRightGestureRecognizer];
 
     //Start the game
+    NSSet *cookies = [self.gameLogic setupGame];
+    [self addSpritesForCookies:cookies];
     [self addTiles];
-    [self beginGame];
 }
 
 #pragma mark - Helper methods
@@ -58,10 +58,13 @@ static const CGFloat TileHeight = 36.0;
 - (void)addTiles {
     for (NSInteger row = 0; row < NumRows; row ++) {
         for (NSInteger column = 0; column < NumColumns; column++) {
-            if ([self.level tileAtColumn:column row:row] != nil) {
-                CCSprite *tileNode = [CCSprite spriteWithImageNamed:@"sprites/Tile.png"];
-                tileNode.position = [self pointForColumn:column row:row];
-                [self.tilesLayer addChild:tileNode];
+            BBQTile *tile = [self.gameLogic.level tileAtColumn:column row:row];
+            if (tile != nil) {
+                NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [tile spriteName]];
+                CCSprite *tileSprite = [CCSprite spriteWithImageNamed:directory];
+                tileSprite.position = [self pointForColumn:column row:row];
+                [self.tilesLayer addChild:tileSprite];
+                tile.sprite = tileSprite;
             }
         }
     }
@@ -92,27 +95,34 @@ static const CGFloat TileHeight = 36.0;
     return CGPointMake(column*TileWidth + TileWidth/2, row*TileHeight + TileHeight / 2);
 }
 
+- (void)removeCookiesFromSharkTiles {
+    for (NSInteger row = 0; row < NumRows; row ++) {
+        for (NSInteger column = 0; column < NumColumns; column++) {
+            BBQTile *tile = [self.gameLogic.level tileAtColumn:column row:row];
+            if (tile.tileType == 2) {
+                BBQCookie *cookie = [self.gameLogic.level cookieAtColumn:column row:row];
+                [self.gameLogic.level replaceCookieAtColumn:column row:row withCookie:nil];
+                [cookie.sprite runAction:[CCActionRemove action]];
+            }
+        }
+    }
+
+}
+
 - (void)swipeDirection:(NSString *)direction {
     NSLog(@"Swipe %@", direction);
     self.userInteractionEnabled = NO;
-    NSDictionary *animations = [self.gameLogic swipe:direction forLevel:self.level];
+    NSDictionary *animations = [self.gameLogic swipe:direction];
     [self animateSwipe:animations completion:^{
         self.userInteractionEnabled = YES;
     }];
-    NSSet *newCookies = [self.level createCookiesInBlankTiles];
+    
+    //[self removeCookiesFromSharkTiles];
+    
+    NSSet *newCookies = [self.gameLogic.level createCookiesInBlankTiles];
     [self addSpritesForCookies:newCookies];
 }
 
-//In the tutorial these are in the View Controller
-
-- (void)beginGame {
-    [self shuffle];
-}
-
-- (void)shuffle {
-    NSSet *newCookies = [self.level shuffle];
-    [self addSpritesForCookies:newCookies];
-}
 
 #pragma mark - Gesture Recognizers
 

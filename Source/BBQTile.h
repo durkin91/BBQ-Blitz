@@ -10,4 +10,10 @@
 
 @interface BBQTile : NSObject
 
+@property (assign, nonatomic) NSInteger tileType;
+@property (assign, nonatomic) CCSprite *sprite;
+
+- (NSString *)spriteName;
+- (instancetype)initWithTileType:(NSInteger)type;
+
 @end

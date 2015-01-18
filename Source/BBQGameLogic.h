@@ -1,5 +1,5 @@
 //
-//  BBQSwipe.h
+//  BBQGameLogic.h
 //  BbqBlitz
 //
 //  Created by Nikki Durkin on 1/14/15.
@@ -14,7 +14,10 @@
 
 @interface BBQGameLogic : NSObject
 
-- (NSDictionary *)swipe:(NSString *)swipeDirection forLevel:(BBQLevel *)level;
+@property (strong, nonatomic) BBQLevel *level;
+
+- (NSSet *)setupGame;
+- (NSDictionary *)swipe:(NSString *)swipeDirection;
 
 
 @end
