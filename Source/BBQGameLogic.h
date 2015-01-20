@@ -18,6 +18,7 @@
 
 - (NSSet *)setupGame;
 - (NSDictionary *)swipe:(NSString *)swipeDirection;
+- (NSMutableArray *)eatCookies;
 
 
 @end

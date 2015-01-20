@@ -95,16 +95,9 @@ static const CGFloat TileHeight = 36.0;
     return CGPointMake(column*TileWidth + TileWidth/2, row*TileHeight + TileHeight / 2);
 }
 
-- (void)removeCookiesFromSharkTiles {
-    for (NSInteger row = 0; row < NumRows; row ++) {
-        for (NSInteger column = 0; column < NumColumns; column++) {
-            BBQTile *tile = [self.gameLogic.level tileAtColumn:column row:row];
-            if (tile.tileType == 2) {
-                BBQCookie *cookie = [self.gameLogic.level cookieAtColumn:column row:row];
-                [self.gameLogic.level replaceCookieAtColumn:column row:row withCookie:nil];
-                [cookie.sprite runAction:[CCActionRemove action]];
-            }
-        }
+- (void)removeSpritesFromSharkTiles:(NSArray *)cookies {
+    for (BBQCookie *cookie in cookies) {
+        [cookie.sprite runAction:[CCActionRemove action]];
     }
 
 }
@@ -117,7 +110,8 @@ static const CGFloat TileHeight = 36.0;
         self.userInteractionEnabled = YES;
     }];
     
-    //[self removeCookiesFromSharkTiles];
+//    NSArray *eatenCookies = [self.gameLogic eatCookies];
+//    [self removeSpritesFromSharkTiles:eatenCookies];
     
     NSSet *newCookies = [self.gameLogic.level createCookiesInBlankTiles];
     [self addSpritesForCookies:newCookies];
@@ -190,7 +184,8 @@ static const CGFloat TileHeight = 36.0;
     }
     
     for (BBQMoveCookie *movement in animations[MOVEMENTS]) {
-        CCActionMoveTo *moveAnimation = [CCActionMoveTo actionWithDuration:duration position:movement.destination];
+        CGPoint position = [self pointForColumn:movement.destinationColumn row:movement.destinationRow];
+        CCActionMoveTo *moveAnimation = [CCActionMoveTo actionWithDuration:duration position:position];
         [movement.cookieA.sprite runAction:moveAnimation];
     }
 }

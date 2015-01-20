@@ -12,8 +12,9 @@
 @interface BBQMoveCookie : NSObject
 
 @property (strong, nonatomic) BBQCookie *cookieA;
-@property (nonatomic) CGPoint destination;
+@property (assign, nonatomic) NSInteger destinationColumn;
+@property (assign, nonatomic) NSInteger destinationRow;
 
--(instancetype)initWithCookieA:(BBQCookie *)cookieA destination:(CGPoint)position;
+-(instancetype)initWithCookieA:(BBQCookie *)cookieA destinationColumn:(NSInteger)column destinationRow:(NSInteger)row;
 
 @end
