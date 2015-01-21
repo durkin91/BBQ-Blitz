@@ -11,6 +11,7 @@
 
 #define COMBOS @"Combos"
 #define MOVEMENTS @"Movements"
+#define EATEN_COOKIES @"Eaten Cookies"
 
 @interface BBQGameLogic : NSObject
 

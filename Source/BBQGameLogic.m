@@ -28,6 +28,7 @@
     NSDictionary *animationsToPerform = @{
                                           COMBOS : [@[] mutableCopy],
                                           MOVEMENTS : [@[] mutableCopy],
+                                          EATEN_COOKIES : [@[] mutableCopy],
                                           };
     
     //UP swipe
@@ -195,13 +196,10 @@
     }
 
 
-
-    
-    
-    
-    
-    
+    //Take care of the eaten cookies
+    [animationsToPerform[EATEN_COOKIES] addObjectsFromArray:[self eatCookies]];
     NSLog(@"Animations to perform: %@", animationsToPerform);
+    
     return animationsToPerform;
 }
 
@@ -225,117 +223,6 @@
         [self.level replaceCookieAtColumn:columnA row:rowA withCookie:nil];
     }
 }
-
-//- (NSMutableArray *)performCombo:(BBQCombo *)combo swipeDirection:(NSString *)direction {
-//    
-//    NSMutableArray *cookieMovements = [@[] mutableCopy];
-//    NSInteger columnA = combo.cookieA.column;
-//    NSInteger rowA = combo.cookieA.row;
-//    
-//    //upgrade cookie B
-//    combo.cookieB.cookieType = combo.cookieB.cookieType + 1;
-//    
-//    //Get cookie A's position, then set the cookie to nil
-//    CGPoint destination = combo.cookieA.sprite.position;
-//    [self.level replaceCookieAtColumn:columnA row:rowA withCookie:nil];
-//    
-//    //Move the rest of the cookies
-//    for (int row = combo.cookieB.row; row >= 0; row --) {
-//        BBQCookie *topCookie = [self.level cookieAtColumn:combo.cookieB.column row:row];
-//        BBQCookie *bottomCookie = [self.level cookieAtColumn:combo.cookieB.column row:row - 1];
-//        BBQTile *bottomTile = [self.level tileAtColumn:combo.cookieB.column row:row - 1];
-//        if (bottomCookie == nil && bottomTile != nil) {
-//            BBQMoveCookie *cookieMovement = [self moveASingleCookie:topCookie direction:direction];
-//            [cookieMovements addObject:cookieMovement];
-//        }
-//    }
-//    
-//    
-//    BBQMoveCookie *cookieMovement = [self moveASingleCookie:combo.cookieB direction:direction];
-//    [cookieMovements addObject:cookieMovement];
-//    
-//    
-//    //UP Swipe
-//    if ([direction isEqualToString:@"Up"]) {
-//        
-//        //Move all cookies in that column up one row
-//        for (int row = rowA - 1; row >= 0; row -- ) {
-//            BBQCookie *cookieA = [self.level cookieAtColumn:columnA row:row];
-//            if ([self.level tileAtColumn:columnA row:row + 1] != nil && [self.level cookieAtColumn:columnA row:row + 1] == nil) {
-//                NSLog(@"destination: %@", NSStringFromCGPoint(destination));
-//                BBQMoveCookie *moveCookie = [[BBQMoveCookie alloc] initWithCookieA:cookieA destination:destination];
-//                [cookieMovements addObject:moveCookie];
-//                
-//                cookieA.row = row + 1;
-//                [self.level replaceCookieAtColumn:columnA row:row + 1 withCookie:cookieA];
-//                [self.level replaceCookieAtColumn:columnA row:row withCookie:nil];
-//            }
-//            //move down one row
-//            destination = cookieA.sprite.position;
-//        }
-//    }
-//    
-//    //DOWN Swipe
-//    if ([direction isEqualToString:@"Down"]) {
-//        //Move all cookies in column down one row
-//        for (int row = rowA + 1; row < NumRows; row ++ ) {
-//            BBQCookie *cookieA = [self.level cookieAtColumn:columnA row:row];
-//            if ([self.level tileAtColumn:columnA row:row - 1] != nil && [self.level cookieAtColumn:columnA row:row - 1] == nil) {
-//                NSLog(@"destination: %@", NSStringFromCGPoint(destination));
-//                BBQMoveCookie *moveCookie = [[BBQMoveCookie alloc] initWithCookieA:cookieA destination:destination];
-//                [cookieMovements addObject:moveCookie];
-//                
-//                cookieA.row = row - 1;
-//                [self.level replaceCookieAtColumn:columnA row:row - 1 withCookie:cookieA];
-//                [self.level replaceCookieAtColumn:columnA row:row withCookie:nil];
-//            }
-//            //move down one row
-//            destination = cookieA.sprite.position;
-//        }
-//    }
-//    
-//    //LEFT Swipe
-//    else if ([direction isEqualToString:@"Left"]) {
-//        //Move all cookies in row one column to the left
-//        for (int column = columnA + 1; column < NumColumns; column ++ ) {
-//            BBQCookie *cookieA = [self.level cookieAtColumn:column row:rowA];
-//            if ([self.level tileAtColumn:column - 1 row:rowA] != nil && [self.level cookieAtColumn:column - 1 row:rowA] == nil) {
-//                NSLog(@"destination: %@", NSStringFromCGPoint(destination));
-//                BBQMoveCookie *moveCookie = [[BBQMoveCookie alloc] initWithCookieA:cookieA destination:destination];
-//                [cookieMovements addObject:moveCookie];
-//                
-//                cookieA.column = column - 1;
-//                [self.level replaceCookieAtColumn:column - 1 row:rowA withCookie:cookieA];
-//                [self.level replaceCookieAtColumn:column row:rowA withCookie:nil];
-//            }
-//            //move down one row
-//            destination = cookieA.sprite.position;
-//        }
-//        
-//    }
-//    
-//    //RIGHT Swipe
-//    else if ([direction isEqualToString:@"Right"]) {
-//        //Move all cookies in that row one column to the right
-//        for (int column = columnA - 1; column >= 0; column -- ) {
-//            BBQCookie *cookieA = [self.level cookieAtColumn:column row:rowA];
-//            if ([self.level tileAtColumn:column + 1 row:rowA] != nil && [self.level cookieAtColumn:column + 1 row:rowA] == nil) {
-//                NSLog(@"destination: %@", NSStringFromCGPoint(destination));
-//                BBQMoveCookie *moveCookie = [[BBQMoveCookie alloc] initWithCookieA:cookieA destination:destination];
-//                [cookieMovements addObject:moveCookie];
-//                
-//                cookieA.column = column + 1;
-//                [self.level replaceCookieAtColumn:column + 1 row:rowA withCookie:cookieA];
-//                [self.level replaceCookieAtColumn:column row:rowA withCookie:nil];
-//            }
-//            //move down one row
-//            destination = cookieA.sprite.position;
-//        }
-//        
-//    }
-//    
-//    return cookieMovements;
-//}
 
 - (BBQMoveCookie *)moveASingleCookieInDirection:(NSString *)direction toColumn:(NSInteger)columnB row:(NSInteger)rowB {
     

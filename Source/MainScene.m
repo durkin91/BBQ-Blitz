@@ -109,12 +109,6 @@ static const CGFloat TileHeight = 36.0;
     [self animateSwipe:animations completion:^{
         self.userInteractionEnabled = YES;
     }];
-    
-//    NSArray *eatenCookies = [self.gameLogic eatCookies];
-//    [self removeSpritesFromSharkTiles:eatenCookies];
-    
-    NSSet *newCookies = [self.gameLogic.level createCookiesInBlankTiles];
-    [self addSpritesForCookies:newCookies];
 }
 
 
@@ -141,7 +135,12 @@ static const CGFloat TileHeight = 36.0;
 - (void)animateSwipe:(NSDictionary *)animations completion:(dispatch_block_t)completion {
     
     const NSTimeInterval duration = 0.2;
+    const NSTimeInterval delay = 0.4;
     
+    NSTimeInterval durationPlusDelay = duration + delay;
+    CCActionDelay *delayAction = [CCActionDelay actionWithDuration:durationPlusDelay];
+    
+    ////**** COMBOS ****
     for (BBQCombo *combo in animations[COMBOS]) {
         
         //Put cookie A on top and move cookie A to cookie B, then remove cookie A
@@ -150,44 +149,59 @@ static const CGFloat TileHeight = 36.0;
         
         CCActionMoveTo *moveA = [CCActionMoveTo actionWithDuration:duration position:combo.cookieB.sprite.position];
         CCActionEaseIn *ease = [CCActionEaseIn actionWithAction:moveA];
-        CCActionRemove *removeA = [CCActionRemove action];
-        
-        //Change sprite texture for cookie B
-//        NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [combo.cookieB spriteName]];
-//        CCSprite *upgradedSprite = [CCSprite spriteWithImageNamed:directory];
-//        upgradedSprite.visible = NO;
-//        [combo.cookieB.sprite addChild:upgradedSprite];
-//        combo.cookieB.upgradedSprite = upgradedSprite;
-//        
-//        CCActionHide *hideRegularSprite = [CCActionHide action];
-//        
-//        CCActionShow *showUpgradedSprite = [CCActionShow action];
-        //CCActionScaleTo *scaleUpgradedSprite = [CCActionScaleTo actionWithDuration:0.1 scale:1.2];
-        //CCActionScaleTo *scaleBackUpgradedSprite = [CCActionScaleTo actionWithDuration:0.05 scale:1];
-        //CCActionSequence *sequenceB = [CCActionSequence actions:showUpgradedSprite, scaleUpgradedSprite, scaleBackUpgradedSprite, nil];
-        
-//        CCActionCallBlock *runSequenceB = [CCActionCallBlock actionWithBlock:^{
-//            [combo.cookieB.sprite runAction:hideRegularSprite];
-//            NSLog(@"Hid regular sprite: %@", combo.cookieB.sprite);
-//            [combo.cookieB.upgradedSprite runAction:showUpgradedSprite];
-//        }];
-        
+        //CCActionRemove *removeA = [CCActionRemove action];
+
         CCActionCallBlock *changeSprite = [CCActionCallBlock actionWithBlock:^{
+            [combo.cookieB.sprite removeFromParent];
+            
             NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [combo.cookieB spriteName]];
-            CCTexture *texture = [CCTexture textureWithFile:directory];
-            combo.cookieB.sprite.texture = texture;
+            CCSprite *sprite = [CCSprite spriteWithImageNamed:directory];
+            sprite.position = [self pointForColumn:combo.cookieB.column row:combo.cookieB.row];
+            [self.cookiesLayer addChild:sprite];
+            combo.cookieB.sprite = sprite;
+            
+            combo.cookieA.sprite = nil;
+            [combo.cookieA.sprite removeFromParent];
         }];
         
-        CCActionSequence *sequenceA = [CCActionSequence actions:ease, removeA, changeSprite, [CCActionCallBlock actionWithBlock:completion], nil];
+        CCActionSequence *sequenceA = [CCActionSequence actions:ease, changeSprite, [CCActionCallBlock actionWithBlock:completion], nil];
         [combo.cookieA.sprite runAction:sequenceA];
         
     }
     
+    ////**** MOVEMENTS ****
     for (BBQMoveCookie *movement in animations[MOVEMENTS]) {
         CGPoint position = [self pointForColumn:movement.destinationColumn row:movement.destinationRow];
         CCActionMoveTo *moveAnimation = [CCActionMoveTo actionWithDuration:duration position:position];
         [movement.cookieA.sprite runAction:moveAnimation];
     }
+    
+    ////**** EAT COOKIES ****
+    for (BBQCookie *cookie in animations[EATEN_COOKIES]) {
+        
+        CCActionCallBlock *explodeBlock = [CCActionCallBlock actionWithBlock:^{
+            CCParticleSystem *explosion = (CCParticleSystem *)[CCBReader load:@"EatCookiesEffect"];
+            explosion.autoRemoveOnFinish = TRUE;
+            explosion.position = [self pointForColumn:cookie.column row:cookie.row];
+            [cookie.sprite.parent addChild:explosion];
+            [cookie.sprite removeFromParent];
+
+        }];
+        
+        CCActionSequence *sequence = [CCActionSequence actions:delayAction, explodeBlock, nil];
+        [cookie.sprite runAction:sequence];
+    }
+    
+    ////**** REGENERATE NEW COOKIES ****
+    
+    CCActionCallBlock *newCookies = [CCActionCallBlock actionWithBlock:^{
+        NSSet *newCookiesSet = [self.gameLogic.level createCookiesInBlankTiles];
+        [self addSpritesForCookies:newCookiesSet];
+    }];
+    
+    CCActionSequence *newCookieSequence = [CCActionSequence actions:delayAction, newCookies, nil];
+    [self.cookiesLayer runAction:newCookieSequence];
+
 }
 
 
