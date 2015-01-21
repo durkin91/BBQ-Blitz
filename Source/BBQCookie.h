@@ -18,9 +18,7 @@ static const NSUInteger NumStartingCookies = 2;
 @property (assign, nonatomic) NSUInteger cookieType;
 @property (assign, nonatomic) CCSprite *sprite;
 @property (assign, nonatomic) CCSprite *upgradedSprite;
-@property (assign, nonatomic) NSUInteger status;
 
-//Status 1 is alive, status 2 is eaten
 
 - (NSString *)spriteName;
 - (NSString *)highlightedSpriteName;

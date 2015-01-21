@@ -13,9 +13,13 @@
 #define MOVEMENTS @"Movements"
 #define EATEN_COOKIES @"Eaten Cookies"
 
+static const NSInteger startingScoreForCookie = 20;
+
 @interface BBQGameLogic : NSObject
 
 @property (strong, nonatomic) BBQLevel *level;
+@property (assign, nonatomic) NSInteger *currentScore;
+
 
 - (NSSet *)setupGame;
 - (NSDictionary *)swipe:(NSString *)swipeDirection;

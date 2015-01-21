@@ -31,6 +31,18 @@
                                           EATEN_COOKIES : [@[] mutableCopy],
                                           };
     
+    [self startSwipeInDirection:swipeDirection animations:animationsToPerform];
+
+    //Take care of the eaten cookies and scoring
+    [animationsToPerform[EATEN_COOKIES] addObjectsFromArray:[self eatCookies]];
+    [self scoreEatenCookies:animationsToPerform[EATEN_COOKIES]];
+    NSLog(@"Current score: %ld", (long)self.currentScore);
+    
+    return animationsToPerform;
+}
+
+- (void)startSwipeInDirection:(NSString *)swipeDirection animations:(NSDictionary *)animationsToPerform {
+    
     //UP swipe
     if ([swipeDirection isEqualToString:@"Up"]) {
         for (int column = 0; column < NumColumns ; column++) {
@@ -66,7 +78,7 @@
                         if (cookieMovement) {
                             [animationsToPerform[MOVEMENTS] addObject:cookieMovement];
                         }
-                    }                    
+                    }
                 }
             }
         }
@@ -194,20 +206,14 @@
             }
         }
     }
-
-
-    //Take care of the eaten cookies
-    [animationsToPerform[EATEN_COOKIES] addObjectsFromArray:[self eatCookies]];
-    NSLog(@"Animations to perform: %@", animationsToPerform);
     
-    return animationsToPerform;
 }
 
 
 - (void)tryCombineCookieA:(BBQCookie *)cookieA withCookieB:(BBQCookie *)cookieB animations:(NSDictionary *)animations {
     
     if (cookieA.cookieType == cookieB.cookieType) {
-        NSLog(@"combining cookie A: %@ with cookie B: %@", cookieA, cookieB);
+        //NSLog(@"combining cookie A: %@ with cookie B: %@", cookieA, cookieB);
         
         //create the combo object
         BBQCombo *combo = [[BBQCombo alloc] initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB];
@@ -247,7 +253,6 @@
             cookieA.row = rowB - 1;
             [self.level replaceCookieAtColumn:columnB row:rowB - 1 withCookie:cookieA];
             [self.level replaceCookieAtColumn:columnB row:rowB - x + 1 withCookie:nil];
-            NSLog(@"Cookie at rowB - x + 1: %@", [self.level cookieAtColumn:columnB row:rowB - x + 1]);
         }
     }
     
@@ -332,13 +337,19 @@
             BBQTile *tile = [self.level tileAtColumn:column row:row];
             BBQCookie *cookie = [self.level cookieAtColumn:column row:row];
             if (tile.tileType == 2 && cookie != nil) {
-                cookie.status = 2;
                 [eatenCookies addObject:cookie];
                 [self.level replaceCookieAtColumn:column row:row withCookie:nil];
             }
         }
     }
     return eatenCookies;
+}
+
+- (void)scoreEatenCookies:(NSArray *)eatenCookies {
+    for (BBQCookie *cookie in eatenCookies) {
+        NSInteger scoreForCookie = startingScoreForCookie * 2 ^ cookie.cookieType;
+        self.currentScore = self.currentScore + scoreForCookie;
+    }
 }
 
 

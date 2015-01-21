@@ -17,7 +17,10 @@ static const CGFloat TileHeight = 36.0;
 
 @end
 
-@implementation MainScene
+@implementation MainScene {
+    CCLabelTTF *_scoreLabel;
+    CCLabelTTF *_movesLabel;
+}
 
 #pragma mark - Setting Up
 
@@ -109,6 +112,7 @@ static const CGFloat TileHeight = 36.0;
     [self animateSwipe:animations completion:^{
         self.userInteractionEnabled = YES;
     }];
+    
 }
 
 
@@ -183,6 +187,7 @@ static const CGFloat TileHeight = 36.0;
             explosion.position = [self pointForColumn:cookie.column row:cookie.row];
             [cookie.sprite.parent addChild:explosion];
             [cookie.sprite removeFromParent];
+            NSLog(@"Exploded this cookie: %@", cookie);
 
         }];
         
