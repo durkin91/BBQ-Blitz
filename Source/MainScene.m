@@ -148,10 +148,10 @@ static const CGFloat TileHeight = 36.0;
         combo.cookieB.sprite.zOrder = 90;
         
         CCActionMoveTo *moveA = [CCActionMoveTo actionWithDuration:duration position:combo.cookieB.sprite.position];
-        CCActionEaseIn *ease = [CCActionEaseIn actionWithAction:moveA];
-        //CCActionRemove *removeA = [CCActionRemove action];
+        CCActionRemove *removeA = [CCActionRemove action];
 
         CCActionCallBlock *changeSprite = [CCActionCallBlock actionWithBlock:^{
+            
             [combo.cookieB.sprite removeFromParent];
             
             NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [combo.cookieB spriteName]];
@@ -159,12 +159,10 @@ static const CGFloat TileHeight = 36.0;
             sprite.position = [self pointForColumn:combo.cookieB.column row:combo.cookieB.row];
             [self.cookiesLayer addChild:sprite];
             combo.cookieB.sprite = sprite;
-            
-            combo.cookieA.sprite = nil;
-            [combo.cookieA.sprite removeFromParent];
+        
         }];
         
-        CCActionSequence *sequenceA = [CCActionSequence actions:ease, changeSprite, [CCActionCallBlock actionWithBlock:completion], nil];
+        CCActionSequence *sequenceA = [CCActionSequence actions:moveA, removeA, changeSprite, [CCActionCallBlock actionWithBlock:completion], nil];
         [combo.cookieA.sprite runAction:sequenceA];
         
     }
