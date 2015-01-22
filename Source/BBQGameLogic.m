@@ -18,6 +18,7 @@
 
 - (NSSet *)setupGame {
     self.level = [[BBQLevel alloc] initWithFile:@"Level_1"];
+    self.movesLeft = self.level.maximumMoves;
     return [self.level createCookiesInBlankTiles];
 }
 
@@ -37,6 +38,7 @@
     [animationsToPerform[EATEN_COOKIES] addObjectsFromArray:[self eatCookies]];
     [self scoreEatenCookies:animationsToPerform[EATEN_COOKIES]];
     NSLog(@"Current score: %ld", (long)self.currentScore);
+    self.movesLeft = self.movesLeft - 1;
     
     return animationsToPerform;
 }

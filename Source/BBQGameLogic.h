@@ -18,7 +18,8 @@ static const NSInteger startingScoreForCookie = 20;
 @interface BBQGameLogic : NSObject
 
 @property (strong, nonatomic) BBQLevel *level;
-@property (assign, nonatomic) NSInteger *currentScore;
+@property (assign, nonatomic) NSInteger currentScore;
+@property (assign, nonatomic) NSInteger movesLeft;
 
 
 - (NSSet *)setupGame;

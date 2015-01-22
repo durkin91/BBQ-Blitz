@@ -4,6 +4,8 @@
 #import "BBQGameLogic.h"
 #import "BBQCombo.h"
 #import "BBQMoveCookie.h"
+#import "BBQCookieOrder.h"
+#import "BBQCookieOrderView.h"
 
 static const CGFloat TileWidth = 32.0;
 static const CGFloat TileHeight = 36.0;
@@ -20,6 +22,7 @@ static const CGFloat TileHeight = 36.0;
 @implementation MainScene {
     CCLabelTTF *_scoreLabel;
     CCLabelTTF *_movesLabel;
+    CCSprite *_orderDisplayNode;
 }
 
 #pragma mark - Setting Up
@@ -52,6 +55,8 @@ static const CGFloat TileHeight = 36.0;
 
     //Start the game
     NSSet *cookies = [self.gameLogic setupGame];
+    [self addSpritesForOrders];
+    _movesLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.movesLeft];
     [self addSpritesForCookies:cookies];
     [self addTiles];
 }
@@ -70,6 +75,24 @@ static const CGFloat TileHeight = 36.0;
                 tile.sprite = tileSprite;
             }
         }
+    }
+}
+
+//The way I have changed the sprite is a hack for now. Would be much better to just figure out how to change the texture
+- (void)addSpritesForOrders {
+    NSArray *orderviews = [_orderDisplayNode children];
+    NSArray *orderObjects = self.gameLogic.level.cookieOrders;
+    for (int i = 0; i < [orderObjects count]; i++) {
+        BBQCookieOrder *order = orderObjects[i];
+        BBQCookieOrderView *orderView = orderviews[i];
+        NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [order.cookie spriteName]];
+        CCSprite *sprite = [CCSprite spriteWithImageNamed:directory];
+        sprite.anchorPoint = CGPointMake(0.0, 0.5);
+        [orderView.cookieSprite addChild:sprite];
+        orderView.quantityLabel.string = [NSString stringWithFormat:@"%ld", (long)order.quantity];
+        
+        order.view = orderView;
+
     }
 }
 
@@ -194,6 +217,14 @@ static const CGFloat TileHeight = 36.0;
         CCActionSequence *sequence = [CCActionSequence actions:delayAction, explodeBlock, nil];
         [cookie.sprite runAction:sequence];
     }
+    
+    ////**** UPDATE SCORE AND MOVES ****
+    CCActionCallBlock *updateScoreBlock = [CCActionCallBlock actionWithBlock:^{
+        _scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.currentScore];
+        _movesLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.movesLeft];
+    }];
+    CCActionSequence *updateScoreSequence = [CCActionSequence actions:delayAction, updateScoreBlock , nil];
+    [self.cookiesLayer runAction:updateScoreSequence];
     
     ////**** REGENERATE NEW COOKIES ****
     

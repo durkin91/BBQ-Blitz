@@ -7,6 +7,7 @@
 //
 
 #import "BBQLevel.h"
+#import "BBQCookieOrder.h"
 
 
 @implementation BBQLevel {
@@ -119,6 +120,20 @@
                 
             }];
         }];
+        
+        self.targetScore = [dictionary[@"targetScore"] unsignedIntegerValue];
+        self.maximumMoves = [dictionary[@"moves"] unsignedIntegerValue];
+        
+        //setup Cookie Order objects
+        NSArray *orderTypes = dictionary[@"orderCookieType"];
+        NSArray *orderQuantities = dictionary[@"orderCookieQuantity"];
+        self.cookieOrders = [@[] mutableCopy];
+        for (int i = 0; i < [orderTypes count]; i ++) {
+            NSInteger orderType = [orderTypes[i] unsignedIntegerValue];
+            NSInteger orderQuantity = [orderQuantities[i] unsignedIntegerValue];
+            BBQCookieOrder *cookieOrder = [[BBQCookieOrder alloc] initWithCookieType:orderType startingAmount:orderQuantity];
+            [self.cookieOrders addObject:cookieOrder];
+        }
     }
     return self;
 }
