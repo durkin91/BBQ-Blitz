@@ -11,6 +11,7 @@
 #import "BBQTile.h"
 #import "BBQCombo.h"
 #import "BBQMoveCookie.h"
+#import "BBQCookieOrder.h"
 
 @implementation BBQGameLogic
 
@@ -30,13 +31,13 @@
                                           COMBOS : [@[] mutableCopy],
                                           MOVEMENTS : [@[] mutableCopy],
                                           EATEN_COOKIES : [@[] mutableCopy],
+                                          EATEN_COOKIES_FROM_ORDER : [@[] mutableCopy],
                                           };
     
     [self startSwipeInDirection:swipeDirection animations:animationsToPerform];
 
     //Take care of the eaten cookies and scoring
     [animationsToPerform[EATEN_COOKIES] addObjectsFromArray:[self eatCookies]];
-    [self scoreEatenCookies:animationsToPerform[EATEN_COOKIES]];
     NSLog(@"Current score: %ld", (long)self.currentScore);
     self.movesLeft = self.movesLeft - 1;
     
@@ -334,6 +335,7 @@
     
     NSMutableArray *eatenCookies = [@[] mutableCopy];
     
+    //find the eaten cookies
     for (NSInteger row = 0; row < NumRows; row ++) {
         for (NSInteger column = 0; column < NumColumns; column++) {
             BBQTile *tile = [self.level tileAtColumn:column row:row];
@@ -341,9 +343,21 @@
             if (tile.tileType == 2 && cookie != nil) {
                 [eatenCookies addObject:cookie];
                 [self.level replaceCookieAtColumn:column row:row withCookie:nil];
+                
+                //update model for cookies eaten from order, and associate them with order so they can be animated
+                for (BBQCookieOrder *order in self.level.cookieOrders) {
+                    if (order.cookie.cookieType == cookie.cookieType) {
+                        order.quantityLeft = order.quantityLeft - 1;
+                        [order.cookiesEatenInThisSwipe addObject:cookie];
+                        
+                    }
+                }
             }
         }
     }
+    
+    //score the eaten cookies
+    [self scoreEatenCookies:eatenCookies];
     return eatenCookies;
 }
 

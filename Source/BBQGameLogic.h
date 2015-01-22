@@ -12,6 +12,7 @@
 #define COMBOS @"Combos"
 #define MOVEMENTS @"Movements"
 #define EATEN_COOKIES @"Eaten Cookies"
+#define EATEN_COOKIES_FROM_ORDER @"Eaten Cookies From Order"
 
 static const NSInteger startingScoreForCookie = 20;
 

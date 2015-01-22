@@ -202,6 +202,7 @@ static const CGFloat TileHeight = 36.0;
     }
     
     ////**** EAT COOKIES ****
+    NSArray *cookieOrders = self.gameLogic.level.cookieOrders;
     for (BBQCookie *cookie in animations[EATEN_COOKIES]) {
         
         CCActionCallBlock *explodeBlock = [CCActionCallBlock actionWithBlock:^{
