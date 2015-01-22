@@ -23,6 +23,7 @@ static const CGFloat TileHeight = 36.0;
     CCLabelTTF *_scoreLabel;
     CCLabelTTF *_movesLabel;
     CCSprite *_orderDisplayNode;
+    CCSprite *_scoreboardBackground;
 }
 
 #pragma mark - Setting Up
@@ -92,6 +93,7 @@ static const CGFloat TileHeight = 36.0;
         orderView.quantityLabel.string = [NSString stringWithFormat:@"%ld", (long)order.quantity];
         
         order.view = orderView;
+        order.sprite = sprite;
 
     }
 }
@@ -210,32 +212,31 @@ static const CGFloat TileHeight = 36.0;
             explosion.autoRemoveOnFinish = TRUE;
             explosion.position = [self pointForColumn:cookie.column row:cookie.row];
             [cookie.sprite.parent addChild:explosion];
+            [cookie.sprite removeFromParent];
             
             //check if the cookie is a cookie from the order
             BOOL didFind = NO;
             for (BBQCookieOrder *order in cookieOrders) {
                 if (cookie.cookieType == order.cookie.cookieType) {
-                    //create the action
-                    ccBezierConfig curve;
-                    CCSprite *orderSprite = order.view.cookieSprite.children[0];
-                    curve.endPosition = [orderSprite convertToWorldSpace:CGPointZero];
                     
-                    CCActionBezierTo *bezierMove = [CCActionBezierTo actionWithDuration:3.0 bezier:curve];
-                    CCActionScaleTo *scaleUp = [CCActionScaleTo actionWithDuration:0.1 scale:1.2];
-                    CCActionScaleTo *scaleDown = [CCActionScaleTo actionWithDuration:0.1 scale:1.0];
-                    CCActionRemove *removeSprite = [CCActionRemove action];
+                    //create the bezier action
+//                    ccBezierConfig curve;
+//                    curve.endPosition = [orderSprite convertToWorldSpace:CGPointZero];
+//                    
+//                    CCActionBezierTo *bezierMove = [CCActionBezierTo actionWithDuration:3.0 bezier:curve];
                     
-                    CCActionSequence *orderActionSequence = [CCActionSequence actions:bezierMove, scaleUp, scaleDown, removeSprite, nil];
-                    [cookie.sprite runAction:orderActionSequence];
+                    CCActionScaleTo *scaleUp = [CCActionScaleTo actionWithDuration:0.3 scale:1.4];
+                    CCActionScaleTo *scaleDown = [CCActionScaleTo actionWithDuration:0.3 scale:1.0];
+                    //CCActionRemove *removeSprite = [CCActionRemove action];
+                    
+                    CCActionSequence *orderActionSequence = [CCActionSequence actions:scaleUp, scaleDown, nil];
+                    order.view.quantityLabel.string = [NSString stringWithFormat:@"%ld", (long)order.quantityLeft];
+                    [order.sprite runAction:orderActionSequence];
+                    [order.view.quantityLabel runAction:orderActionSequence];
                     
                     didFind = YES;
                     break;
                 }
-            }
-            
-            //if the cookie doesn't match an order, get rid of the sprite after the explosion
-            if (!didFind) {
-                [cookie.sprite removeFromParent];
             }
 
             NSLog(@"Exploded this cookie: %@", cookie);

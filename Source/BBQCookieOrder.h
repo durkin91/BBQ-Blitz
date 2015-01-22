@@ -16,6 +16,7 @@
 @property (assign, nonatomic) NSInteger quantity;
 @property (assign, nonatomic) NSInteger quantityLeft;
 @property (assign, nonatomic) BBQCookieOrderView *view;
+@property (assign, nonatomic) CCSprite *sprite;
 
 -(instancetype)initWithCookieType:(NSInteger)cookieType startingAmount:(NSInteger)startingAmount;
 
