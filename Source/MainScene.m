@@ -210,7 +210,34 @@ static const CGFloat TileHeight = 36.0;
             explosion.autoRemoveOnFinish = TRUE;
             explosion.position = [self pointForColumn:cookie.column row:cookie.row];
             [cookie.sprite.parent addChild:explosion];
-            [cookie.sprite removeFromParent];
+            
+            //check if the cookie is a cookie from the order
+            BOOL didFind = NO;
+            for (BBQCookieOrder *order in cookieOrders) {
+                if (cookie.cookieType == order.cookie.cookieType) {
+                    //create the action
+                    ccBezierConfig curve;
+                    CCSprite *orderSprite = order.view.cookieSprite.children[0];
+                    curve.endPosition = [orderSprite convertToWorldSpace:CGPointZero];
+                    
+                    CCActionBezierTo *bezierMove = [CCActionBezierTo actionWithDuration:3.0 bezier:curve];
+                    CCActionScaleTo *scaleUp = [CCActionScaleTo actionWithDuration:0.1 scale:1.2];
+                    CCActionScaleTo *scaleDown = [CCActionScaleTo actionWithDuration:0.1 scale:1.0];
+                    CCActionRemove *removeSprite = [CCActionRemove action];
+                    
+                    CCActionSequence *orderActionSequence = [CCActionSequence actions:bezierMove, scaleUp, scaleDown, removeSprite, nil];
+                    [cookie.sprite runAction:orderActionSequence];
+                    
+                    didFind = YES;
+                    break;
+                }
+            }
+            
+            //if the cookie doesn't match an order, get rid of the sprite after the explosion
+            if (!didFind) {
+                [cookie.sprite removeFromParent];
+            }
+
             NSLog(@"Exploded this cookie: %@", cookie);
 
         }];

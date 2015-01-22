@@ -348,8 +348,6 @@
                 for (BBQCookieOrder *order in self.level.cookieOrders) {
                     if (order.cookie.cookieType == cookie.cookieType) {
                         order.quantityLeft = order.quantityLeft - 1;
-                        [order.cookiesEatenInThisSwipe addObject:cookie];
-                        
                     }
                 }
             }
