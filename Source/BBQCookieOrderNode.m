@@ -6,8 +6,8 @@
 //  Copyright (c) 2015 Apportable. All rights reserved.
 //
 
-#import "BBQCookieOrderView.h"
+#import "BBQCookieOrderNode.h"
 
-@implementation BBQCookieOrderView
+@implementation BBQCookieOrderNode
 
 @end

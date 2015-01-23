@@ -26,6 +26,8 @@ static const NSInteger startingScoreForCookie = 20;
 - (NSSet *)setupGame;
 - (NSDictionary *)swipe:(NSString *)swipeDirection;
 - (NSMutableArray *)eatCookies;
+- (BOOL)isLevelComplete;
+- (BOOL)areThereMovesLeft;
 
 
 @end

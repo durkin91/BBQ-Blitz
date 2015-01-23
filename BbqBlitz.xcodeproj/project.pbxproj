@@ -9,7 +9,8 @@
 /* Begin PBXBuildFile section */
 		151FBA6B1A69362D00132373 /* BBQMoveCookie.m in Sources */ = {isa = PBXBuildFile; fileRef = 151FBA6A1A69362D00132373 /* BBQMoveCookie.m */; };
 		15A95A651A70592100E007D6 /* BBQCookieOrder.m in Sources */ = {isa = PBXBuildFile; fileRef = 15A95A641A70592100E007D6 /* BBQCookieOrder.m */; };
-		15A95A6A1A7079D300E007D6 /* BBQCookieOrderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 15A95A691A7079D300E007D6 /* BBQCookieOrderView.m */; };
+		15A95A6A1A7079D300E007D6 /* BBQCookieOrderNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 15A95A691A7079D300E007D6 /* BBQCookieOrderNode.m */; };
+		15A95A6D1A71E81E00E007D6 /* BBQRanOutOfMovesNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 15A95A6C1A71E81E00E007D6 /* BBQRanOutOfMovesNode.m */; };
 		15AB57821A661A9F00DFB4D6 /* BBQCookie.m in Sources */ = {isa = PBXBuildFile; fileRef = 15AB57811A661A9F00DFB4D6 /* BBQCookie.m */; };
 		15AB57851A66207400DFB4D6 /* BBQLevel.m in Sources */ = {isa = PBXBuildFile; fileRef = 15AB57841A66207400DFB4D6 /* BBQLevel.m */; };
 		15AB578C1A66695500DFB4D6 /* Level_0.json in Resources */ = {isa = PBXBuildFile; fileRef = 15AB57871A66695500DFB4D6 /* Level_0.json */; };
@@ -185,8 +186,10 @@
 		151FBA6A1A69362D00132373 /* BBQMoveCookie.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQMoveCookie.m; path = Source/BBQMoveCookie.m; sourceTree = "<group>"; };
 		15A95A631A70592100E007D6 /* BBQCookieOrder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQCookieOrder.h; path = Source/BBQCookieOrder.h; sourceTree = "<group>"; };
 		15A95A641A70592100E007D6 /* BBQCookieOrder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQCookieOrder.m; path = Source/BBQCookieOrder.m; sourceTree = "<group>"; };
-		15A95A681A7079D300E007D6 /* BBQCookieOrderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQCookieOrderView.h; path = Source/BBQCookieOrderView.h; sourceTree = "<group>"; };
-		15A95A691A7079D300E007D6 /* BBQCookieOrderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQCookieOrderView.m; path = Source/BBQCookieOrderView.m; sourceTree = "<group>"; };
+		15A95A681A7079D300E007D6 /* BBQCookieOrderNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQCookieOrderNode.h; path = Source/BBQCookieOrderNode.h; sourceTree = "<group>"; };
+		15A95A691A7079D300E007D6 /* BBQCookieOrderNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQCookieOrderNode.m; path = Source/BBQCookieOrderNode.m; sourceTree = "<group>"; };
+		15A95A6B1A71E81E00E007D6 /* BBQRanOutOfMovesNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQRanOutOfMovesNode.h; path = Source/BBQRanOutOfMovesNode.h; sourceTree = "<group>"; };
+		15A95A6C1A71E81E00E007D6 /* BBQRanOutOfMovesNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQRanOutOfMovesNode.m; path = Source/BBQRanOutOfMovesNode.m; sourceTree = "<group>"; };
 		15AB57801A661A9F00DFB4D6 /* BBQCookie.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQCookie.h; path = Source/BBQCookie.h; sourceTree = "<group>"; };
 		15AB57811A661A9F00DFB4D6 /* BBQCookie.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQCookie.m; path = Source/BBQCookie.m; sourceTree = "<group>"; };
 		15AB57831A66207400DFB4D6 /* BBQLevel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQLevel.h; path = Source/BBQLevel.h; sourceTree = "<group>"; };
@@ -332,8 +335,10 @@
 			children = (
 				B7378992180767190076A88C /* MainScene.h */,
 				B7378993180767190076A88C /* MainScene.m */,
-				15A95A681A7079D300E007D6 /* BBQCookieOrderView.h */,
-				15A95A691A7079D300E007D6 /* BBQCookieOrderView.m */,
+				15A95A681A7079D300E007D6 /* BBQCookieOrderNode.h */,
+				15A95A691A7079D300E007D6 /* BBQCookieOrderNode.m */,
+				15A95A6B1A71E81E00E007D6 /* BBQRanOutOfMovesNode.h */,
+				15A95A6C1A71E81E00E007D6 /* BBQRanOutOfMovesNode.m */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -948,7 +953,8 @@
 				B73789871807631A0076A88C /* main.m in Sources */,
 				151FBA6B1A69362D00132373 /* BBQMoveCookie.m in Sources */,
 				15AB57851A66207400DFB4D6 /* BBQLevel.m in Sources */,
-				15A95A6A1A7079D300E007D6 /* BBQCookieOrderView.m in Sources */,
+				15A95A6A1A7079D300E007D6 /* BBQCookieOrderNode.m in Sources */,
+				15A95A6D1A71E81E00E007D6 /* BBQRanOutOfMovesNode.m in Sources */,
 				15AB57961A66994B00DFB4D6 /* BBQGameLogic.m in Sources */,
 				15AB57821A661A9F00DFB4D6 /* BBQCookie.m in Sources */,
 				7A046D8C19E8A20E004C4763 /* MainScene.m in Sources */,

@@ -5,7 +5,8 @@
 #import "BBQCombo.h"
 #import "BBQMoveCookie.h"
 #import "BBQCookieOrder.h"
-#import "BBQCookieOrderView.h"
+#import "BBQCookieOrderNode.h"
+#import "BBQRanOutOfMovesNode.h"
 
 static const CGFloat TileWidth = 32.0;
 static const CGFloat TileHeight = 36.0;
@@ -85,7 +86,7 @@ static const CGFloat TileHeight = 36.0;
     NSArray *orderObjects = self.gameLogic.level.cookieOrders;
     for (int i = 0; i < [orderObjects count]; i++) {
         BBQCookieOrder *order = orderObjects[i];
-        BBQCookieOrderView *orderView = orderviews[i];
+        BBQCookieOrderNode *orderView = orderviews[i];
         NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [order.cookie spriteName]];
         CCSprite *sprite = [CCSprite spriteWithImageNamed:directory];
         sprite.anchorPoint = CGPointMake(0.0, 0.5);
@@ -136,6 +137,17 @@ static const CGFloat TileHeight = 36.0;
     NSDictionary *animations = [self.gameLogic swipe:direction];
     [self animateSwipe:animations completion:^{
         self.userInteractionEnabled = YES;
+        
+        //check whether player has run out of moves
+        if (![self.gameLogic areThereMovesLeft]) {
+            BBQRanOutOfMovesNode *noMovesLeftPopover = (BBQRanOutOfMovesNode *)[CCBReader load:@"NoMovesLeftPopover"];
+            
+            CGPoint position = CGPointMake(self.scene.contentSize.width / 2, self.scene.contentSize.height / 2);
+            NSLog(@"Position: %@", NSStringFromCGPoint(position));
+            noMovesLeftPopover.position = position;
+            [self.scene addChild:noMovesLeftPopover];
+            
+        }
     }];
     
 }
@@ -164,7 +176,7 @@ static const CGFloat TileHeight = 36.0;
 - (void)animateSwipe:(NSDictionary *)animations completion:(dispatch_block_t)completion {
     
     const NSTimeInterval duration = 0.2;
-    const NSTimeInterval delay = 0.4;
+    const NSTimeInterval delay = 0.5;
     
     CCActionDelay *delayAction = [CCActionDelay actionWithDuration:delay];
     

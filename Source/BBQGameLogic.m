@@ -366,6 +366,29 @@
     }
 }
 
+- (BOOL)isLevelComplete {
+    BOOL isComplete = NO;
+    
+    for (BBQCookieOrder *order in self.level.cookieOrders) {
+        if (order.quantityLeft <= 0) {
+            isComplete = YES;
+        }
+        else {
+            isComplete = NO;
+            break;
+        }
+    }
+    return isComplete;
+}
+
+- (BOOL)areThereMovesLeft {
+    BOOL movesLeft = NO;
+    if (self.movesLeft > 0) {
+        movesLeft = YES;
+    }
+    return movesLeft;
+}
+
 
 
 

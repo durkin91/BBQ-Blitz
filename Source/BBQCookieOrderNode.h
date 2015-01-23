@@ -8,7 +8,7 @@
 
 #import "CCNode.h"
 
-@interface BBQCookieOrderView : CCNode
+@interface BBQCookieOrderNode : CCNode
 
 @property (strong, nonatomic) CCSprite *cookieSprite;
 @property (strong, nonatomic) CCLabelTTF *quantityLabel;
