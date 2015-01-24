@@ -21,4 +21,12 @@
     return self;
 }
 
+-(BOOL)orderIsComplete {
+    BOOL isComplete = NO;
+    if (self.quantityLeft <= 0) {
+        isComplete = YES;
+    }
+    return isComplete;
+}
+
 @end

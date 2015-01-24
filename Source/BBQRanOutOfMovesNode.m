@@ -7,19 +7,16 @@
 //
 
 #import "BBQRanOutOfMovesNode.h"
+#import "BBQAnimations.h"
 
 @implementation BBQRanOutOfMovesNode {
     CCButton *_keepPlayingButton;
+    CCLabelTTF *_coinsLabel;
 }
 
 - (void)didLoadFromCCB {
     
-    //Create the action to animate the keep playing button
-    CCActionScaleTo *scaleUp = [CCActionScaleTo actionWithDuration:1.0 scale:1.05];
-    CCActionScaleTo *scaleDown = [CCActionScaleTo actionWithDuration:1.0 scale:1.0];
-    CCActionSequence *sequence = [CCActionSequence actions:scaleUp, scaleDown, nil];
-    CCActionRepeatForever *repeat = [CCActionRepeatForever actionWithAction:sequence];
-    [_keepPlayingButton runAction:repeat];
+    [BBQAnimations animateButton:_keepPlayingButton];
     
 }
 

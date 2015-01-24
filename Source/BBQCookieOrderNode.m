@@ -10,4 +10,8 @@
 
 @implementation BBQCookieOrderNode
 
+- (void)didLoadFromCCB {
+    self.tickSprite.visible = NO;
+}
+
 @end

@@ -18,6 +18,8 @@
 @property (assign, nonatomic) BBQCookieOrderNode *view;
 @property (assign, nonatomic) CCSprite *sprite;
 
+
 -(instancetype)initWithCookieType:(NSInteger)cookieType startingAmount:(NSInteger)startingAmount;
+-(BOOL)orderIsComplete;
 
 @end

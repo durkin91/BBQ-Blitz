@@ -12,5 +12,6 @@
 
 @property (strong, nonatomic) CCSprite *cookieSprite;
 @property (strong, nonatomic) CCLabelTTF *quantityLabel;
+@property (strong, nonatomic) CCSprite *tickSprite;
 
 @end
