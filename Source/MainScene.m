@@ -29,6 +29,7 @@ static const CGFloat TileHeight = 36.0;
     CCSprite *_orderDisplayNode;
     CCSprite *_scoreboardBackground;
     BBQMenu *_menuNode;
+    NSMutableArray *_gestureRecognizers;
 }
 
 #pragma mark - Setting Up
@@ -38,26 +39,31 @@ static const CGFloat TileHeight = 36.0;
     //load the level, setup gameLogic and begin game
     self.gameLogic = [[BBQGameLogic alloc] init];
     
-    //**** Add Gesture Recognizers ****//
+    ////****GESTURE RECOGNIZERS****
+    _gestureRecognizers = [@[] mutableCopy];
+    
     //Swipe Up
     UISwipeGestureRecognizer *swipeUpGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeUpFrom:)];
     swipeUpGestureRecognizer.direction = UISwipeGestureRecognizerDirectionUp;
-    [[UIApplication sharedApplication].delegate.window addGestureRecognizer:swipeUpGestureRecognizer];
+    [_gestureRecognizers addObject:swipeUpGestureRecognizer];
     
     //Swipe Down
     UISwipeGestureRecognizer *swipeDownGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeDownFrom:)];
     swipeDownGestureRecognizer.direction = UISwipeGestureRecognizerDirectionDown;
-    [[UIApplication sharedApplication].delegate.window addGestureRecognizer:swipeDownGestureRecognizer];
+    [_gestureRecognizers addObject:swipeDownGestureRecognizer];
     
     //Swipe Left
     UISwipeGestureRecognizer *swipeLeftGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeLeftFrom:)];
     swipeLeftGestureRecognizer.direction = UISwipeGestureRecognizerDirectionLeft;
-    [[UIApplication sharedApplication].delegate.window addGestureRecognizer:swipeLeftGestureRecognizer];
+    [_gestureRecognizers addObject:swipeLeftGestureRecognizer];
     
     //Swipe Right
     UISwipeGestureRecognizer *swipeRightGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeRightFrom:)];
     swipeRightGestureRecognizer.direction = UISwipeGestureRecognizerDirectionRight;
-    [[UIApplication sharedApplication].delegate.window addGestureRecognizer:swipeRightGestureRecognizer];
+    [_gestureRecognizers addObject:swipeRightGestureRecognizer];
+    
+    [self addGestureRecognizers];
+
 
     //Start the game
     NSSet *cookies = [self.gameLogic setupGame];
@@ -68,6 +74,18 @@ static const CGFloat TileHeight = 36.0;
 }
 
 #pragma mark - Helper methods
+
+- (void)addGestureRecognizers {
+    for (UISwipeGestureRecognizer *gesture in _gestureRecognizers) {
+        [[UIApplication sharedApplication].delegate.window addGestureRecognizer:gesture];
+    }
+}
+
+- (void)removeGestureRecognizers {
+    for (UISwipeGestureRecognizer *gesture in _gestureRecognizers) {
+        [[UIApplication sharedApplication].delegate.window removeGestureRecognizer:gesture];
+    }
+}
 
 - (void)addTiles {
     for (NSInteger row = 0; row < NumRows; row ++) {
@@ -144,12 +162,14 @@ static const CGFloat TileHeight = 36.0;
         
         //check whether the player has finished the level
         if ([self.gameLogic isLevelComplete]) {
+            [self removeGestureRecognizers];
             [_menuNode displayMenuFor:LEVEL_COMPLETE gameLogic:self.gameLogic];
 
         }
         
         //check whether player has run out of moves
         else if (![self.gameLogic areThereMovesLeft]) {
+            [self removeGestureRecognizers];
             [_menuNode displayMenuFor:NO_MORE_MOVES gameLogic:self.gameLogic];
         }
     }];

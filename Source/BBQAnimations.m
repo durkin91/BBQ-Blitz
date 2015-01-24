@@ -28,7 +28,6 @@
     //move popover
     float x = background.contentSize.width / 2;
     float y = background.contentSizeInPoints.height / 2;
-    
     CGPoint endingPosition = CGPointMake(x, y);
     
     //popoverNode.position = startingPosition;
