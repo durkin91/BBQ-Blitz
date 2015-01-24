@@ -7,11 +7,13 @@
 //
 
 #import "CCNode.h"
+#import "BBQGameLogic.h"
 
 #define NO_MORE_MOVES @"No More Moves"
+#define LEVEL_COMPLETE @"Level Complete"
 
 @interface BBQMenu : CCNode
 
-- (void)displayMenuFor:(NSString *)command;
+- (void)displayMenuFor:(NSString *)command gameLogic:(BBQGameLogic *)gameLogic;
 
 @end

@@ -144,33 +144,13 @@ static const CGFloat TileHeight = 36.0;
         
         //check whether the player has finished the level
         if ([self.gameLogic isLevelComplete]) {
-            BBQLevelCompleteNode *levelCompletePopover = (BBQLevelCompleteNode *)[CCBReader load:@"LevelCompletePopover"];
-            CGPoint position = CGPointMake(self.scene.contentSize.width / 2, self.scene.contentSize.height / 2);
-            levelCompletePopover.position = position;
-            NSString *score = [NSString stringWithFormat:@"Your Score: %i", self.gameLogic.currentScore];
-            levelCompletePopover.yourScoreLabel.string = score;
-            
-            [_menuNode addChild:levelCompletePopover];
-            //[BBQAnimations animateMenu:_menuNode popover:levelCompletePopover];
-            
-            
+            [_menuNode displayMenuFor:LEVEL_COMPLETE gameLogic:self.gameLogic];
+
         }
         
         //check whether player has run out of moves
         else if (![self.gameLogic areThereMovesLeft]) {
-            [_menuNode displayMenuFor:NO_MORE_MOVES];
-            
-            
-            
-            
-//            BBQRanOutOfMovesNode *noMovesLeftPopover = (BBQRanOutOfMovesNode *)[CCBReader load:@"NoMovesLeftPopover"];
-//            
-//            CGPoint position = CGPointMake(self.scene.contentSize.width / 2, self.scene.contentSize.height / 2);
-//            noMovesLeftPopover.position = position;
-//            
-//            [_menuNode addChild:noMovesLeftPopover];
-//            [BBQAnimations animateMenu:_menuNode popover:noMovesLeftPopover];
-            
+            [_menuNode displayMenuFor:NO_MORE_MOVES gameLogic:self.gameLogic];
         }
     }];
     

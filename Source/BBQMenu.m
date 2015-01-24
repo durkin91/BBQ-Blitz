@@ -9,20 +9,28 @@
 #import "BBQMenu.h"
 #import "BBQAnimations.h"
 #import "BBQRanOutOfMovesNode.h"
+#import "BBQLevelCompleteNode.h"
+
 
 @implementation BBQMenu {
     BBQRanOutOfMovesNode *_noMoreMovesPopover;
+    BBQLevelCompleteNode *_levelCompletePopover;
     CCNodeColor *_background;
 }
 
 
-- (void)displayMenuFor:(NSString *)command {
+- (void)displayMenuFor:(NSString *)command gameLogic:(BBQGameLogic *)gameLogic {
     
     //Find the right popover
     CCNode *popover;
     
     if ([command isEqualToString:NO_MORE_MOVES]) {
         popover = _noMoreMovesPopover;
+    }
+    
+    else if ([command isEqualToString:LEVEL_COMPLETE]) {
+        _levelCompletePopover.yourScoreLabel.string = [NSString stringWithFormat:@"Your Score: %ld", (long)gameLogic.currentScore];
+        popover = _levelCompletePopover;
     }
     
     [BBQAnimations animateMenuWithBackground:_background popover:popover];
