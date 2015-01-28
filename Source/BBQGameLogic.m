@@ -361,9 +361,15 @@
 
 - (void)scoreEatenCookies:(NSArray *)eatenCookies {
     for (BBQCookie *cookie in eatenCookies) {
-        NSInteger scoreForCookie = startingScoreForCookie * 2 ^ cookie.cookieType;
+        NSInteger scoreForCookie = [self scoreForCookie:cookie];
         self.currentScore = self.currentScore + scoreForCookie;
     }
+}
+
+- (NSInteger)scoreForCookie:(BBQCookie *)cookie {
+    NSInteger multiplier = pow(2.0, cookie.cookieType);
+    NSInteger scoreForCookie = startingScoreForCookie * multiplier;
+    return scoreForCookie;
 }
 
 - (BOOL)isLevelComplete {

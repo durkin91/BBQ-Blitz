@@ -1,13 +1,13 @@
 //
-//  MainScene.h
+//  BBQActiveLandingPad.h
 //  BbqBlitz
 //
 //  Created by Nikki Durkin on 1/28/15.
 //  Copyright (c) 2015 Apportable. All rights reserved.
 //
 
-#import "CCScene.h"
+#import "CCNode.h"
 
-@interface MainScene : CCScene
+@interface BBQActiveLandingPad : CCNode
 
 @end

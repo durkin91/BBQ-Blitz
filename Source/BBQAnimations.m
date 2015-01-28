@@ -36,4 +36,17 @@
 
 }
 
++ (void)animateScoreLabel:(CCLabelTTF *)scoreLabel {
+    CGPoint endPoint = CGPointMake(scoreLabel.position.x, scoreLabel.position.y + 40);
+    CCActionMoveTo *moveLabel = [CCActionMoveTo actionWithDuration:0.6 position:endPoint];
+    
+    CCActionDelay *delayBeforeFade = [CCActionDelay actionWithDuration:0.3];
+    CCActionFadeOut *fadeOut = [CCActionFadeOut actionWithDuration:0.3];
+    CCActionSequence *fadeSequence = [CCActionSequence actions:delayBeforeFade, fadeOut, nil];
+    
+    CCActionSpawn *spawn = [CCActionSpawn actions:moveLabel, fadeSequence, nil];
+    CCActionSequence *labelSequence = [CCActionSequence actions:spawn, [CCActionRemove action], nil];
+    [scoreLabel runAction:labelSequence];
+}
+
 @end

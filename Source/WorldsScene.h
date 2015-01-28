@@ -1,5 +1,5 @@
 //
-//  MainScene.h
+//  WorldsScene.h
 //  BbqBlitz
 //
 //  Created by Nikki Durkin on 1/28/15.
@@ -8,6 +8,6 @@
 
 #import "CCScene.h"
 
-@interface MainScene : CCScene
+@interface WorldsScene : CCScene
 
 @end

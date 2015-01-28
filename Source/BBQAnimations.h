@@ -7,10 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "BBQCookie.h"
 
 @interface BBQAnimations : NSObject
 
 + (void)animateButton:(CCButton *)button;
 + (void)animateMenuWithBackground:(CCNode *)background popover:(CCNode *)popover;
++ (void)animateScoreLabel:(CCLabelTTF *)scoreLabel;
 
 @end

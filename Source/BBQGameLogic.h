@@ -28,6 +28,7 @@ static const NSInteger startingScoreForCookie = 20;
 - (NSMutableArray *)eatCookies;
 - (BOOL)isLevelComplete;
 - (BOOL)areThereMovesLeft;
+- (NSInteger)scoreForCookie:(BBQCookie *)cookie;
 
 
 @end
