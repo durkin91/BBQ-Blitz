@@ -51,7 +51,7 @@
 				<key>displayName</key>
 				<string>CCScrollView</string>
 				<key>memberVarAssignmentName</key>
-				<string></string>
+				<string>_worldMapScrollView</string>
 				<key>memberVarAssignmentType</key>
 				<integer>1</integer>
 				<key>properties</key>
@@ -156,8 +156,6 @@
 						<false/>
 					</dict>
 				</array>
-				<key>selected</key>
-				<true/>
 			</dict>
 			<dict>
 				<key>UUID</key>
@@ -446,7 +444,7 @@
 								<key>value</key>
 								<array>
 									<string></string>
-									<string>assets/Lives.png</string>
+									<string>assets/worlds/Lives.png</string>
 								</array>
 							</dict>
 							<dict>
@@ -762,7 +760,7 @@
 								<key>value</key>
 								<array>
 									<string></string>
-									<string>assets/Coins.png</string>
+									<string>assets/worlds/Coins.png</string>
 								</array>
 							</dict>
 							<dict>
@@ -948,7 +946,7 @@
 						<key>value</key>
 						<array>
 							<string></string>
-							<string>assets/Back.png</string>
+							<string>assets/worlds/Back.png</string>
 						</array>
 					</dict>
 					<dict>
@@ -1056,7 +1054,7 @@
 						<key>value</key>
 						<array>
 							<string></string>
-							<string>assets/Forward.png</string>
+							<string>assets/worlds/Forward.png</string>
 						</array>
 					</dict>
 					<dict>
@@ -1372,7 +1370,7 @@
 						<key>value</key>
 						<array>
 							<string></string>
-							<string>assets/city name plate.png</string>
+							<string>assets/worlds/city name plate.png</string>
 						</array>
 					</dict>
 					<dict>

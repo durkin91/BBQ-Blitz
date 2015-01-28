@@ -8,6 +8,17 @@
 
 #import "WorldsScene.h"
 
-@implementation WorldsScene
+@implementation WorldsScene {
+    CCNode *_worldMapScrollView;
+}
+
+- (void)didLoadFromCCB {
+    //Highlight the first level
+    
+}
+
+- (CCNode *)findNodeForLevel:(NSInteger)level {
+    
+}
 
 @end
