@@ -7,18 +7,26 @@
 //
 
 #import "WorldsScene.h"
+#import "BBQWorldView.h"
+#import "BBQActiveLandingPad.h"
 
 @implementation WorldsScene {
-    CCNode *_worldMapScrollView;
+    CCScrollView *_worldMapScrollView;
+    BBQWorldView *_worldNode;
+    CCSprite *_livesSprite;
+    CCSprite *_coinsSprite;
+    CCLabelTTF *_numberOfLivesLabel;
+    CCLabelTTF *_numberOfCoinsLabel;
+    CCButton *_backButton;
+    CCButton *_forwardButton;
+    CCLabelTTF *_worldNameLabel;
 }
 
 - (void)didLoadFromCCB {
-    //Highlight the first level
-    
+    _worldNode = (BBQWorldView *)_worldMapScrollView.contentNode;
 }
 
-- (CCNode *)findNodeForLevel:(NSInteger)level {
-    
-}
+
+
 
 @end

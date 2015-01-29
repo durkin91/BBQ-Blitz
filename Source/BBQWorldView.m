@@ -7,14 +7,16 @@
 //
 
 #import "BBQWorldView.h"
+#import "BBQAnimations.h"
 
 @implementation BBQWorldView {
     CCNode *_levelsNode;
 }
 
 - (void)didLoadFromCCB {
-    self.currentLevel = 2;
+    self.currentLevel = 3;
     [self setupWorld];
+    NSLog(@"Position of world view: %@", NSStringFromCGPoint(self.position));
 }
 
 - (void)setupWorld {
@@ -26,22 +28,33 @@
         
         //Light up the stepping stones
         NSArray *greySteppingStones = [self getSteppingStonesForLevel:i];
-        NSLog(@"Stepping stones: %@", greySteppingStones);
         for (CCSprite *stone in greySteppingStones) {
             CCSprite *lightedStone = [CCSprite spriteWithImageNamed:@"assets/worlds/yellowSteppingStone.png"];
             lightedStone.position = stone.position;
             [nodeForThisLevel addChild:lightedStone];
             [stone removeFromParent];
         }
-        NSLog(@"level's children: %@", nodeForThisLevel.children);
         
-        //Light up the landing pad
+        //Light up the landing pad and place the marker
         CCNode *greyLandingPad = [self getGreyLandingPadForLevel:i];
-        CCSprite *activeLandingPad = [CCSprite spriteWithImageNamed:@"assets/worlds/activeLandingPad.png"];
+        BBQActiveLandingPad *activeLandingPad = (BBQActiveLandingPad *)[CCBReader load:@"ActiveLandingPad"];
+        activeLandingPad.level = i;
         activeLandingPad.position = greyLandingPad.position;
         [nodeForThisLevel addChild:activeLandingPad];
         [greyLandingPad removeFromParent];
+        
+        
+        if (i == self.currentLevel) {
+            CCSprite *marker = [CCSprite spriteWithImageNamed:@"assets/worlds/marker.png"];
+            CGPoint position = CGPointMake(activeLandingPad.position.x, activeLandingPad.position.y + 20);
+            marker.position = position;
+            marker.anchorPoint = CGPointMake(0.5, 0);
+            [self addChild:marker];
+            [BBQAnimations animateMarker:marker];
+            self.currentLevelLandingPad = activeLandingPad;
+        }
     }
+    
 }
 
 
@@ -56,5 +69,23 @@
     CCNode *withSteppingStones = _levelsNode.children[level - 1];
     return withSteppingStones.children[0];
 }
+
+-(void)touchBegan:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
+    
+    NSLog(@"World View was touched");
+    
+//    CGPoint touchLocation = [touch locationInNode:self];
+//    
+//    BBQActiveLandingPad *highlightedLandingPad;
+//    
+//    //find the correct landing pad that is touched
+//    for (BBQActiveLandingPad *landingPad in _activeLandingPads) {
+//        if (CGRectContainsPoint([landingPad boundingBox], touchLocation)) {
+//            NSLog(@"Landing Pad for level %d was touched", landingPad.level);
+//        }
+//    }
+}
+
+
 
 @end

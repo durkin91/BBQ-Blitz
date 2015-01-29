@@ -14,5 +14,6 @@
 + (void)animateButton:(CCButton *)button;
 + (void)animateMenuWithBackground:(CCNode *)background popover:(CCNode *)popover;
 + (void)animateScoreLabel:(CCLabelTTF *)scoreLabel;
++ (void)animateMarker:(CCNode *)marker;
 
 @end

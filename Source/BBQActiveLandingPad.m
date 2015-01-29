@@ -10,4 +10,17 @@
 
 @implementation BBQActiveLandingPad
 
+- (void)didLoadFromCCB {
+    self.userInteractionEnabled = YES;
+}
+
+- (void)setLevel:(NSInteger)level {
+    _level = level;
+    _levelLabel.string = [NSString stringWithFormat:@"%d", level];
+}
+
+- (void)levelSelected {
+    NSLog(@"level selected: %d", self.level);
+}
+
 @end

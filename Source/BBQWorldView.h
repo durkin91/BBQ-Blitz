@@ -7,9 +7,11 @@
 //
 
 #import "CCNode.h"
+#import "BBQActiveLandingPad.h"
 
 @interface BBQWorldView : CCNode
 
 @property (assign, nonatomic) NSInteger currentLevel;
+@property (strong, nonatomic) BBQActiveLandingPad *currentLevelLandingPad;
 
 @end

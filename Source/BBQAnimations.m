@@ -49,4 +49,13 @@
     [scoreLabel runAction:labelSequence];
 }
 
++ (void)animateMarker:(CCNode *)marker {
+    CGPoint startingPosition = marker.position;
+    CCActionMoveTo *moveDown = [CCActionMoveTo actionWithDuration:1.0 position:ccp(marker.position.x, marker.position.y - 5)];
+    CCActionMoveTo *moveUp = [CCActionMoveTo actionWithDuration:1.0 position:startingPosition];
+    CCActionSequence *sequence = [CCActionSequence actions:moveDown, moveUp, nil];
+    CCActionRepeatForever *repeat = [CCActionRepeatForever actionWithAction:sequence];
+    [marker runAction:repeat];
+}
+
 @end

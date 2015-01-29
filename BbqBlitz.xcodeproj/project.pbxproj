@@ -355,13 +355,13 @@
 			isa = PBXGroup;
 			children = (
 				15A95A8E1A78AED400E007D6 /* Scenes */,
+				15A95A981A79166B00E007D6 /* World Views */,
 				15A95A7B1A7318C700E007D6 /* BBQMenu.h */,
 				15A95A7C1A7318C700E007D6 /* BBQMenu.m */,
 				15A95A771A723F7200E007D6 /* BBQAnimations.h */,
 				15A95A781A723F7200E007D6 /* BBQAnimations.m */,
 				15A95A681A7079D300E007D6 /* BBQCookieOrderNode.h */,
 				15A95A691A7079D300E007D6 /* BBQCookieOrderNode.m */,
-				15A95A981A79166B00E007D6 /* World Views */,
 				15A95A7A1A72464900E007D6 /* Popovers */,
 			);
 			name = View;
