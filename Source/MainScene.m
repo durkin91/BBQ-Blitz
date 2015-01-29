@@ -18,8 +18,8 @@
 }
 
 - (void)playGame {
-    CCScene *gamePlayScene = [CCBReader loadAsScene:@"Worlds"];
-    [[CCDirector sharedDirector] replaceScene:gamePlayScene];
+    CCScene *worlds = [CCBReader loadAsScene:@"Worlds"];
+    [[CCDirector sharedDirector] replaceScene:worlds];
 }
 
 @end

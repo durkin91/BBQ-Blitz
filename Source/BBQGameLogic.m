@@ -17,8 +17,9 @@
 
 #pragma mark - Setup Logic
 
-- (NSSet *)setupGame {
-    self.level = [[BBQLevel alloc] initWithFile:@"Level_1"];
+- (NSSet *)setupGameLogicWithLevel:(NSInteger)level {
+    NSString *directory = [NSString stringWithFormat:@"Level_%ld", (long)level];
+    self.level = [[BBQLevel alloc] initWithFile:directory];
     self.movesLeft = self.level.maximumMoves;
     return [self.level createCookiesInBlankTiles];
 }

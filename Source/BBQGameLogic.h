@@ -23,7 +23,7 @@ static const NSInteger startingScoreForCookie = 20;
 @property (assign, nonatomic) NSInteger movesLeft;
 
 
-- (NSSet *)setupGame;
+- (NSSet *)setupGameLogicWithLevel:(NSInteger)level;
 - (NSDictionary *)swipe:(NSString *)swipeDirection;
 - (NSMutableArray *)eatCookies;
 - (BOOL)isLevelComplete;

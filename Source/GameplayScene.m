@@ -36,9 +36,6 @@ static const CGFloat TileHeight = 36.0;
 
 -(void)didLoadFromCCB {
     
-    //load the level, setup gameLogic and begin game
-    self.gameLogic = [[BBQGameLogic alloc] init];
-    
     ////****GESTURE RECOGNIZERS****
     _gestureRecognizers = [@[] mutableCopy];
     
@@ -63,14 +60,8 @@ static const CGFloat TileHeight = 36.0;
     [_gestureRecognizers addObject:swipeRightGestureRecognizer];
     
     [self addGestureRecognizers];
+    //[self setupGameWithLevel:1];
 
-
-    //Start the game
-    NSSet *cookies = [self.gameLogic setupGame];
-    [self addSpritesForOrders];
-    _movesLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.movesLeft];
-    [self addSpritesForCookies:cookies];
-    [self addTiles];
 }
 
 #pragma mark - Helper methods
@@ -85,6 +76,15 @@ static const CGFloat TileHeight = 36.0;
     for (UISwipeGestureRecognizer *gesture in _gestureRecognizers) {
         [[UIApplication sharedApplication].delegate.window removeGestureRecognizer:gesture];
     }
+}
+
+- (void)setupGameWithLevel:(NSInteger)level {
+    self.gameLogic = [[BBQGameLogic alloc] init];
+    NSSet *cookies = [self.gameLogic setupGameLogicWithLevel:level];
+    [self addSpritesForOrders];
+    _movesLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.movesLeft];
+    [self addSpritesForCookies:cookies];
+    [self addTiles];
 }
 
 - (void)addTiles {
