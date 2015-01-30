@@ -11,6 +11,7 @@
 @interface WorldsScene : CCScene
 
 @property (assign, nonatomic) NSInteger currentLevel;
+@property (assign, nonatomic) NSInteger maxLevel;
 
 
 @end

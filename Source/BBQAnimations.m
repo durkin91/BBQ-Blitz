@@ -25,15 +25,43 @@
     CCActionFadeTo *fadeIn = [CCActionFadeTo actionWithDuration:0.3 opacity:0.7];
     [background runAction:fadeIn];
     
-    //move popover
-    float x = background.contentSize.width / 2;
-    float y = background.contentSizeInPoints.height / 2;
-    CGPoint endingPosition = CGPointMake(x, y);
-    
-    //popoverNode.position = startingPosition;
-    CCActionMoveTo *movePopover = [CCActionMoveTo actionWithDuration:0.3 position:endingPosition];
-    [popover runAction:movePopover];
+    popover.position = CGPointMake(popover.position.x, -160.0);
+    [popover runAction:[BBQAnimations movePopoverOnScreenWithbackground:background]];
 
+}
+
++ (void)animateMenuWithoutTouchingBackground:(CCNode *)background popover:(CCNode *)popover {
+    popover.position = CGPointMake(popover.position.x, -160.0);
+    [popover runAction:[BBQAnimations movePopoverOnScreenWithbackground:background]];
+}
+
++ (void)dismissMenuWithBackground:(CCNode *)background popover:(CCNode *)popover {
+    [popover runAction:[BBQAnimations movePopoverOffScreenWithBackground:background]];
+    [BBQAnimations fadeOutBackground:background];
+}
+
++ (void)dismissMenuWithoutTouchingBackground:(CCNode *)background popover:(CCNode *)popover {
+    [popover runAction:[BBQAnimations movePopoverOffScreenWithBackground:background]];
+}
+
++ (void)dismissMenu:(CCNode *)menu1 andShowMenu:(CCNode *)menu2 background:(CCNode *)background {
+    
+    menu2.position = CGPointMake(menu2.position.x, -160.0);
+    
+    CCActionCallBlock *dismissBlock = [CCActionCallBlock actionWithBlock:^{
+        CCActionMoveTo *dismiss = [BBQAnimations movePopoverOffScreenWithBackground:background];
+        [menu1 runAction:dismiss];
+    }];
+    
+    CCActionCallBlock *enterBlock = [CCActionCallBlock actionWithBlock:^{
+        CCActionMoveTo *enter = [BBQAnimations movePopoverOnScreenWithbackground:background];
+        [menu2 runAction:enter];
+    }];
+    
+    
+    CCActionSequence *sequence = [CCActionSequence actions:dismissBlock, enterBlock, nil];
+    [menu1 runAction:sequence];
+    
 }
 
 + (void)animateScoreLabel:(CCLabelTTF *)scoreLabel {
@@ -58,4 +86,23 @@
     [marker runAction:repeat];
 }
 
++ (CCActionMoveTo *)movePopoverOffScreenWithBackground:(CCNode *)background {
+    CGPoint endingPosition = CGPointMake(background.contentSize.width / 2 , background.contentSizeInPoints.height + 160);
+    CCActionMoveTo *movePopover = [CCActionMoveTo actionWithDuration:0.3 position:endingPosition];
+    return movePopover;
+}
+
++ (CCActionMoveTo *)movePopoverOnScreenWithbackground:(CCNode *)background {
+    //move popover
+    float x = background.contentSize.width / 2;
+    float y = background.contentSizeInPoints.height / 2;
+    CGPoint endingPosition = CGPointMake(x, y);
+    CCActionMoveTo *movePopover = [CCActionMoveTo actionWithDuration:0.3 position:endingPosition];
+    return movePopover;
+}
+
++ (void)fadeOutBackground:(CCNode *)background {
+    CCActionFadeOut *fadeOut = [CCActionFadeOut actionWithDuration:0.3];
+    [background runAction:fadeOut];
+}
 @end

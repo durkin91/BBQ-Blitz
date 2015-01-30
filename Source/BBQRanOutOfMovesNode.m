@@ -20,4 +20,8 @@
     
 }
 
+- (void)endGame {
+    [self.delegate didPressEnd];
+}
+
 @end

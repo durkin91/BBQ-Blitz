@@ -8,12 +8,32 @@
 
 #import "CCNode.h"
 #import "BBQGameLogic.h"
+#import "BBQRanOutOfMovesNode.h"
+#import "BBQLevelCompleteNode.h"
+#import "BBQStartLevelNode.h"
+#import "BBQReplayNode.h"
+
 
 #define NO_MORE_MOVES @"No More Moves"
 #define LEVEL_COMPLETE @"Level Complete"
+#define START_LEVEL @"Start Level"
+#define REPLAY @"Replay"
 
-@interface BBQMenu : CCNode
+@protocol BBQMenuDelegate <NSObject>
 
-- (void)displayMenuFor:(NSString *)command gameLogic:(BBQGameLogic *)gameLogic;
+- (void)addGestureRecognizers;
+- (void)removeGestureRecognizers;
+- (void)replayGame;
+- (void)startNextLevel;
+
+@end
+
+@interface BBQMenu : CCNode <BBQStartLevelNodeDelegate, BBQLevelCompleteNodeDelegate, BBQRanOutOfMovesNodeDelegate, BBQReplayNodeDelegate>
+
+@property (weak, nonatomic) id <BBQMenuDelegate> delegate;
+@property (assign, nonatomic) BBQGameLogic *gameLogic;
+
+- (void)displayMenuFor:(NSString *)command;
+- (void)dismissMenu:(NSString *)command withBackgroundFadeOut:(BOOL)wantsFadeOut;
 
 @end

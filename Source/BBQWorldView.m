@@ -14,7 +14,7 @@
 }
 
 - (void)didLoadFromCCB {
-    self.currentLevel = 3;
+    self.currentLevel = 1;
     [self setupWorld];
     NSLog(@"Position of world view: %@", NSStringFromCGPoint(self.position));
 }
@@ -70,21 +70,6 @@
     return withSteppingStones.children[0];
 }
 
--(void)touchBegan:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
-    
-    NSLog(@"World View was touched");
-    
-//    CGPoint touchLocation = [touch locationInNode:self];
-//    
-//    BBQActiveLandingPad *highlightedLandingPad;
-//    
-//    //find the correct landing pad that is touched
-//    for (BBQActiveLandingPad *landingPad in _activeLandingPads) {
-//        if (CGRectContainsPoint([landingPad boundingBox], touchLocation)) {
-//            NSLog(@"Landing Pad for level %d was touched", landingPad.level);
-//        }
-//    }
-}
 
 
 

@@ -8,6 +8,14 @@
 
 #import "CCNode.h"
 
+@protocol BBQRanOutOfMovesNodeDelegate <NSObject>
+
+- (void)didPressEnd;
+
+@end
+
 @interface BBQRanOutOfMovesNode : CCNode
+
+@property (weak, nonatomic) id <BBQRanOutOfMovesNodeDelegate> delegate;
 
 @end

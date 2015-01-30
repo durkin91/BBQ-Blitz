@@ -1,11 +1,20 @@
+
+#import "BBQMenu.h"
+
 @class BBQLevel;
 @class BBQCombo;
 
+@protocol GameplaySceneDelegate <NSObject>
 
-@interface GameplayScene : CCNode
+-(void)setCurrentLevel:(NSInteger)currentLevel;
 
+@end
+
+
+@interface GameplayScene : CCNode <BBQMenuDelegate>
+
+@property (weak, nonatomic) id <GameplaySceneDelegate> delegate;
 @property (assign, nonatomic) NSInteger level;
-
 
 
 - (void)addSpritesForCookies:(NSSet *)cookies;

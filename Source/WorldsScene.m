@@ -24,6 +24,11 @@
 
 - (void)didLoadFromCCB {
     _worldNode = (BBQWorldView *)_worldMapScrollView.contentNode;
+    
+}
+
+- (void)openUpNextLevel {
+    
 }
 
 

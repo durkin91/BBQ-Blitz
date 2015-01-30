@@ -9,7 +9,7 @@
 #import "BBQRanOutOfMovesNode.h"
 #import "BBQLevelCompleteNode.h"
 #import "BBQAnimations.h"
-#import "BBQMenu.h"
+
 
 static const CGFloat TileWidth = 32.0;
 static const CGFloat TileHeight = 36.0;
@@ -60,7 +60,7 @@ static const CGFloat TileHeight = 36.0;
     [_gestureRecognizers addObject:swipeRightGestureRecognizer];
     
     [self addGestureRecognizers];
-    //[self setupGameWithLevel:1];
+    _menuNode.delegate = self;
 
 }
 
@@ -79,12 +79,47 @@ static const CGFloat TileHeight = 36.0;
 }
 
 - (void)setupGameWithLevel:(NSInteger)level {
+    
+    self.level = level;
     self.gameLogic = [[BBQGameLogic alloc] init];
+    _menuNode.gameLogic = self.gameLogic;
     NSSet *cookies = [self.gameLogic setupGameLogicWithLevel:level];
     [self addSpritesForOrders];
     _movesLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.movesLeft];
+    _scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.currentScore];
     [self addSpritesForCookies:cookies];
     [self addTiles];
+    [_menuNode displayMenuFor:START_LEVEL];
+}
+
+- (void)replayGame {
+    [self clearOutAllCookiesAndTiles];
+    [self setupGameWithLevel:self.level];
+}
+
+- (void)startNextLevel {
+    [self clearOutAllCookiesAndTiles];
+    [self setupGameWithLevel:self.level + 1];
+}
+
+- (void)clearOutAllCookiesAndTiles {
+    //Clear out all of the existing cookies and tiles and orders
+    NSMutableArray *cookies = [_cookiesLayer.children mutableCopy];
+    for (CCSprite *sprite in cookies) {
+        [sprite removeFromParent];
+    }
+    
+    NSMutableArray *tiles = [_tilesLayer.children mutableCopy];
+    for (CCSprite *tile in tiles) {
+        [tile removeFromParent];
+    }
+    
+    NSMutableArray *orders = [_orderDisplayNode.children mutableCopy];
+    for (BBQCookieOrderNode *orderNode in orders) {
+        [orderNode.cookieSprite.children[0] removeFromParent];
+        orderNode.tickSprite.visible = NO;
+        orderNode.quantityLabel.visible = NO;
+    }
 }
 
 - (void)addTiles {
@@ -114,7 +149,7 @@ static const CGFloat TileHeight = 36.0;
         sprite.anchorPoint = CGPointMake(0.0, 0.5);
         [orderView.cookieSprite addChild:sprite];
         orderView.quantityLabel.string = [NSString stringWithFormat:@"%ld", (long)order.quantity];
-        
+        orderView.quantityLabel.visible = YES;        
         order.view = orderView;
         order.sprite = sprite;
 
@@ -163,14 +198,14 @@ static const CGFloat TileHeight = 36.0;
         //check whether the player has finished the level
         if ([self.gameLogic isLevelComplete]) {
             [self removeGestureRecognizers];
-            [_menuNode displayMenuFor:LEVEL_COMPLETE gameLogic:self.gameLogic];
+            [_menuNode displayMenuFor:LEVEL_COMPLETE];
 
         }
         
         //check whether player has run out of moves
         else if (![self.gameLogic areThereMovesLeft]) {
             [self removeGestureRecognizers];
-            [_menuNode displayMenuFor:NO_MORE_MOVES gameLogic:self.gameLogic];
+            [_menuNode displayMenuFor:NO_MORE_MOVES];
         }
     }];
     
@@ -324,6 +359,12 @@ static const CGFloat TileHeight = 36.0;
     CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, delayAction, eatCookies, updateScoreBlock, newCookies, [CCActionCallBlock actionWithBlock:completion], nil];
     [self.cookiesLayer runAction:finalSequence];
     
+}
+
+#pragma mark - Popover methods
+
+- (void)didPlay {
+    [_menuNode dismissMenu:START_LEVEL withBackgroundFadeOut:YES];
 }
 
 

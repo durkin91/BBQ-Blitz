@@ -8,7 +8,15 @@
 
 #import "CCNode.h"
 
+@protocol BBQLevelCompleteNodeDelegate <NSObject>
+
+- (void)didPressNext;
+
+@end
+
 @interface BBQLevelCompleteNode : CCNode
+
+@property (weak, nonatomic) id <BBQLevelCompleteNodeDelegate> delegate;
 
 @property (assign, nonatomic) CCLayoutBox *greyStarsLayoutNode;
 @property (assign, nonatomic) CCLabelTTF *yourScoreLabel;

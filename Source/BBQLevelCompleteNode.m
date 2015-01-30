@@ -18,4 +18,8 @@
     [BBQAnimations animateButton:_nextButton];
 }
 
+- (void)nextButtonPressed {
+    [self.delegate didPressNext];
+}
+
 @end

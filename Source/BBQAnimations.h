@@ -15,5 +15,8 @@
 + (void)animateMenuWithBackground:(CCNode *)background popover:(CCNode *)popover;
 + (void)animateScoreLabel:(CCLabelTTF *)scoreLabel;
 + (void)animateMarker:(CCNode *)marker;
++ (void)dismissMenuWithBackground:(CCNode *)background popover:(CCNode *)popover;
++ (void)dismissMenuWithoutTouchingBackground:(CCNode *)background popover:(CCNode *)popover;
++ (void)dismissMenu:(CCNode *)menu1 andShowMenu:(CCNode *)menu2 background:(CCNode *)background;
 
 @end
