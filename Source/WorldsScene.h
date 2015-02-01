@@ -7,11 +7,12 @@
 //
 
 #import "CCScene.h"
+#import "BBQWorldView.h"
 
 @interface WorldsScene : CCScene
 
 @property (assign, nonatomic) NSInteger currentLevel;
-@property (assign, nonatomic) NSInteger maxLevel;
+@property (assign, nonatomic) BBQWorldView *worldNode;
 
 
 @end

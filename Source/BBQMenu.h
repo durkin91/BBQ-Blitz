@@ -25,6 +25,7 @@
 - (void)removeGestureRecognizers;
 - (void)replayGame;
 - (void)startNextLevel;
+- (void)progressToNextMaxLevel;
 
 @end
 

@@ -19,6 +19,64 @@
     [button runAction:repeat];
 }
 
++ (void)animateScoreLabel:(CCLabelTTF *)scoreLabel {
+    CGPoint endPoint = CGPointMake(scoreLabel.position.x, scoreLabel.position.y + 40);
+    CCActionMoveTo *moveLabel = [CCActionMoveTo actionWithDuration:0.6 position:endPoint];
+    
+    CCActionDelay *delayBeforeFade = [CCActionDelay actionWithDuration:0.3];
+    CCActionFadeOut *fadeOut = [CCActionFadeOut actionWithDuration:0.3];
+    CCActionSequence *fadeSequence = [CCActionSequence actions:delayBeforeFade, fadeOut, nil];
+    
+    CCActionSpawn *spawn = [CCActionSpawn actions:moveLabel, fadeSequence, nil];
+    CCActionSequence *labelSequence = [CCActionSequence actions:spawn, [CCActionRemove action], nil];
+    [scoreLabel runAction:labelSequence];
+}
+
+#pragma mark - Animate World View
+
++ (void)animateMarker:(CCNode *)marker {
+    CGPoint startingPosition = marker.position;
+    CCActionMoveTo *moveDown = [CCActionMoveTo actionWithDuration:1.0 position:ccp(marker.position.x, marker.position.y - 5)];
+    CCActionMoveTo *moveUp = [CCActionMoveTo actionWithDuration:1.0 position:startingPosition];
+    CCActionSequence *sequence = [CCActionSequence actions:moveDown, moveUp, nil];
+    CCActionRepeatForever *repeat = [CCActionRepeatForever actionWithAction:sequence];
+    [marker runAction:repeat];
+}
+
++ (void)animateProgressToNextLevelWithGreySteppingStones:(NSArray *)greySteppingStones yellowSteppingStones:(NSArray *)yellowSteppingStones greyLandingPad:(CCSprite *)greyLandingPad activeLandingPad:(CCNode *)activeLandingPad marker:(CCSprite *)marker {
+    
+    [marker stopAllActions];
+    
+    //move across stones
+    NSMutableArray *moveAcrossStones = [@[] mutableCopy];
+    for (CCSprite *greyStone in greySteppingStones) {
+        CCActionMoveTo *moveMarker = [CCActionMoveTo actionWithDuration:0.2 position:greyStone.position];
+        CCActionCallBlock *showYellowStone = [CCActionCallBlock actionWithBlock:^{
+            NSInteger index = [greySteppingStones indexOfObject:greyStone];
+            CCSprite *yellowStone = yellowSteppingStones[index];
+            yellowStone.visible = YES;
+            [greyStone removeFromParent];
+        }];
+        CCActionSequence *sequence = [CCActionSequence actions:moveMarker, showYellowStone, nil];
+        [moveAcrossStones addObject:sequence];
+    }
+    
+    //move to active landing pad
+    CCActionMoveTo *moveToActivePad = [CCActionMoveTo actionWithDuration:0.2 position:greyLandingPad.position];
+    [moveAcrossStones addObject:moveToActivePad];
+    CCActionCallBlock *showActivePad = [CCActionCallBlock actionWithBlock:^{
+        activeLandingPad.visible = YES;
+        [greyLandingPad removeFromParent];
+        [BBQAnimations animateMarker:marker];
+    }];
+    [moveAcrossStones addObject:showActivePad];
+    
+    CCActionSequence *moveMarker = [CCActionSequence actionWithArray:moveAcrossStones];
+    [marker runAction:moveMarker];
+}
+
+#pragma mark - Animate Menus
+
 + (void)animateMenuWithBackground:(CCNode *)background popover:(CCNode *)popover {
     
     //fade in background
@@ -62,28 +120,6 @@
     CCActionSequence *sequence = [CCActionSequence actions:dismissBlock, enterBlock, nil];
     [menu1 runAction:sequence];
     
-}
-
-+ (void)animateScoreLabel:(CCLabelTTF *)scoreLabel {
-    CGPoint endPoint = CGPointMake(scoreLabel.position.x, scoreLabel.position.y + 40);
-    CCActionMoveTo *moveLabel = [CCActionMoveTo actionWithDuration:0.6 position:endPoint];
-    
-    CCActionDelay *delayBeforeFade = [CCActionDelay actionWithDuration:0.3];
-    CCActionFadeOut *fadeOut = [CCActionFadeOut actionWithDuration:0.3];
-    CCActionSequence *fadeSequence = [CCActionSequence actions:delayBeforeFade, fadeOut, nil];
-    
-    CCActionSpawn *spawn = [CCActionSpawn actions:moveLabel, fadeSequence, nil];
-    CCActionSequence *labelSequence = [CCActionSequence actions:spawn, [CCActionRemove action], nil];
-    [scoreLabel runAction:labelSequence];
-}
-
-+ (void)animateMarker:(CCNode *)marker {
-    CGPoint startingPosition = marker.position;
-    CCActionMoveTo *moveDown = [CCActionMoveTo actionWithDuration:1.0 position:ccp(marker.position.x, marker.position.y - 5)];
-    CCActionMoveTo *moveUp = [CCActionMoveTo actionWithDuration:1.0 position:startingPosition];
-    CCActionSequence *sequence = [CCActionSequence actions:moveDown, moveUp, nil];
-    CCActionRepeatForever *repeat = [CCActionRepeatForever actionWithAction:sequence];
-    [marker runAction:repeat];
 }
 
 + (CCActionMoveTo *)movePopoverOffScreenWithBackground:(CCNode *)background {

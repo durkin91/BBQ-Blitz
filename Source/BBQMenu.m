@@ -90,7 +90,7 @@
 
 //on level complete popover
 - (void)didPressNext {
-    [self.delegate startNextLevel];
+    [self.delegate progressToNextMaxLevel];
     [self dismissMenu:LEVEL_COMPLETE withBackgroundFadeOut:NO];
 }
 

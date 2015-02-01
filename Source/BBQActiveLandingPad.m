@@ -22,6 +22,7 @@
 
 - (void)levelSelected {
     NSLog(@"level selected: %d", self.level);
+    
     CCScene *scene = [CCBReader loadAsScene:@"Gameplay"];
     GameplayScene *gamePlay = (GameplayScene *)[scene.children objectAtIndex:0];
     [gamePlay setupGameWithLevel:self.level];

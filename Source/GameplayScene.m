@@ -9,6 +9,7 @@
 #import "BBQRanOutOfMovesNode.h"
 #import "BBQLevelCompleteNode.h"
 #import "BBQAnimations.h"
+#import "WorldsScene.h"
 
 
 static const CGFloat TileWidth = 32.0;
@@ -100,6 +101,14 @@ static const CGFloat TileHeight = 36.0;
 - (void)startNextLevel {
     [self clearOutAllCookiesAndTiles];
     [self setupGameWithLevel:self.level + 1];
+}
+
+- (void)progressToNextMaxLevel {
+    CCScene *scene = [CCBReader loadAsScene:@"Worlds"];
+    //WorldsScene *worlds = (WorldsScene *)[scene.children objectAtIndex:0];
+    //self.delegate = worlds.worldNode;
+    [[CCDirector sharedDirector] replaceScene:scene];
+    //[self.delegate progressToNextLevel];
 }
 
 - (void)clearOutAllCookiesAndTiles {

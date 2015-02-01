@@ -11,12 +11,12 @@
 
 @implementation BBQWorldView {
     CCNode *_levelsNode;
+    CCSprite *_marker;
 }
 
 - (void)didLoadFromCCB {
     self.currentLevel = 1;
     [self setupWorld];
-    NSLog(@"Position of world view: %@", NSStringFromCGPoint(self.position));
 }
 
 - (void)setupWorld {
@@ -45,15 +45,40 @@
         
         
         if (i == self.currentLevel) {
-            CCSprite *marker = [CCSprite spriteWithImageNamed:@"assets/worlds/marker.png"];
+            _marker = [CCSprite spriteWithImageNamed:@"assets/worlds/marker.png"];
             CGPoint position = CGPointMake(activeLandingPad.position.x, activeLandingPad.position.y + 20);
-            marker.position = position;
-            marker.anchorPoint = CGPointMake(0.5, 0);
-            [self addChild:marker];
-            [BBQAnimations animateMarker:marker];
+            _marker.position = position;
+            _marker.anchorPoint = CGPointMake(0.5, 0);
+            [self addChild:_marker];
+            [BBQAnimations animateMarker:_marker];
             self.currentLevelLandingPad = activeLandingPad;
         }
     }
+}
+
+- (void)progressToNextLevel {
+    self.maxLevel = self.maxLevel + 1;
+    CCNode *nodeForThisLevel = _levelsNode.children[self.maxLevel - 1];
+    
+    //get grey and yellow stepping stones
+    NSArray *greySteppingStones = [self getSteppingStonesForLevel:self.maxLevel];
+    NSMutableArray *yellowSteppingStones = [@[] mutableCopy];
+    for (CCSprite *greyStone in greySteppingStones) {
+        CCSprite *lightedStone = [CCSprite spriteWithImageNamed:@"assets/worlds/yellowSteppingStone.png"];
+        lightedStone.position = greyStone.position;
+        lightedStone.visible = NO;
+        [nodeForThisLevel addChild:lightedStone];
+        [yellowSteppingStones addObject:lightedStone];
+    }
+    
+    //get grey and active landing pad
+    CCSprite *greyLandingPad = [self getGreyLandingPadForLevel:self.maxLevel];
+    BBQActiveLandingPad *activeLandingPad = (BBQActiveLandingPad *)[CCBReader load:@"ActiveLandingPad"];
+    activeLandingPad.level = self.maxLevel;
+    activeLandingPad.position = greyLandingPad.position;
+    activeLandingPad.visible = NO;
+    [nodeForThisLevel addChild:activeLandingPad];
+    
     
 }
 
@@ -65,7 +90,7 @@
     return stonesArray;
 }
 
-- (CCNode *)getGreyLandingPadForLevel:(NSInteger )level {
+- (CCSprite *)getGreyLandingPadForLevel:(NSInteger )level {
     CCNode *withSteppingStones = _levelsNode.children[level - 1];
     return withSteppingStones.children[0];
 }

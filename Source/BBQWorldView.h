@@ -8,10 +8,12 @@
 
 #import "CCNode.h"
 #import "BBQActiveLandingPad.h"
+#import "GameplayScene.h"
 
-@interface BBQWorldView : CCNode
+@interface BBQWorldView : CCNode <GameplaySceneDelegate>
 
 @property (assign, nonatomic) NSInteger currentLevel;
+@property (assign, nonatomic) NSInteger maxLevel;
 @property (strong, nonatomic) BBQActiveLandingPad *currentLevelLandingPad;
 
 @end
