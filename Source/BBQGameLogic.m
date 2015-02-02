@@ -53,6 +53,197 @@
             for (int row = NumRows - 1; row > 0; row--) {
                 BBQTile *tileB = [self.level tileAtColumn:column  row:row];
                 if (tileB != nil) {
+                    BOOL didCombineSameCookies = YES;
+                    while (didCombineSameCookies) {
+                        //Find cookie B and if it is nil (as is case if its a shark tile underneath a blank tile), move what would be cookie A to B's tile
+                        BBQCookie *cookieB = [self.level cookieAtColumn:column row:row];
+                        if (cookieB == nil) {
+                            BBQMoveCookie *cookieMovementB = [self moveASingleCookieInDirection:@"Up" toColumn:column row:row + 1];
+                            cookieB = [self.level cookieAtColumn:column row:row];
+                            if (cookieMovementB) {
+                                [animationsToPerform[MOVEMENTS] addObject:cookieMovementB];
+                            }
+                        }
+                        
+                        //Find cookie A
+                        BBQCookie *cookieA = [self.level cookieAtColumn:column row:row - 1];
+                        BBQTile *tileA = [self.level tileAtColumn:column row:row - 1];
+                        int x = 2;
+                        while (tileA != nil && cookieA == nil && x <= row) {
+                            tileA = [self.level tileAtColumn:column row:row - x];
+                            cookieA = [self.level cookieAtColumn:column row:row - x];
+                            x++;
+                        }
+                        
+                        if (cookieA != nil) {
+                            didCombineSameCookies = [self tryCombineCookieA:cookieA withCookieB:cookieB animations:animationsToPerform];
+                            
+                            //if there was a combo or cookie A is the last cookie above a nil tile, move the cookie below tile A into tile A
+                            BBQMoveCookie *cookieMovement = [self moveASingleCookieInDirection:@"Up" toColumn:column row:row];
+                            if (cookieMovement) {
+                                [animationsToPerform[MOVEMENTS] addObject:cookieMovement];
+                            }
+                        }
+                        else {
+                            didCombineSameCookies = NO;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    //DOWN swipe
+    if ([swipeDirection isEqualToString:@"Down"]) {
+        for (int column = 0; column < NumColumns ; column++) {
+            for (int row = 0; row < NumRows - 1; row++) {
+                BBQTile *tileB = [self.level tileAtColumn:column  row:row];
+                if (tileB != nil) {
+                    BOOL didCombineSameCookies = YES;
+                    while (didCombineSameCookies) {
+                        //Find cookie B and if it is nil move what would be cookie A to B's tile
+                        BBQCookie *cookieB = [self.level cookieAtColumn:column row:row];
+                        if (cookieB == nil) {
+                            BBQMoveCookie *cookieMovementB = [self moveASingleCookieInDirection:@"Down" toColumn:column row:row - 1];
+                            cookieB = [self.level cookieAtColumn:column row:row];
+                            if (cookieMovementB) {
+                                [animationsToPerform[MOVEMENTS] addObject:cookieMovementB];
+                            }
+                        }
+                        
+                        //Find cookie A
+                        BBQCookie *cookieA = [self.level cookieAtColumn:column row:row + 1];
+                        BBQTile *tileA = [self.level tileAtColumn:column row:row + 1];
+                        int x = 2;
+                        while (tileA != nil && cookieA == nil && row + x < NumRows) {
+                            tileA = [self.level tileAtColumn:column row:row + x];
+                            cookieA = [self.level cookieAtColumn:column row:row + x];
+                            x++;
+                        }
+                        
+                        if (cookieA != nil) {
+                            didCombineSameCookies = [self tryCombineCookieA:cookieA withCookieB:cookieB animations:animationsToPerform];
+                            
+                            //if there was a combo or cookie A is the last cookie above a nil tile, move the cookie below tile A into tile A
+                            BBQMoveCookie *cookieMovement = [self moveASingleCookieInDirection:@"Down" toColumn:column row:row];
+                            if (cookieMovement) {
+                                [animationsToPerform[MOVEMENTS] addObject:cookieMovement];
+                            }
+                        }
+                        else {
+                            didCombineSameCookies = NO;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    //LEFT swipe
+    if ([swipeDirection isEqualToString:@"Left"]) {
+        for (int row = 0; row < NumRows ; row++) {
+            for (int column = 0; column < NumColumns - 1; column++) {
+                BBQTile *tileB = [self.level tileAtColumn:column  row:row];
+                if (tileB != nil) {
+                    BOOL didCombineSameCookies = YES;
+                    while (didCombineSameCookies) {
+                        //Find cookie B and if it is nil move what would be cookie A to B's tile
+                        BBQCookie *cookieB = [self.level cookieAtColumn:column row:row];
+                        if (cookieB == nil) {
+                            BBQMoveCookie *cookieMovementB = [self moveASingleCookieInDirection:@"Left" toColumn:column - 1 row:row];
+                            cookieB = [self.level cookieAtColumn:column row:row];
+                            if (cookieMovementB) {
+                                [animationsToPerform[MOVEMENTS] addObject:cookieMovementB];
+                            }
+                        }
+                        
+                        //Find cookie A
+                        BBQCookie *cookieA = [self.level cookieAtColumn:column + 1 row:row];
+                        BBQTile *tileA = [self.level tileAtColumn:column + 1 row:row];
+                        int x = 2;
+                        while (tileA != nil && cookieA == nil && column + x < NumColumns) {
+                            tileA = [self.level tileAtColumn:column + x row:row];
+                            cookieA = [self.level cookieAtColumn:column + x row:row];
+                            x++;
+                        }
+                        
+                        if (cookieA != nil) {
+                            didCombineSameCookies = [self tryCombineCookieA:cookieA withCookieB:cookieB animations:animationsToPerform];
+                            
+                            //if there was a combo or cookie A is the last cookie above a nil tile, move the cookie below tile A into tile A
+                            BBQMoveCookie *cookieMovement = [self moveASingleCookieInDirection:@"Left" toColumn:column row:row];
+                            if (cookieMovement) {
+                                [animationsToPerform[MOVEMENTS] addObject:cookieMovement];
+                            }
+                        }
+                        
+                        else {
+                            didCombineSameCookies = NO;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    //RIGHT swipe
+    if ([swipeDirection isEqualToString:@"Right"]) {
+        for (int row = 0; row < NumRows ; row++) {
+            for (int column = NumColumns - 1; column > 0; column--) {
+                BBQTile *tileB = [self.level tileAtColumn:column  row:row];
+                if (tileB != nil) {
+                    BOOL didCombineSameCookies = YES;
+                    while (didCombineSameCookies) {
+                        //Find cookie B and if it is nil (as is case if its a shark tile underneath a blank tile), move what would be cookie A to B's tile
+                        BBQCookie *cookieB = [self.level cookieAtColumn:column row:row];
+                        if (cookieB == nil) {
+                            BBQMoveCookie *cookieMovementB = [self moveASingleCookieInDirection:@"Right" toColumn:column + 1 row:row];
+                            cookieB = [self.level cookieAtColumn:column row:row];
+                            if (cookieMovementB) {
+                                [animationsToPerform[MOVEMENTS] addObject:cookieMovementB];
+                            }
+                        }
+                        
+                        //Find cookie A
+                        BBQCookie *cookieA = [self.level cookieAtColumn:column - 1 row:row];
+                        BBQTile *tileA = [self.level tileAtColumn:column - 1 row:row];
+                        int x = 2;
+                        while (tileA != nil && cookieA == nil && x <= column) {
+                            tileA = [self.level tileAtColumn:column - x row:row];
+                            cookieA = [self.level cookieAtColumn:column - x row:row];
+                            x++;
+                        }
+                        
+                        if (cookieA != nil) {
+                            didCombineSameCookies = [self tryCombineCookieA:cookieA withCookieB:cookieB animations:animationsToPerform];
+                            
+                            //if there was a combo or cookie A is the last cookie above a nil tile, move the cookie below tile A into tile A
+                            BBQMoveCookie *cookieMovement = [self moveASingleCookieInDirection:@"Right" toColumn:column row:row];
+                            if (cookieMovement) {
+                                [animationsToPerform[MOVEMENTS] addObject:cookieMovement];
+                            }
+                        }
+                        else {
+                            didCombineSameCookies = NO;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+}
+
+
+
+- (void)ORIGINALstartSwipeInDirection:(NSString *)swipeDirection animations:(NSDictionary *)animationsToPerform {
+    
+    //UP swipe
+    if ([swipeDirection isEqualToString:@"Up"]) {
+        for (int column = 0; column < NumColumns ; column++) {
+            for (int row = NumRows - 1; row > 0; row--) {
+                BBQTile *tileB = [self.level tileAtColumn:column  row:row];
+                if (tileB != nil) {
                     
                     //Find cookie B and if it is nil (as is case if its a shark tile underneath a blank tile), move what would be cookie A to B's tile
                     BBQCookie *cookieB = [self.level cookieAtColumn:column row:row];
@@ -213,26 +404,54 @@
     
 }
 
-
-- (void)tryCombineCookieA:(BBQCookie *)cookieA withCookieB:(BBQCookie *)cookieB animations:(NSDictionary *)animations {
+- (BOOL)tryCombineCookieA:(BBQCookie *)cookieA withCookieB:(BBQCookie *)cookieB animations:(NSDictionary *)animations {
+    
+    BOOL didCombineSameCookies = NO;
     
     if (cookieA.cookieType == cookieB.cookieType) {
-        //NSLog(@"combining cookie A: %@ with cookie B: %@", cookieA, cookieB);
         
-        //create the combo object
-        BBQCombo *combo = [[BBQCombo alloc] initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB];
+        //Upgrade count and check whether the new count will turn it into an upgrade
+        cookieB.count = cookieB.count + cookieA.count;
+        BBQCombo *combo;
         NSMutableArray *combos = animations[COMBOS];
+        
+        if (cookieB.count < NumCookiesToUpgrade) {
+            combo = [[BBQCombo alloc] initWithCookieA:cookieA cookieB:cookieB upgradeType:SAME_TYPE_UPGRADE];
+            didCombineSameCookies = YES;
+        }
+        
+        else if (cookieB.count >= NumCookiesToUpgrade) {
+            //create the combo object
+            combo = [[BBQCombo alloc] initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB upgradeType:DIFFERENT_TYPE_UPGRADE];
+            combo.cookieB.cookieType = combo.cookieB.cookieType + 1;
+            combo.cookieB.count = 1;
+        }
+        
         [combos addObject:combo];
-        
-        //Perform the combo model logic
-        NSInteger columnA = combo.cookieA.column;
-        NSInteger rowA = combo.cookieA.row;
-        
-        combo.cookieB.cookieType = combo.cookieB.cookieType + 1;
-        
-        [self.level replaceCookieAtColumn:columnA row:rowA withCookie:nil];
+        [self.level replaceCookieAtColumn:cookieA.column row:cookieA.row withCookie:nil];
     }
+    return didCombineSameCookies;
 }
+
+//- (void)ORIGINALtryCombineCookieA:(BBQCookie *)cookieA withCookieB:(BBQCookie *)cookieB animations:(NSDictionary *)animations {
+//    
+//    if (cookieA.cookieType == cookieB.cookieType) {
+//        //NSLog(@"combining cookie A: %@ with cookie B: %@", cookieA, cookieB);
+//        
+//        //create the combo object
+//        BBQCombo *combo = [[BBQCombo alloc] initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB];
+//        NSMutableArray *combos = animations[COMBOS];
+//        [combos addObject:combo];
+//        
+//        //Perform the combo model logic
+//        NSInteger columnA = combo.cookieA.column;
+//        NSInteger rowA = combo.cookieA.row;
+//        
+//        combo.cookieB.cookieType = combo.cookieB.cookieType + 1;
+//        
+//        [self.level replaceCookieAtColumn:columnA row:rowA withCookie:nil];
+//    }
+//}
 
 - (BBQMoveCookie *)moveASingleCookieInDirection:(NSString *)direction toColumn:(NSInteger)columnB row:(NSInteger)rowB {
     

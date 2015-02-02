@@ -20,6 +20,7 @@
 		15A95A971A79166000E007D6 /* BBQWorldView.m in Sources */ = {isa = PBXBuildFile; fileRef = 15A95A961A79166000E007D6 /* BBQWorldView.m */; };
 		15A95A9C1A7A2EBE00E007D6 /* BBQStartLevelNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 15A95A9B1A7A2EBE00E007D6 /* BBQStartLevelNode.m */; };
 		15A95A9F1A7AFCE500E007D6 /* BBQReplayNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 15A95A9E1A7AFCE500E007D6 /* BBQReplayNode.m */; };
+		15A95AA61A7F5BCD00E007D6 /* BBQCookieNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 15A95AA51A7F5BCD00E007D6 /* BBQCookieNode.m */; };
 		15AB57821A661A9F00DFB4D6 /* BBQCookie.m in Sources */ = {isa = PBXBuildFile; fileRef = 15AB57811A661A9F00DFB4D6 /* BBQCookie.m */; };
 		15AB57851A66207400DFB4D6 /* BBQLevel.m in Sources */ = {isa = PBXBuildFile; fileRef = 15AB57841A66207400DFB4D6 /* BBQLevel.m */; };
 		15AB578C1A66695500DFB4D6 /* Level_0.json in Resources */ = {isa = PBXBuildFile; fileRef = 15AB57871A66695500DFB4D6 /* Level_0.json */; };
@@ -217,6 +218,8 @@
 		15A95A9B1A7A2EBE00E007D6 /* BBQStartLevelNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQStartLevelNode.m; path = Source/BBQStartLevelNode.m; sourceTree = "<group>"; };
 		15A95A9D1A7AFCE500E007D6 /* BBQReplayNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQReplayNode.h; path = Source/BBQReplayNode.h; sourceTree = "<group>"; };
 		15A95A9E1A7AFCE500E007D6 /* BBQReplayNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQReplayNode.m; path = Source/BBQReplayNode.m; sourceTree = "<group>"; };
+		15A95AA41A7F5BCD00E007D6 /* BBQCookieNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQCookieNode.h; path = Source/BBQCookieNode.h; sourceTree = "<group>"; };
+		15A95AA51A7F5BCD00E007D6 /* BBQCookieNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQCookieNode.m; path = Source/BBQCookieNode.m; sourceTree = "<group>"; };
 		15AB57801A661A9F00DFB4D6 /* BBQCookie.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQCookie.h; path = Source/BBQCookie.h; sourceTree = "<group>"; };
 		15AB57811A661A9F00DFB4D6 /* BBQCookie.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQCookie.m; path = Source/BBQCookie.m; sourceTree = "<group>"; };
 		15AB57831A66207400DFB4D6 /* BBQLevel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQLevel.h; path = Source/BBQLevel.h; sourceTree = "<group>"; };
@@ -362,13 +365,9 @@
 			children = (
 				15A95A8E1A78AED400E007D6 /* Scenes */,
 				15A95A981A79166B00E007D6 /* World Views */,
-				15A95A7B1A7318C700E007D6 /* BBQMenu.h */,
-				15A95A7C1A7318C700E007D6 /* BBQMenu.m */,
-				15A95A771A723F7200E007D6 /* BBQAnimations.h */,
-				15A95A781A723F7200E007D6 /* BBQAnimations.m */,
-				15A95A681A7079D300E007D6 /* BBQCookieOrderNode.h */,
-				15A95A691A7079D300E007D6 /* BBQCookieOrderNode.m */,
+				15A95AA31A7F5BA200E007D6 /* Nodes */,
 				15A95A7A1A72464900E007D6 /* Popovers */,
+				15A95AA71A7F5C6900E007D6 /* Other */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -431,6 +430,28 @@
 				15A95A961A79166000E007D6 /* BBQWorldView.m */,
 			);
 			name = "World Views";
+			sourceTree = "<group>";
+		};
+		15A95AA31A7F5BA200E007D6 /* Nodes */ = {
+			isa = PBXGroup;
+			children = (
+				15A95A681A7079D300E007D6 /* BBQCookieOrderNode.h */,
+				15A95A691A7079D300E007D6 /* BBQCookieOrderNode.m */,
+				15A95AA41A7F5BCD00E007D6 /* BBQCookieNode.h */,
+				15A95AA51A7F5BCD00E007D6 /* BBQCookieNode.m */,
+			);
+			name = Nodes;
+			sourceTree = "<group>";
+		};
+		15A95AA71A7F5C6900E007D6 /* Other */ = {
+			isa = PBXGroup;
+			children = (
+				15A95A7B1A7318C700E007D6 /* BBQMenu.h */,
+				15A95A7C1A7318C700E007D6 /* BBQMenu.m */,
+				15A95A771A723F7200E007D6 /* BBQAnimations.h */,
+				15A95A781A723F7200E007D6 /* BBQAnimations.m */,
+			);
+			name = Other;
 			sourceTree = "<group>";
 		};
 		15AB57861A66695500DFB4D6 /* Levels */ = {
@@ -1032,6 +1053,7 @@
 				15AB57961A66994B00DFB4D6 /* BBQGameLogic.m in Sources */,
 				15A95A9C1A7A2EBE00E007D6 /* BBQStartLevelNode.m in Sources */,
 				15AB57821A661A9F00DFB4D6 /* BBQCookie.m in Sources */,
+				15A95AA61A7F5BCD00E007D6 /* BBQCookieNode.m in Sources */,
 				15A95A8D1A78AD6400E007D6 /* MainScene.m in Sources */,
 				7A046D8C19E8A20E004C4763 /* GameplayScene.m in Sources */,
 				15A95A9F1A7AFCE500E007D6 /* BBQReplayNode.m in Sources */,

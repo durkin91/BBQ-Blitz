@@ -10,6 +10,7 @@
 #import "BBQLevelCompleteNode.h"
 #import "BBQAnimations.h"
 #import "WorldsScene.h"
+#import "BBQCookieNode.h"
 
 
 static const CGFloat TileWidth = 32.0;
@@ -104,10 +105,6 @@ static const CGFloat TileHeight = 36.0;
 }
 
 - (void)progressToNextMaxLevel {
-    //CCScene *scene = [CCBReader loadAsScene:@"Worlds"];
-    //WorldsScene *worlds = (WorldsScene *)[scene.children objectAtIndex:0];
-    //self.delegate = worlds.worldNode;
-    
     WorldsScene *worlds = (WorldsScene *)[CCBReader load:@"Worlds"];
     CCScene *scene = [[CCScene alloc] init];
     [scene addChild:worlds];
@@ -150,6 +147,16 @@ static const CGFloat TileHeight = 36.0;
     }
 }
 
+- (BBQCookieNode *)createCookieNodeForCookie:(BBQCookie *)cookie column:(NSInteger)column row:(NSInteger)row {
+    BBQCookieNode *cookieNode = (BBQCookieNode *)[CCBReader load:@"Cookie"];
+    NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [cookie spriteName]];
+    CCSprite *sprite = [CCSprite spriteWithImageNamed:directory];
+    [cookieNode.cookieSprite addChild:sprite];
+    cookieNode.position = [GameplayScene pointForColumn:column row:row];
+    [self.cookiesLayer addChild:cookieNode];
+    return cookieNode;
+}
+
 //The way I have changed the sprite is a hack for now. Would be much better to just figure out how to change the texture
 - (void)addSpritesForOrders {
     NSArray *orderviews = [_orderDisplayNode children];
@@ -171,11 +178,8 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)addSpritesForCookies:(NSSet *)cookies {
     for (BBQCookie *cookie in cookies) {
-        NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [cookie spriteName]];
-        CCSprite *sprite = [CCSprite spriteWithImageNamed:directory];
-        sprite.position = [GameplayScene pointForColumn:cookie.column row:cookie.row];
-        [self.cookiesLayer addChild:sprite];
-        cookie.sprite = sprite;
+        BBQCookieNode *cookieNode = [self createCookieNodeForCookie:cookie column:cookie.column row:cookie.row];
+        cookie.sprite = cookieNode;
         
         //animate them
         self.userInteractionEnabled = NO;
@@ -247,7 +251,7 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)animateSwipe:(NSDictionary *)animations completion:(dispatch_block_t)completion {
     
-    const NSTimeInterval duration = 0.2;
+    const NSTimeInterval duration = 0.4;
     const NSTimeInterval delay = 0.5;
     
     CCActionDelay *delayAction = [CCActionDelay actionWithDuration:delay];
@@ -268,13 +272,15 @@ static const CGFloat TileHeight = 36.0;
             
             CCActionCallBlock *changeSprite = [CCActionCallBlock actionWithBlock:^{
                 
-                [combo.cookieB.sprite removeFromParent];
+                if ([combo.upgradeType isEqualToString:DIFFERENT_TYPE_UPGRADE]) {
+                    [combo.cookieB.sprite removeFromParent];
+                    combo.cookieB.sprite = [self createCookieNodeForCookie:combo.cookieB column:combo.cookieB.column row:combo.cookieB.row];
+                }
                 
-                NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [combo.cookieB spriteName]];
-                CCSprite *sprite = [CCSprite spriteWithImageNamed:directory];
-                sprite.position = [GameplayScene pointForColumn:combo.cookieB.column row:combo.cookieB.row];
-                [self.cookiesLayer addChild:sprite];
-                combo.cookieB.sprite = sprite;
+                else if ([combo.upgradeType isEqualToString:SAME_TYPE_UPGRADE]) {
+                    combo.cookieB.sprite.countCircle.visible = YES;
+                    combo.cookieB.sprite.countLabel.string = [NSString stringWithFormat:@"%ld", (long)combo.cookieB.count];
+                }
                 
             }];
             

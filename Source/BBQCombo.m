@@ -11,13 +11,12 @@
 
 @implementation BBQCombo
 
-- (instancetype)initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB {
+- (instancetype)initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB upgradeType:(NSString *)upgradeType {
     self = [super init];
     if (self) {
         self.cookieA = cookieA;
         self.cookieB = cookieB;
-
-    //cookie replacement logic in the level is performed in game logic class
+        self.upgradeType = upgradeType;
     }
     return self;
 }

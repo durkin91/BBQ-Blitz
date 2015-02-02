@@ -10,6 +10,14 @@
 
 @implementation BBQCookie
 
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.count = 1;
+    }
+    return self;
+}
+
 - (NSString *)spriteName {
     static NSString * const spriteNames[] = {
         @"Croissant",
