@@ -16,4 +16,6 @@
 @property (assign, nonatomic) NSInteger maxLevel;
 @property (strong, nonatomic) BBQActiveLandingPad *currentLevelLandingPad;
 
+- (void)progressToNextLevel;
+
 @end

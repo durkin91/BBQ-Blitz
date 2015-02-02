@@ -11,6 +11,6 @@
 
     "targetScore" : 1000,
     "moves" : 17,
-    "orderCookieType" : [1],
-    "orderCookieQuantity" : [1],
+    "orderCookieType" : [1, 2],
+    "orderCookieQuantity" : [1, 5],
 }

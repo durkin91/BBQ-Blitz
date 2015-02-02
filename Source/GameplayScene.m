@@ -104,11 +104,15 @@ static const CGFloat TileHeight = 36.0;
 }
 
 - (void)progressToNextMaxLevel {
-    CCScene *scene = [CCBReader loadAsScene:@"Worlds"];
+    //CCScene *scene = [CCBReader loadAsScene:@"Worlds"];
     //WorldsScene *worlds = (WorldsScene *)[scene.children objectAtIndex:0];
     //self.delegate = worlds.worldNode;
+    
+    WorldsScene *worlds = (WorldsScene *)[CCBReader load:@"Worlds"];
+    CCScene *scene = [[CCScene alloc] init];
+    [scene addChild:worlds];
     [[CCDirector sharedDirector] replaceScene:scene];
-    //[self.delegate progressToNextLevel];
+    [worlds.worldNode progressToNextLevel];
 }
 
 - (void)clearOutAllCookiesAndTiles {

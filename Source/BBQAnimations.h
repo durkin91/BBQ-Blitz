@@ -18,5 +18,6 @@
 + (void)dismissMenuWithBackground:(CCNode *)background popover:(CCNode *)popover;
 + (void)dismissMenuWithoutTouchingBackground:(CCNode *)background popover:(CCNode *)popover;
 + (void)dismissMenu:(CCNode *)menu1 andShowMenu:(CCNode *)menu2 background:(CCNode *)background;
++ (void)animateProgressToNextLevelWithGreySteppingStones:(NSArray *)greySteppingStones yellowSteppingStones:(NSArray *)yellowSteppingStones greyLandingPad:(CCSprite *)greyLandingPad activeLandingPad:(CCNode *)activeLandingPad marker:(CCSprite *)marker;
 
 @end

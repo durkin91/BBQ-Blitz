@@ -16,6 +16,7 @@
 
 - (void)didLoadFromCCB {
     self.currentLevel = 1;
+    self.maxLevel = 1;
     [self setupWorld];
 }
 
@@ -79,6 +80,7 @@
     activeLandingPad.visible = NO;
     [nodeForThisLevel addChild:activeLandingPad];
     
+    [BBQAnimations animateProgressToNextLevelWithGreySteppingStones:greySteppingStones yellowSteppingStones:yellowSteppingStones greyLandingPad:greyLandingPad activeLandingPad:activeLandingPad marker:_marker];
     
 }
 

@@ -50,7 +50,8 @@
     //move across stones
     NSMutableArray *moveAcrossStones = [@[] mutableCopy];
     for (CCSprite *greyStone in greySteppingStones) {
-        CCActionMoveTo *moveMarker = [CCActionMoveTo actionWithDuration:0.2 position:greyStone.position];
+        CGPoint position = CGPointMake(greyStone.position.x, greyStone.position.y + 20);
+        CCActionMoveTo *moveMarker = [CCActionMoveTo actionWithDuration:0.5 position:position];
         CCActionCallBlock *showYellowStone = [CCActionCallBlock actionWithBlock:^{
             NSInteger index = [greySteppingStones indexOfObject:greyStone];
             CCSprite *yellowStone = yellowSteppingStones[index];
@@ -62,7 +63,8 @@
     }
     
     //move to active landing pad
-    CCActionMoveTo *moveToActivePad = [CCActionMoveTo actionWithDuration:0.2 position:greyLandingPad.position];
+    CGPoint markerPosition = CGPointMake(greyLandingPad.position.x, greyLandingPad.position.y + 20);
+    CCActionMoveTo *moveToActivePad = [CCActionMoveTo actionWithDuration:0.5 position:markerPosition];
     [moveAcrossStones addObject:moveToActivePad];
     CCActionCallBlock *showActivePad = [CCActionCallBlock actionWithBlock:^{
         activeLandingPad.visible = YES;
