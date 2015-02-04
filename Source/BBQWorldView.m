@@ -15,8 +15,8 @@
 }
 
 - (void)didLoadFromCCB {
-    self.currentLevel = 1;
-    self.maxLevel = 1;
+    self.currentLevel = 3;
+    self.maxLevel = 3;
     [self setupWorld];
 }
 

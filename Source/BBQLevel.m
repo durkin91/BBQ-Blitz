@@ -7,7 +7,6 @@
 //
 
 #import "BBQLevel.h"
-#import "BBQCookieOrder.h"
 
 
 @implementation BBQLevel {
@@ -41,7 +40,7 @@
     for (NSInteger row = 0; row < NumRows; row++) {
         for (NSInteger column = 0; column < NumColumns; column++) {
             BBQTile *tile = _tiles[column][row];
-            if (tile != nil && tile.tileType != 2 && _cookies[column][row] == nil) {
+            if (tile != nil && _cookies[column][row] == nil) {
             
             //choose a random cookie number
             NSUInteger cookieType = arc4random_uniform(NumStartingCookies) + 1;
@@ -113,27 +112,11 @@
                     _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:1];
                 }
                 
-                //if the value is 2, create a shark tile object
-                if ([value integerValue] == 2) {
-                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:2];
-                }
-                
             }];
         }];
         
         self.targetScore = [dictionary[@"targetScore"] unsignedIntegerValue];
         self.maximumMoves = [dictionary[@"moves"] unsignedIntegerValue];
-        
-        //setup Cookie Order objects
-        NSArray *orderTypes = dictionary[@"orderCookieType"];
-        NSArray *orderQuantities = dictionary[@"orderCookieQuantity"];
-        self.cookieOrders = [@[] mutableCopy];
-        for (int i = 0; i < [orderTypes count]; i ++) {
-            NSInteger orderType = [orderTypes[i] unsignedIntegerValue];
-            NSInteger orderQuantity = [orderQuantities[i] unsignedIntegerValue];
-            BBQCookieOrder *cookieOrder = [[BBQCookieOrder alloc] initWithCookieType:orderType startingAmount:orderQuantity];
-            [self.cookieOrders addObject:cookieOrder];
-        }
     }
     return self;
 }

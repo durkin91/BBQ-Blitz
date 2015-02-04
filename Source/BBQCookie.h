@@ -10,8 +10,8 @@
 #import "BBQCookieNode.h"
 
 static const NSUInteger NumCookieTypes = 6;
-static const NSUInteger NumStartingCookies = 2;
-static const NSUInteger NumCookiesToUpgrade = 4;
+static const NSUInteger NumStartingCookies = 5;
+static const NSUInteger NumCookiesToUpgrade = 40;
 
 @interface BBQCookie : NSObject
 
@@ -24,6 +24,5 @@ static const NSUInteger NumCookiesToUpgrade = 4;
 
 
 - (NSString *)spriteName;
-- (NSString *)highlightedSpriteName;
 
 @end

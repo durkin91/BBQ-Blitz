@@ -4,7 +4,6 @@
 #import "BBQGameLogic.h"
 #import "BBQCombo.h"
 #import "BBQMoveCookie.h"
-#import "BBQCookieOrder.h"
 #import "BBQCookieOrderNode.h"
 #import "BBQRanOutOfMovesNode.h"
 #import "BBQLevelCompleteNode.h"
@@ -86,7 +85,6 @@ static const CGFloat TileHeight = 36.0;
     self.gameLogic = [[BBQGameLogic alloc] init];
     _menuNode.gameLogic = self.gameLogic;
     NSSet *cookies = [self.gameLogic setupGameLogicWithLevel:level];
-    [self addSpritesForOrders];
     _movesLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.movesLeft];
     _scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.currentScore];
     [self addSpritesForCookies:cookies];
@@ -113,7 +111,7 @@ static const CGFloat TileHeight = 36.0;
 }
 
 - (void)clearOutAllCookiesAndTiles {
-    //Clear out all of the existing cookies and tiles and orders
+    //Clear out all of the existing cookies and tiles
     NSMutableArray *cookies = [_cookiesLayer.children mutableCopy];
     for (CCSprite *sprite in cookies) {
         [sprite removeFromParent];
@@ -122,13 +120,6 @@ static const CGFloat TileHeight = 36.0;
     NSMutableArray *tiles = [_tilesLayer.children mutableCopy];
     for (CCSprite *tile in tiles) {
         [tile removeFromParent];
-    }
-    
-    NSMutableArray *orders = [_orderDisplayNode.children mutableCopy];
-    for (BBQCookieOrderNode *orderNode in orders) {
-        [orderNode.cookieSprite.children[0] removeFromParent];
-        orderNode.tickSprite.visible = NO;
-        orderNode.quantityLabel.visible = NO;
     }
 }
 
@@ -157,25 +148,6 @@ static const CGFloat TileHeight = 36.0;
     return cookieNode;
 }
 
-//The way I have changed the sprite is a hack for now. Would be much better to just figure out how to change the texture
-- (void)addSpritesForOrders {
-    NSArray *orderviews = [_orderDisplayNode children];
-    NSArray *orderObjects = self.gameLogic.level.cookieOrders;
-    for (int i = 0; i < [orderObjects count]; i++) {
-        BBQCookieOrder *order = orderObjects[i];
-        BBQCookieOrderNode *orderView = orderviews[i];
-        NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [order.cookie spriteName]];
-        CCSprite *sprite = [CCSprite spriteWithImageNamed:directory];
-        sprite.anchorPoint = CGPointMake(0.0, 0.5);
-        [orderView.cookieSprite addChild:sprite];
-        orderView.quantityLabel.string = [NSString stringWithFormat:@"%ld", (long)order.quantity];
-        orderView.quantityLabel.visible = YES;        
-        order.view = orderView;
-        order.sprite = sprite;
-
-    }
-}
-
 - (void)addSpritesForCookies:(NSSet *)cookies {
     for (BBQCookie *cookie in cookies) {
         BBQCookieNode *cookieNode = [self createCookieNodeForCookie:cookie column:cookie.column row:cookie.row];
@@ -198,25 +170,18 @@ static const CGFloat TileHeight = 36.0;
     return CGPointMake(column*TileWidth + TileWidth/2, row*TileHeight + TileHeight / 2);
 }
 
-- (void)removeSpritesFromSharkTiles:(NSArray *)cookies {
-    for (BBQCookie *cookie in cookies) {
-        [cookie.sprite runAction:[CCActionRemove action]];
-    }
-
-}
-
 - (void)swipeDirection:(NSString *)direction {
     NSLog(@"Swipe %@", direction);
     self.userInteractionEnabled = NO;
     NSDictionary *animations = [self.gameLogic swipe:direction];
-    [self animateSwipe:animations completion:^{
+    [BBQAnimations animateSwipe:animations scoreLabel:_scoreLabel movesLabel:_movesLabel cookiesLayer:_cookiesLayer currentScore:self.gameLogic.currentScore movesLeft:self.gameLogic.movesLeft completion:^{
         self.userInteractionEnabled = YES;
         
         //check whether the player has finished the level
         if ([self.gameLogic isLevelComplete]) {
             [self removeGestureRecognizers];
             [_menuNode displayMenuFor:LEVEL_COMPLETE];
-
+            
         }
         
         //check whether player has run out of moves
@@ -224,6 +189,7 @@ static const CGFloat TileHeight = 36.0;
             [self removeGestureRecognizers];
             [_menuNode displayMenuFor:NO_MORE_MOVES];
         }
+
     }];
     
 }
@@ -247,138 +213,6 @@ static const CGFloat TileHeight = 36.0;
     [self swipeDirection:@"Right"];
 }
 
-#pragma mark - Animations
-
-- (void)animateSwipe:(NSDictionary *)animations completion:(dispatch_block_t)completion {
-    
-    const NSTimeInterval duration = 0.4;
-    const NSTimeInterval delay = 0.5;
-    
-    CCActionDelay *delayAction = [CCActionDelay actionWithDuration:delay];
-    
-    ////**** COMBOS ACTION BLOCK ****
-    
-    CCActionCallBlock *performCombosAndMoveCookies = [CCActionCallBlock actionWithBlock:^{
-        
-        ////COMBOS
-        for (BBQCombo *combo in animations[COMBOS]) {
-            
-            //Put cookie A on top and move cookie A to cookie B, then remove cookie A
-            combo.cookieA.sprite.zOrder = 100;
-            combo.cookieB.sprite.zOrder = 90;
-            
-            CCActionMoveTo *moveA = [CCActionMoveTo actionWithDuration:duration position:combo.cookieB.sprite.position];
-            CCActionRemove *removeA = [CCActionRemove action];
-            
-            CCActionCallBlock *changeSprite = [CCActionCallBlock actionWithBlock:^{
-                
-                if ([combo.upgradeType isEqualToString:DIFFERENT_TYPE_UPGRADE]) {
-                    [combo.cookieB.sprite removeFromParent];
-                    combo.cookieB.sprite = [self createCookieNodeForCookie:combo.cookieB column:combo.cookieB.column row:combo.cookieB.row];
-                }
-                
-                else if ([combo.upgradeType isEqualToString:SAME_TYPE_UPGRADE]) {
-                    combo.cookieB.sprite.countCircle.visible = YES;
-                    combo.cookieB.sprite.countLabel.string = [NSString stringWithFormat:@"%ld", (long)combo.cookieB.count];
-                }
-                
-            }];
-            
-            CCActionSequence *sequenceA = [CCActionSequence actions:moveA, removeA, changeSprite, nil];
-            [combo.cookieA.sprite runAction:sequenceA];
-            
-        }
-        
-        ////MOVE COOKIES
-        for (BBQMoveCookie *movement in animations[MOVEMENTS]) {
-            CGPoint position = [GameplayScene pointForColumn:movement.destinationColumn row:movement.destinationRow];
-            CCActionMoveTo *moveAnimation = [CCActionMoveTo actionWithDuration:duration position:position];
-            [movement.cookieA.sprite runAction:moveAnimation];
-        }
-        
-    }];
-    
-    
-    ////**** EAT COOKIES ****
-    CCActionCallBlock *eatCookies = [CCActionCallBlock actionWithBlock:^{
-        NSArray *cookieOrders = self.gameLogic.level.cookieOrders;
-        for (BBQCookie *cookie in animations[EATEN_COOKIES]) {
-            
-            //Particle System
-            CCParticleSystem *explosion = (CCParticleSystem *)[CCBReader load:@"EatCookiesEffect"];
-            explosion.autoRemoveOnFinish = TRUE;
-            explosion.position = [GameplayScene pointForColumn:cookie.column row:cookie.row];
-            [cookie.sprite.parent addChild:explosion];
-            
-            //Score Label
-            NSInteger scoreForCookie = [self.gameLogic scoreForCookie:cookie];
-            NSString *scoreString = [NSString stringWithFormat:@"%ld", (long)scoreForCookie];
-            CCLabelTTF *scoreLabel = [CCLabelTTF labelWithString:scoreString fontName:@"GillSans-BoldItalic" fontSize:16.0];
-            scoreLabel.position = cookie.sprite.position;
-            scoreLabel.outlineColor = [CCColor blackColor];
-            scoreLabel.outlineWidth = 1.0;
-            scoreLabel.zOrder = 300;
-            [_cookiesLayer addChild:scoreLabel];
-            [BBQAnimations animateScoreLabel:scoreLabel];
-            
-            [cookie.sprite removeFromParent];
-            
-            //check if the cookie is a cookie from the order
-            BOOL didFind = NO;
-            for (BBQCookieOrder *order in cookieOrders) {
-                if (cookie.cookieType == order.cookie.cookieType) {
-                    
-                    //create the bezier action
-                    //                    ccBezierConfig curve;
-                    //                    curve.endPosition = [orderSprite convertToWorldSpace:CGPointZero];
-                    //
-                    //                    CCActionBezierTo *bezierMove = [CCActionBezierTo actionWithDuration:3.0 bezier:curve];
-                    
-                    CCActionScaleTo *scaleUp = [CCActionScaleTo actionWithDuration:0.3 scale:1.4];
-                    CCActionScaleTo *scaleDown = [CCActionScaleTo actionWithDuration:0.3 scale:1.0];
-                    //CCActionRemove *removeSprite = [CCActionRemove action];
-                    
-                    CCActionSequence *orderActionSequence = [CCActionSequence actions:scaleUp, scaleDown, nil];
-                    
-                    //check whether order is complete
-                    if ([order orderIsComplete]) {
-                        order.view.tickSprite.visible = YES;
-                        order.view.quantityLabel.visible = NO;
-                        [order.view.tickSprite runAction:orderActionSequence];
-                    }
-                    else {
-                        order.view.quantityLabel.string = [NSString stringWithFormat:@"%ld", (long)order.quantityLeft];
-                        [order.view.quantityLabel runAction:orderActionSequence];
-                    }
-                    
-                    didFind = YES;
-                    break;
-                }
-            }
-            
-            NSLog(@"Exploded this cookie: %@", cookie);
-            
-        }
-        
-    }];
-    
-    ////**** UPDATE SCORE & MOVES ****
-    CCActionCallBlock *updateScoreBlock = [CCActionCallBlock actionWithBlock:^{
-        _scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.currentScore];
-        _movesLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.movesLeft];
-    }];
-    
-    ////**** REGENERATE NEW COOKIES ****
-    CCActionCallBlock *newCookies = [CCActionCallBlock actionWithBlock:^{
-        NSSet *newCookiesSet = [self.gameLogic.level createCookiesInBlankTiles];
-        [self addSpritesForCookies:newCookiesSet];
-    }];
-    
-    ////**** FINAL SEQUENCE ****
-    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, delayAction, eatCookies, updateScoreBlock, newCookies, [CCActionCallBlock actionWithBlock:completion], nil];
-    [self.cookiesLayer runAction:finalSequence];
-    
-}
 
 #pragma mark - Popover methods
 

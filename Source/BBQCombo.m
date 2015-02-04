@@ -11,12 +11,11 @@
 
 @implementation BBQCombo
 
-- (instancetype)initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB upgradeType:(NSString *)upgradeType {
+- (instancetype)initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB {
     self = [super init];
     if (self) {
         self.cookieA = cookieA;
         self.cookieB = cookieB;
-        self.upgradeType = upgradeType;
     }
     return self;
 }

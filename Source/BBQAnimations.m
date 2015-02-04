@@ -7,6 +7,8 @@
 //
 
 #import "BBQAnimations.h"
+#import "BBQGameLogic.h"
+#import "GameplayScene.h"
 
 @implementation BBQAnimations
 
@@ -143,4 +145,57 @@
     CCActionFadeOut *fadeOut = [CCActionFadeOut actionWithDuration:0.3];
     [background runAction:fadeOut];
 }
+
+#pragma mark - Gameplay Scene Animations
+
++ (void)animateSwipe:(NSDictionary *)animations scoreLabel:(CCLabelTTF *)scoreLabel movesLabel:(CCLabelTTF *)movesLabel cookiesLayer:(CCNode *)cookiesLayer currentScore:(NSInteger)currentScore movesLeft:(NSInteger)movesLeft completion:(dispatch_block_t)completion {
+    
+    const NSTimeInterval duration = 1.0;
+    
+    ////**** COMBOS ACTION BLOCK ****
+    
+    CCActionCallBlock *performCombosAndMoveCookies = [CCActionCallBlock actionWithBlock:^{
+        
+        ////COMBOS
+        for (BBQCombo *combo in animations[COMBOS]) {
+            
+            //Put cookie A on top and move cookie A to cookie B, then remove cookie A
+            combo.cookieA.sprite.zOrder = 100;
+            combo.cookieB.sprite.zOrder = 90;
+            
+            CCActionMoveTo *moveA = [CCActionMoveTo actionWithDuration:duration position:combo.cookieB.sprite.position];
+            CCActionRemove *removeA = [CCActionRemove action];
+            
+            CCActionCallBlock *updateCountCircle = [CCActionCallBlock actionWithBlock:^{
+                NSLog(@"Same type combo cookie: %@ and sprite: %@", combo.cookieB, combo.cookieB.sprite);
+                combo.cookieB.sprite.countCircle.visible = YES;
+                combo.cookieB.sprite.countLabel.string = [NSString stringWithFormat:@"%ld", (long)combo.cookieB.count];
+                
+            }];
+            
+            CCActionSequence *sequenceA = [CCActionSequence actions:moveA, removeA, updateCountCircle, nil];
+            [combo.cookieA.sprite runAction:sequenceA];
+            
+        }
+        
+        ////MOVE COOKIES
+        for (BBQMoveCookie *movement in animations[MOVEMENTS]) {
+            CGPoint position = [GameplayScene pointForColumn:movement.destinationColumn row:movement.destinationRow];
+            CCActionMoveTo *moveAnimation = [CCActionMoveTo actionWithDuration:duration position:position];
+            [movement.cookieA.sprite runAction:moveAnimation];
+        }
+        
+    }];
+    
+    ////**** UPDATE SCORE & MOVES ****
+    CCActionCallBlock *updateScoreBlock = [CCActionCallBlock actionWithBlock:^{
+        scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)currentScore];
+        movesLabel.string = [NSString stringWithFormat:@"%ld", (long)movesLeft];
+    }];
+    
+    ////**** FINAL SEQUENCE ****
+    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, updateScoreBlock, [CCActionCallBlock actionWithBlock:completion], nil];
+    [cookiesLayer runAction:finalSequence];
+}
+
 @end

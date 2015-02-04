@@ -13,7 +13,6 @@
 - (NSString *)spriteName {
     static NSString * const spriteNames[] = {
         @"Tile",
-        @"SharkTile",
     };
     
     return spriteNames[self.tileType - 1];

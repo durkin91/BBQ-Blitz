@@ -11,8 +11,6 @@
 
 #define COMBOS @"Combos"
 #define MOVEMENTS @"Movements"
-#define EATEN_COOKIES @"Eaten Cookies"
-#define EATEN_COOKIES_FROM_ORDER @"Eaten Cookies From Order"
 
 static const NSInteger startingScoreForCookie = 20;
 
@@ -25,10 +23,8 @@ static const NSInteger startingScoreForCookie = 20;
 
 - (NSSet *)setupGameLogicWithLevel:(NSInteger)level;
 - (NSDictionary *)swipe:(NSString *)swipeDirection;
-- (NSMutableArray *)eatCookies;
 - (BOOL)isLevelComplete;
 - (BOOL)areThereMovesLeft;
-- (NSInteger)scoreForCookie:(BBQCookie *)cookie;
 
 
 @end

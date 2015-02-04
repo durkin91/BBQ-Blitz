@@ -16,8 +16,7 @@
 
 @property (strong, nonatomic) BBQCookie *cookieA;
 @property (strong, nonatomic) BBQCookie *cookieB;
-@property (assign, nonatomic) NSString *upgradeType;
 
-- (instancetype)initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB upgradeType:(NSString *)upgradeType;
+- (instancetype)initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB;
 
 @end

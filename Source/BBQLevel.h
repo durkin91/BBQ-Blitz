@@ -19,7 +19,6 @@ static const NSInteger NumRows = 9;
 
 @property (assign ,nonatomic) NSUInteger targetScore;
 @property (assign, nonatomic) NSUInteger maximumMoves;
-@property (strong, nonatomic) NSMutableArray *cookieOrders;
 
 - (NSSet *)shuffle;
 
