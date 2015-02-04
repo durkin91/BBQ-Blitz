@@ -11,11 +11,13 @@
 
 @implementation BBQCombo
 
-- (instancetype)initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB {
+- (instancetype)initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB destinationColumn:(NSInteger)destinationColumn destinationRow:(NSInteger)destinationRow {
     self = [super init];
     if (self) {
         self.cookieA = cookieA;
         self.cookieB = cookieB;
+        self.destinationColumn = destinationColumn;
+        self.destinationRow = destinationRow;
     }
     return self;
 }

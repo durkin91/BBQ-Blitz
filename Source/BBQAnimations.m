@@ -150,7 +150,7 @@
 
 + (void)animateSwipe:(NSDictionary *)animations scoreLabel:(CCLabelTTF *)scoreLabel movesLabel:(CCLabelTTF *)movesLabel cookiesLayer:(CCNode *)cookiesLayer currentScore:(NSInteger)currentScore movesLeft:(NSInteger)movesLeft completion:(dispatch_block_t)completion {
     
-    const NSTimeInterval duration = 1.0;
+    const NSTimeInterval duration = 0.4;
     
     ////**** COMBOS ACTION BLOCK ****
     
@@ -163,13 +163,19 @@
             combo.cookieA.sprite.zOrder = 100;
             combo.cookieB.sprite.zOrder = 90;
             
-            CCActionMoveTo *moveA = [CCActionMoveTo actionWithDuration:duration position:combo.cookieB.sprite.position];
+            CCActionMoveTo *moveA = [CCActionMoveTo actionWithDuration:duration position:[GameplayScene pointForColumn:combo.destinationColumn row:combo.destinationRow]];
             CCActionRemove *removeA = [CCActionRemove action];
             
             CCActionCallBlock *updateCountCircle = [CCActionCallBlock actionWithBlock:^{
                 NSLog(@"Same type combo cookie: %@ and sprite: %@", combo.cookieB, combo.cookieB.sprite);
                 combo.cookieB.sprite.countCircle.visible = YES;
                 combo.cookieB.sprite.countLabel.string = [NSString stringWithFormat:@"%ld", (long)combo.cookieB.count];
+                
+                //scale up and down
+                CCActionScaleTo *scaleUp = [CCActionScaleTo actionWithDuration:0.1 scale:1.2];
+                CCActionScaleTo *scaleDown = [CCActionScaleTo actionWithDuration:0.1 scale:1.0];
+                CCActionSequence *scaleSequence = [CCActionSequence actions:scaleUp, scaleDown, nil];
+                [combo.cookieB.sprite runAction:scaleSequence];
                 
             }];
             

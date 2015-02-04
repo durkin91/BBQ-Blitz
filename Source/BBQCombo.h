@@ -16,7 +16,9 @@
 
 @property (strong, nonatomic) BBQCookie *cookieA;
 @property (strong, nonatomic) BBQCookie *cookieB;
+@property (assign, nonatomic) NSInteger destinationColumn;
+@property (assign, nonatomic) NSInteger destinationRow;
 
-- (instancetype)initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB;
+- (instancetype)initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB destinationColumn:(NSInteger)destinationColumn destinationRow:(NSInteger)destinationRow;
 
 @end
