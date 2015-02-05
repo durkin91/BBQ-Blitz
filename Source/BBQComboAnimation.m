@@ -27,4 +27,12 @@
     return [NSString stringWithFormat:@"%@ combine cookieA: %@ with cookieB: %@", [super description], self.cookieA, self.cookieB];
 }
 
+- (void)setNumberOfCookiesInCombo:(NSInteger)numberOfCookiesInCombo {
+    _numberOfCookiesInCombo = numberOfCookiesInCombo;
+    
+    NSInteger additionalCookiesInCombo = self.numberOfCookiesInCombo - 2;
+    NSInteger exponential = pow(additionalCookiesInCombo + 1, 2.0);
+    self.score = startingScoreForCombo + startingScoreForCombo * exponential;
+}
+
 @end

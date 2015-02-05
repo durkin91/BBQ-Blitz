@@ -10,7 +10,7 @@
 
 @interface BBQActiveLandingPad : CCNode
 
-@property (assign, nonatomic) CCLabelTTF *levelLabel;
-@property (assign, nonatomic) NSInteger level;
+@property (strong, nonatomic) CCLabelTTF *levelLabel;
+@property (nonatomic) NSInteger level;
 
 @end

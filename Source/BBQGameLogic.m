@@ -11,7 +11,6 @@
 #import "BBQTile.h"
 #import "BBQComboAnimation.h"
 #import "BBQMoveCookie.h"
-#import "BBQComboModel.h"
 
 @implementation BBQGameLogic
 
@@ -21,7 +20,26 @@
     NSString *directory = [NSString stringWithFormat:@"Level_%ld", (long)level];
     self.level = [[BBQLevel alloc] initWithFile:directory];
     self.movesLeft = self.level.maximumMoves;
-    return [self.level createCookiesInBlankTiles];
+    NSSet *cookies = [self.level createCookiesInBlankTiles];
+    [self sortCookieSetIntoTypes:cookies];
+    NSLog(@"in setup: %@", self.cookieTypeCount);
+    return cookies;
+}
+
+- (void)sortCookieSetIntoTypes:(NSSet *)cookieSet {
+    
+    NSMutableArray *sortedCookies = [@[] mutableCopy];
+    for (int i = 0; i < NumStartingCookies; i++) {
+        [sortedCookies addObject:@(0)];
+    }
+    
+    for (BBQCookie *cookie in cookieSet) {
+        NSNumber *count = sortedCookies[cookie.cookieType - 1];
+        NSInteger newCount = [count integerValue] + 1;
+        sortedCookies[cookie.cookieType - 1] = [NSNumber numberWithInteger:newCount];
+    }
+    
+    self.cookieTypeCount = sortedCookies;
 }
 
 #pragma mark - Swipe Logic
@@ -31,13 +49,13 @@
     NSDictionary *animationsToPerform = @{
                                           COMBOS : [@[] mutableCopy],
                                           MOVEMENTS : [@[] mutableCopy],
-                                          COMBO_SCORES : [@[] mutableCopy],
                                           };
     
     [self startSwipeInDirection:swipeDirection animations:animationsToPerform];
     self.movesLeft = self.movesLeft - 1;
     
-    [self findComboChains:animationsToPerform[COMBOS] comboModelObjects:animationsToPerform[COMBO_SCORES]];
+    [self findComboChains:animationsToPerform[COMBOS]];
+    [self scoreTheCombos:animationsToPerform[COMBOS]];
     
     return animationsToPerform;
 }
@@ -244,10 +262,14 @@
         //Upgrade count and check whether the new count will turn it into an upgrade
         cookieB.count = cookieB.count + cookieA.count;
         BBQComboAnimation *combo = combo = [[BBQComboAnimation alloc] initWithCookieA:cookieA cookieB:cookieB destinationColumn:cookieB.column destinationRow:cookieB.row];
+        
+        combo.cookieB.isFinalCookie = [self isFinalCookie:combo];
+        
         NSMutableArray *combos = animations[COMBOS];
         [combos addObject:combo];
         [self.level replaceCookieAtColumn:cookieA.column row:cookieA.row withCookie:nil];
         didCombineSameCookies = YES;
+        
     }
     return didCombineSameCookies;
 }
@@ -370,8 +392,14 @@
 //}
 
 - (BOOL)isLevelComplete {
-    BOOL isComplete = NO;
+    BOOL isComplete = YES;
     
+    for (NSNumber *number in self.cookieTypeCount) {
+        if ([number integerValue] > 1) {
+            isComplete = NO;
+            break;
+        }
+    }
     
     return isComplete;
 }
@@ -384,12 +412,12 @@
     return movesLeft;
 }
 
--(NSArray *)findComboChains:(NSArray *)combos comboModelObjects:(NSMutableArray *)comboModelObjects {
+- (void)findComboChains:(NSArray *)combos {
     
     NSInteger index = 0;
     while (index < [combos count]) {
         BBQComboAnimation *comboAnimation1 = combos[index];
-        BBQComboModel *comboModelObject = [[BBQComboModel alloc] initWithCookieB:comboAnimation1.cookieB numberOfCookiesInCombo:2];
+        comboAnimation1.numberOfCookiesInCombo = 2;
         
         if (index >= [combos count] - 1) break;
         
@@ -398,7 +426,7 @@
         NSInteger x = 2;
         NSInteger y = index;
         while ([comboAnimation1.cookieB isEqual:comboAnimation2.cookieB]) {
-            comboModelObject.numberOfCookiesInCombo = x + 1;
+            comboAnimation1.numberOfCookiesInCombo = x + 1;
             
             if (index + x >= [combos count]) break;
             
@@ -407,10 +435,30 @@
             index ++;
         }
         
-        [comboModelObjects addObject:comboModelObject];
         index ++;
     }
-    return comboModelObjects;
+}
+
+- (void)scoreTheCombos:(NSArray *)combos {
+    NSInteger scoreForThisRound = 0;
+    for (BBQComboAnimation *combo in combos) {
+        if (combo.score > 0) {
+            scoreForThisRound = scoreForThisRound + combo.score;
+        }
+    }
+    self.currentScore = self.currentScore + scoreForThisRound;
+}
+
+- (BOOL)isFinalCookie:(BBQComboAnimation *)combo {
+    
+    //adjust the count
+    NSNumber *count = self.cookieTypeCount[combo.cookieA.cookieType - 1];
+    NSInteger newCount = [count integerValue] - 1;
+    self.cookieTypeCount[combo.cookieA.cookieType - 1] = [NSNumber numberWithInteger:newCount];
+    
+    //check if its the final cookie of its type
+    if (newCount == 1) return YES;
+    else return NO;
 }
 
 

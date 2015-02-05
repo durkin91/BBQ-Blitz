@@ -14,6 +14,7 @@
     self = [super init];
     if (self) {
         self.count = 1;
+        self.isFinalCookie = NO;
     }
     return self;
 }

@@ -11,13 +11,13 @@
 
 #define COMBOS @"Combos"
 #define MOVEMENTS @"Movements"
-#define COMBO_SCORES @"Combo Scores"
 
 @interface BBQGameLogic : NSObject
 
 @property (strong, nonatomic) BBQLevel *level;
-@property (assign, nonatomic) NSInteger currentScore;
-@property (assign, nonatomic) NSInteger movesLeft;
+@property (nonatomic) NSInteger currentScore;
+@property (nonatomic) NSInteger movesLeft;
+@property (strong, nonatomic) NSMutableArray *cookieTypeCount;
 
 
 - (NSSet *)setupGameLogicWithLevel:(NSInteger)level;

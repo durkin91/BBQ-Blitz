@@ -15,7 +15,7 @@
 @interface GameplayScene : CCNode <BBQMenuDelegate>
 
 @property (weak, nonatomic) id <GameplaySceneDelegate> delegate;
-@property (assign, nonatomic) NSInteger level;
+@property (nonatomic) NSInteger level;
 
 
 - (void)addSpritesForCookies:(NSSet *)cookies;

@@ -11,8 +11,8 @@
 
 @interface WorldsScene : CCScene
 
-@property (assign, nonatomic) NSInteger currentLevel;
-@property (assign, nonatomic) BBQWorldView *worldNode;
+@property (nonatomic) NSInteger currentLevel;
+@property (strong, nonatomic) BBQWorldView *worldNode;
 
 
 @end

@@ -11,7 +11,7 @@
 @interface BBQTile : NSObject
 
 @property (assign, nonatomic) NSInteger tileType;
-@property (assign, nonatomic) CCSprite *sprite;
+@property (strong, nonatomic) CCSprite *sprite;
 
 - (NSString *)spriteName;
 - (instancetype)initWithTileType:(NSInteger)type;

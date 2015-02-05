@@ -9,7 +9,6 @@
 #import "BBQAnimations.h"
 #import "BBQGameLogic.h"
 #import "GameplayScene.h"
-#import "BBQComboModel.h"
 
 @implementation BBQAnimations
 
@@ -22,7 +21,7 @@
     [button runAction:repeat];
 }
 
-+ (void)animateScoreLabel:(CCLabelTTF *)scoreLabel {
++ (CCActionSequence *)animateScoreLabel:(CCLabelTTF *)scoreLabel {
     CGPoint endPoint = CGPointMake(scoreLabel.position.x, scoreLabel.position.y + 40);
     CCActionMoveTo *moveLabel = [CCActionMoveTo actionWithDuration:0.6 position:endPoint];
     
@@ -32,7 +31,7 @@
     
     CCActionSpawn *spawn = [CCActionSpawn actions:moveLabel, fadeSequence, nil];
     CCActionSequence *labelSequence = [CCActionSequence actions:spawn, [CCActionRemove action], nil];
-    [scoreLabel runAction:labelSequence];
+    return labelSequence;
 }
 
 #pragma mark - Animate World View
@@ -168,8 +167,16 @@
             CCActionRemove *removeA = [CCActionRemove action];
             
             CCActionCallBlock *updateCountCircle = [CCActionCallBlock actionWithBlock:^{
-                combo.cookieB.sprite.countCircle.visible = YES;
-                combo.cookieB.sprite.countLabel.string = [NSString stringWithFormat:@"%ld", (long)combo.cookieB.count];
+
+                if (combo.cookieB.isFinalCookie) {
+                    combo.cookieB.sprite.countCircle.visible = NO;
+                    combo.cookieB.sprite.tickSprite.visible = YES;
+                }
+                
+                else {
+                    combo.cookieB.sprite.countCircle.visible = YES;
+                    combo.cookieB.sprite.countLabel.string = [NSString stringWithFormat:@"%ld", (long)combo.cookieB.count];
+                }
                 
                 //scale up and down
                 CCActionScaleTo *scaleUp = [CCActionScaleTo actionWithDuration:0.1 scale:1.2];
@@ -177,11 +184,23 @@
                 CCActionSequence *scaleSequence = [CCActionSequence actions:scaleUp, scaleDown, nil];
                 [combo.cookieB.sprite runAction:scaleSequence];
                 
-                //add particle effect
-//                CCParticleSystem *explosion = (CCParticleSystem *)[CCBReader load:@"CombineCookiesEffect"];
-//                explosion.autoRemoveOnFinish = TRUE;
-//                explosion.position = combo.cookieB.sprite.position;
-//                [combo.cookieB.sprite.parent addChild:explosion];
+                //Display score label
+                if (combo.score > 0) {
+                    NSString *scoreString = [NSString stringWithFormat:@"%ld", (long)combo.score];
+                    CCLabelTTF *scoreLabel = [CCLabelTTF labelWithString:scoreString fontName:@"GillSans-BoldItalic" fontSize:12.0];
+                    scoreLabel.position = [GameplayScene pointForColumn:combo.destinationColumn row:combo.destinationRow];
+                    scoreLabel.outlineColor = [CCColor blackColor];
+                    scoreLabel.outlineWidth = 1.0;
+                    scoreLabel.zOrder = 300;
+                    [cookiesLayer addChild:scoreLabel];
+                    [scoreLabel runAction:[self animateScoreLabel:scoreLabel]];
+                }
+                
+                //Update total score and moves left
+                NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+                [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
+                scoreLabel.string = [formatter stringFromNumber:@(currentScore)];
+                movesLabel.string = [NSString stringWithFormat:@"%ld", (long)movesLeft];
                 
             }];
             
@@ -199,29 +218,15 @@
         
     }];
     
-    ///****SCORE COMBOS****
-//    CCActionCallBlock *scoreCombos = [CCActionCallBlock actionWithBlock:^{
-//        NSArray *comboObjects = animations[COMBO_SCORES];
-//        for (BBQComboModel *combo in comboObjects) {
-//            NSString *scoreString = [NSString stringWithFormat:@"%ld", (long)combo.score];
-//            CCLabelTTF *scoreLabel = [CCLabelTTF labelWithString:scoreString fontName:@"GillSans-BoldItalic" fontSize:16.0];
-//            scoreLabel.position = combo.cookieB.sprite.position;
-//            scoreLabel.outlineColor = [CCColor blackColor];
-//            scoreLabel.outlineWidth = 1.0;
-//            scoreLabel.zOrder = 300;
-//            [cookiesLayer addChild:scoreLabel];
-//            [self animateScoreLabel:scoreLabel];
-//        }
-//    }];
     
     ////**** UPDATE SCORE & MOVES ****
-    CCActionCallBlock *updateScoreBlock = [CCActionCallBlock actionWithBlock:^{
-        scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)currentScore];
-        movesLabel.string = [NSString stringWithFormat:@"%ld", (long)movesLeft];
-    }];
+//    CCActionCallBlock *updateScoreBlock = [CCActionCallBlock actionWithBlock:^{
+//        scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)currentScore];
+//        movesLabel.string = [NSString stringWithFormat:@"%ld", (long)movesLeft];
+//    }];
     
     ////**** FINAL SEQUENCE ****
-    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, updateScoreBlock, [CCActionCallBlock actionWithBlock:completion], nil];
+    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, [CCActionCallBlock actionWithBlock:completion], nil];
     [cookiesLayer runAction:finalSequence];
 }
 

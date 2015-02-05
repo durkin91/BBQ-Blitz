@@ -32,7 +32,7 @@
 @interface BBQMenu : CCNode <BBQStartLevelNodeDelegate, BBQLevelCompleteNodeDelegate, BBQRanOutOfMovesNodeDelegate, BBQReplayNodeDelegate>
 
 @property (weak, nonatomic) id <BBQMenuDelegate> delegate;
-@property (assign, nonatomic) BBQGameLogic *gameLogic;
+@property (strong, nonatomic) BBQGameLogic *gameLogic;
 
 - (void)displayMenuFor:(NSString *)command;
 - (void)dismissMenu:(NSString *)command withBackgroundFadeOut:(BOOL)wantsFadeOut;

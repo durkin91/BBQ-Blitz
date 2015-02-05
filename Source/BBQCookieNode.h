@@ -10,8 +10,9 @@
 
 @interface BBQCookieNode : CCNode
 
-@property (assign, nonatomic) CCSprite *cookieSprite;
-@property (assign, nonatomic) CCNode *countCircle;
-@property (assign, nonatomic) CCLabelTTF *countLabel;
+@property (strong, nonatomic) CCSprite *cookieSprite;
+@property (strong, nonatomic) CCNode *countCircle;
+@property (strong, nonatomic) CCLabelTTF *countLabel;
+@property (strong, nonatomic) CCSprite *tickSprite;
 
 @end

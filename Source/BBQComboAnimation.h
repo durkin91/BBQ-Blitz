@@ -12,12 +12,16 @@
 #define SAME_TYPE_UPGRADE @"Same"
 #define DIFFERENT_TYPE_UPGRADE @"Different"
 
+static const NSInteger startingScoreForCombo = 400;
+
 @interface BBQComboAnimation : NSObject
 
 @property (strong, nonatomic) BBQCookie *cookieA;
 @property (strong, nonatomic) BBQCookie *cookieB;
 @property (assign, nonatomic) NSInteger destinationColumn;
 @property (assign, nonatomic) NSInteger destinationRow;
+@property (assign, nonatomic) NSInteger score;
+@property (assign, nonatomic) NSInteger numberOfCookiesInCombo;
 
 - (instancetype)initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB destinationColumn:(NSInteger)destinationColumn destinationRow:(NSInteger)destinationRow;
 
