@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "BBQCookie.h"
 #import "BBQTile.h"
-#import "BBQCombo.h"
+#import "BBQComboAnimation.h"
 #import "BBQMoveCookie.h"
 
 static const NSInteger NumColumns = 9;

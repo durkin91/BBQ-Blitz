@@ -12,7 +12,7 @@
 #define SAME_TYPE_UPGRADE @"Same"
 #define DIFFERENT_TYPE_UPGRADE @"Different"
 
-@interface BBQCombo : NSObject
+@interface BBQComboAnimation : NSObject
 
 @property (strong, nonatomic) BBQCookie *cookieA;
 @property (strong, nonatomic) BBQCookie *cookieB;

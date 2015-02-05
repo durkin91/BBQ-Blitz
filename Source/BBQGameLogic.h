@@ -11,8 +11,7 @@
 
 #define COMBOS @"Combos"
 #define MOVEMENTS @"Movements"
-
-static const NSInteger startingScoreForCookie = 20;
+#define COMBO_SCORES @"Combo Scores"
 
 @interface BBQGameLogic : NSObject
 

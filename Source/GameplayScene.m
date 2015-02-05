@@ -2,7 +2,7 @@
 #import "BBQCookie.h"
 #import "BBQLevel.h"
 #import "BBQGameLogic.h"
-#import "BBQCombo.h"
+#import "BBQComboAnimation.h"
 #import "BBQMoveCookie.h"
 #import "BBQCookieOrderNode.h"
 #import "BBQRanOutOfMovesNode.h"

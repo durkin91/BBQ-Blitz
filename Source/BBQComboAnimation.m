@@ -6,10 +6,10 @@
 //  Copyright (c) 2015 Apportable. All rights reserved.
 //
 
-#import "BBQCombo.h"
+#import "BBQComboAnimation.h"
 #import "BBQLevel.h"
 
-@implementation BBQCombo
+@implementation BBQComboAnimation
 
 - (instancetype)initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB destinationColumn:(NSInteger)destinationColumn destinationRow:(NSInteger)destinationRow {
     self = [super init];

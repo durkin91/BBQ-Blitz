@@ -9,8 +9,9 @@
 #import "BBQGameLogic.h"
 #import "BBQCookie.h"
 #import "BBQTile.h"
-#import "BBQCombo.h"
+#import "BBQComboAnimation.h"
 #import "BBQMoveCookie.h"
+#import "BBQComboModel.h"
 
 @implementation BBQGameLogic
 
@@ -30,10 +31,13 @@
     NSDictionary *animationsToPerform = @{
                                           COMBOS : [@[] mutableCopy],
                                           MOVEMENTS : [@[] mutableCopy],
+                                          COMBO_SCORES : [@[] mutableCopy],
                                           };
     
     [self startSwipeInDirection:swipeDirection animations:animationsToPerform];
     self.movesLeft = self.movesLeft - 1;
+    
+    [self findComboChains:animationsToPerform[COMBOS] comboModelObjects:animationsToPerform[COMBO_SCORES]];
     
     return animationsToPerform;
 }
@@ -239,7 +243,7 @@
         
         //Upgrade count and check whether the new count will turn it into an upgrade
         cookieB.count = cookieB.count + cookieA.count;
-        BBQCombo *combo = combo = [[BBQCombo alloc] initWithCookieA:cookieA cookieB:cookieB destinationColumn:cookieB.column destinationRow:cookieB.row];
+        BBQComboAnimation *combo = combo = [[BBQComboAnimation alloc] initWithCookieA:cookieA cookieB:cookieB destinationColumn:cookieB.column destinationRow:cookieB.row];
         NSMutableArray *combos = animations[COMBOS];
         [combos addObject:combo];
         [self.level replaceCookieAtColumn:cookieA.column row:cookieA.row withCookie:nil];
@@ -378,6 +382,35 @@
         movesLeft = YES;
     }
     return movesLeft;
+}
+
+-(NSArray *)findComboChains:(NSArray *)combos comboModelObjects:(NSMutableArray *)comboModelObjects {
+    
+    NSInteger index = 0;
+    while (index < [combos count]) {
+        BBQComboAnimation *comboAnimation1 = combos[index];
+        BBQComboModel *comboModelObject = [[BBQComboModel alloc] initWithCookieB:comboAnimation1.cookieB numberOfCookiesInCombo:2];
+        
+        if (index >= [combos count] - 1) break;
+        
+        BBQComboAnimation *comboAnimation2 = combos[index + 1];
+        
+        NSInteger x = 2;
+        NSInteger y = index;
+        while ([comboAnimation1.cookieB isEqual:comboAnimation2.cookieB]) {
+            comboModelObject.numberOfCookiesInCombo = x + 1;
+            
+            if (index + x >= [combos count]) break;
+            
+            comboAnimation2 = combos[y + x];
+            x ++;
+            index ++;
+        }
+        
+        [comboModelObjects addObject:comboModelObject];
+        index ++;
+    }
+    return comboModelObjects;
 }
 
 

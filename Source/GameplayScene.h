@@ -2,7 +2,7 @@
 #import "BBQMenu.h"
 
 @class BBQLevel;
-@class BBQCombo;
+@class BBQComboAnimation;
 
 @protocol GameplaySceneDelegate <NSObject>
 
