@@ -107,9 +107,13 @@
                 //Note that in cocos (0,0) is at the bottom of the screen so we need to read this file upside down
                 NSInteger tileRow = NumRows - row - 1;
                 
-                //if the value is 1, create a regular tile object
+                //create a tile object depending on the type of tile
                 if ([value integerValue] == 1) {
                     _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:1];
+                }
+                
+                else if ([value integerValue] == 2) {
+                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:2];
                 }
                 
             }];

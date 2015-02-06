@@ -128,11 +128,21 @@ static const CGFloat TileHeight = 36.0;
         for (NSInteger column = 0; column < NumColumns; column++) {
             BBQTile *tile = [self.gameLogic.level tileAtColumn:column row:row];
             if (tile != nil) {
-                NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [tile spriteName]];
-                CCSprite *tileSprite = [CCSprite spriteWithImageNamed:directory];
+                CCSprite *tileSprite = [CCSprite spriteWithImageNamed:@"sprites/Tile.png"];
                 tileSprite.position = [GameplayScene pointForColumn:column row:row];
                 [self.tilesLayer addChild:tileSprite];
                 tile.sprite = tileSprite;
+                tileSprite.zOrder = 10;
+                tileSprite.anchorPoint = CGPointMake(0.5, 0.5);
+                
+                if (tile.tileType >= 2) {
+                    NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [tile spriteName]];
+                    CCSprite *specialTileSprite = [CCSprite spriteWithImageNamed:directory];
+                    specialTileSprite.anchorPoint = CGPointMake(0, 0);
+                    specialTileSprite.position = CGPointMake(0, 0);
+                    [tileSprite addChild:specialTileSprite];
+                    specialTileSprite.zOrder = 20;
+                }
             }
         }
     }

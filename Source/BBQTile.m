@@ -12,10 +12,10 @@
 
 - (NSString *)spriteName {
     static NSString * const spriteNames[] = {
-        @"Tile",
+        @"SharkTile",
     };
     
-    return spriteNames[self.tileType - 1];
+    return spriteNames[self.tileType - 2];
 }
 
 - (instancetype)initWithTileType:(NSInteger)type {

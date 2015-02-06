@@ -17,7 +17,7 @@ static const NSInteger NumRows = 9;
 
 @interface BBQLevel : NSObject
 
-@property (assign ,nonatomic) NSUInteger targetScore;
+@property (assign, nonatomic) NSUInteger targetScore;
 @property (assign, nonatomic) NSUInteger maximumMoves;
 
 - (NSSet *)shuffle;
