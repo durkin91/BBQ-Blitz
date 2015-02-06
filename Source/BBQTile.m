@@ -22,6 +22,18 @@
     self = [super init];
     if (self) {
         self.tileType = type;
+        
+        switch (self.tileType) {
+            case 1:
+                self.isABlocker = NO;
+                break;
+                
+            case 2:
+                self.isABlocker = YES;
+                
+            default:
+                break;
+        }
     }
     return self;
 }

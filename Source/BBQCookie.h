@@ -21,6 +21,7 @@ static const NSUInteger NumCookiesToUpgrade = 40;
 @property (assign, nonatomic) NSInteger count;
 @property (strong, nonatomic) BBQCookieNode *sprite;
 @property (assign, nonatomic) BOOL isFinalCookie;
+@property (assign, nonatomic) BOOL isInStaticTile;
 
 
 

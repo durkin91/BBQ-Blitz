@@ -7,7 +7,6 @@
 //
 
 #import "BBQAnimations.h"
-#import "BBQGameLogic.h"
 #import "GameplayScene.h"
 
 @implementation BBQAnimations
@@ -148,7 +147,7 @@
 
 #pragma mark - Gameplay Scene Animations
 
-+ (void)animateSwipe:(NSDictionary *)animations scoreLabel:(CCLabelTTF *)scoreLabel movesLabel:(CCLabelTTF *)movesLabel cookiesLayer:(CCNode *)cookiesLayer currentScore:(NSInteger)currentScore movesLeft:(NSInteger)movesLeft completion:(dispatch_block_t)completion {
++ (void)animateSwipe:(NSDictionary *)animations scoreLabel:(CCLabelTTF *)scoreLabel movesLabel:(CCLabelTTF *)movesLabel cookiesLayer:(CCNode *)cookiesLayer currentScore:(NSInteger)currentScore movesLeft:(NSInteger)movesLeft gameLogic:(BBQGameLogic *)gameLogic completion:(dispatch_block_t)completion {
     
     const NSTimeInterval duration = 0.4;
     
@@ -201,6 +200,14 @@
                 [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
                 scoreLabel.string = [formatter stringFromNumber:@(currentScore)];
                 movesLabel.string = [NSString stringWithFormat:@"%ld", (long)movesLeft];
+                
+                //If it is a static tile, break the tile
+                if (combo.didBreakOutOfStaticTile == YES) {
+                    BBQTile *tileB = [gameLogic.level tileAtColumn:combo.cookieB.column row:combo.cookieB.row];
+                    CCSprite *specialTile = tileB.sprite.children[0];
+                    [specialTile removeFromParent];
+                }
+                
                 
             }];
             

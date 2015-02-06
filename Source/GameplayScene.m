@@ -128,24 +128,35 @@ static const CGFloat TileHeight = 36.0;
         for (NSInteger column = 0; column < NumColumns; column++) {
             BBQTile *tile = [self.gameLogic.level tileAtColumn:column row:row];
             if (tile != nil) {
-                CCSprite *tileSprite = [CCSprite spriteWithImageNamed:@"sprites/Tile.png"];
-                tileSprite.position = [GameplayScene pointForColumn:column row:row];
-                [self.tilesLayer addChild:tileSprite];
-                tile.sprite = tileSprite;
-                tileSprite.zOrder = 10;
-                tileSprite.anchorPoint = CGPointMake(0.5, 0.5);
-                
-                if (tile.tileType >= 2) {
-                    NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [tile spriteName]];
-                    CCSprite *specialTileSprite = [CCSprite spriteWithImageNamed:directory];
-                    specialTileSprite.anchorPoint = CGPointMake(0, 0);
-                    specialTileSprite.position = CGPointMake(0, 0);
-                    [tileSprite addChild:specialTileSprite];
-                    specialTileSprite.zOrder = 20;
-                }
+                [self createSpriteForTile:tile column:column row:row];
             }
         }
     }
+}
+
+- (void)createSpriteForTile:(BBQTile *)tile column:(NSInteger)column row:(NSInteger)row {
+    
+    CCSprite *tileSprite = [CCSprite spriteWithImageNamed:@"sprites/Tile.png"];
+    tileSprite.position = [GameplayScene pointForColumn:column row:row];
+    tileSprite.zOrder = 10;
+    tileSprite.anchorPoint = CGPointMake(0.5, 0.5);
+    [self.tilesLayer addChild:tileSprite];
+    
+    if (tile.sprite) {
+        [tile.sprite removeFromParent];
+    }
+
+    tile.sprite = tileSprite;
+    
+    if (tile.tileType >= 2) {
+        NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [tile spriteName]];
+        CCSprite *specialTileSprite = [CCSprite spriteWithImageNamed:directory];
+        specialTileSprite.anchorPoint = CGPointMake(0, 0);
+        specialTileSprite.position = CGPointMake(0, 0);
+        [tileSprite addChild:specialTileSprite];
+        specialTileSprite.zOrder = 20;
+    }
+
 }
 
 - (BBQCookieNode *)createCookieNodeForCookie:(BBQCookie *)cookie column:(NSInteger)column row:(NSInteger)row {
@@ -184,7 +195,7 @@ static const CGFloat TileHeight = 36.0;
     NSLog(@"Swipe %@", direction);
     self.userInteractionEnabled = NO;
     NSDictionary *animations = [self.gameLogic swipe:direction];
-    [BBQAnimations animateSwipe:animations scoreLabel:_scoreLabel movesLabel:_movesLabel cookiesLayer:_cookiesLayer currentScore:self.gameLogic.currentScore movesLeft:self.gameLogic.movesLeft completion:^{
+    [BBQAnimations animateSwipe:animations scoreLabel:_scoreLabel movesLabel:_movesLabel cookiesLayer:_cookiesLayer currentScore:self.gameLogic.currentScore movesLeft:self.gameLogic.movesLeft gameLogic:self.gameLogic completion:^{
         self.userInteractionEnabled = YES;
         
         //check whether the player has finished the level

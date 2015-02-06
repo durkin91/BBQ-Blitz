@@ -18,6 +18,7 @@
         self.cookieB = cookieB;
         self.destinationColumn = destinationColumn;
         self.destinationRow = destinationRow;
+        self.didBreakOutOfStaticTile = NO;
     }
     return self;
 }

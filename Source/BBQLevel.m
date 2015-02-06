@@ -41,13 +41,18 @@
         for (NSInteger column = 0; column < NumColumns; column++) {
             BBQTile *tile = _tiles[column][row];
             if (tile != nil && _cookies[column][row] == nil) {
-            
-            //choose a random cookie number
-            NSUInteger cookieType = arc4random_uniform(NumStartingCookies) + 1;
-            
-            BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
-            
-            [set addObject:cookie];
+                
+                //choose a random cookie number
+                NSUInteger cookieType = arc4random_uniform(NumStartingCookies) + 1;
+                
+                BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
+                
+                if (tile.isABlocker) {
+                    cookie.isInStaticTile = YES;
+                }
+                else cookie.isInStaticTile = NO;
+                
+                [set addObject:cookie];
             }
             
         }

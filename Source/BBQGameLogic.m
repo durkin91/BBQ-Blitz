@@ -56,6 +56,7 @@
     
     [self findComboChains:animationsToPerform[COMBOS]];
     [self scoreTheCombos:animationsToPerform[COMBOS]];
+    NSLog(@"Moves left: %@", [NSString stringWithFormat:@"%ld", (long)self.movesLeft]);
     
     return animationsToPerform;
 }
@@ -257,7 +258,7 @@
     
     BOOL didCombineSameCookies = NO;
     
-    if (cookieA.cookieType == cookieB.cookieType) {
+    if (cookieA.cookieType == cookieB.cookieType && cookieA.isInStaticTile == NO) {
         
         //Upgrade count and check whether the new count will turn it into an upgrade
         cookieB.count = cookieB.count + cookieA.count;
@@ -269,6 +270,14 @@
         [combos addObject:combo];
         [self.level replaceCookieAtColumn:cookieA.column row:cookieA.row withCookie:nil];
         didCombineSameCookies = YES;
+        
+        //Take care of breaking out of the tile if necessary
+        if (cookieB.isInStaticTile) {
+            cookieB.isInStaticTile = NO;
+            BBQTile *tileB = [self.level tileAtColumn:cookieB.column row:cookieB.row];
+            tileB.tileType = 1;
+            combo.didBreakOutOfStaticTile = YES;
+        }
         
     }
     return didCombineSameCookies;
@@ -291,7 +300,7 @@
         }
         
         //move cookie A if it isn't the cookie already directly below cookie B
-        if (cookieA != nil && cookieA.row != rowB - 1) {
+        if (cookieA != nil && cookieA.row != rowB - 1 && cookieA.isInStaticTile == NO) {
             cookieA.row = rowB - 1;
             [self.level replaceCookieAtColumn:columnB row:rowB - 1 withCookie:cookieA];
             [self.level replaceCookieAtColumn:columnB row:rowB - x + 1 withCookie:nil];
@@ -312,7 +321,7 @@
         }
         
         //move cookie A if it isn't the cookie already directly below cookie B
-        if (cookieA != nil && cookieA.row != rowB + 1) {
+        if (cookieA != nil && cookieA.row != rowB + 1 && cookieA.isInStaticTile == NO) {
             cookieA.row = rowB + 1;
             [self.level replaceCookieAtColumn:columnB row:rowB + 1 withCookie:cookieA];
             [self.level replaceCookieAtColumn:columnB row:rowB + x - 1 withCookie:nil];
@@ -333,7 +342,7 @@
         }
         
         //move cookie A if it isn't the cookie already directly below cookie B
-        if (cookieA != nil && cookieA.column != columnB + 1) {
+        if (cookieA != nil && cookieA.column != columnB + 1 && cookieA.isInStaticTile == NO) {
             cookieA.column = columnB + 1;
             [self.level replaceCookieAtColumn:columnB + 1 row:rowB withCookie:cookieA];
             [self.level replaceCookieAtColumn:columnB + x - 1 row:rowB withCookie:nil];
@@ -354,7 +363,7 @@
         }
         
         //move cookie A if it isn't the cookie already directly below cookie B
-        if (cookieA != nil && cookieA.column != columnB - 1) {
+        if (cookieA != nil && cookieA.column != columnB - 1 && cookieA.isInStaticTile == NO) {
             cookieA.column = columnB - 1;
             [self.level replaceCookieAtColumn:columnB - 1 row:rowB withCookie:cookieA];
             [self.level replaceCookieAtColumn:columnB - x + 1 row:rowB withCookie:nil];
@@ -459,6 +468,14 @@
     //check if its the final cookie of its type
     if (newCount == 1) return YES;
     else return NO;
+}
+
+#pragma mark - Dealing with special tiles
+
+- (void)breakOutOfStaticTile:(BBQCookie *)cookieB {
+    cookieB.isInStaticTile = NO;
+    BBQTile *tileB = [self.level tileAtColumn:cookieB.column row:cookieB.row];
+    tileB.tileType = 1;
 }
 
 

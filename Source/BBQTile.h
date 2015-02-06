@@ -12,6 +12,7 @@
 
 @property (assign, nonatomic) NSInteger tileType;
 @property (strong, nonatomic) CCSprite *sprite;
+@property (nonatomic) BOOL isABlocker;
 
 - (NSString *)spriteName;
 - (instancetype)initWithTileType:(NSInteger)type;
