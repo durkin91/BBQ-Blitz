@@ -260,65 +260,103 @@
     BOOL didCombineSameCookies = NO;
     
     if (cookieA.cookieType == cookieB.cookieType && cookieA.isInStaticTile == NO) {
-        BBQComboAnimation *combo = [self combineCookieA:cookieA withcookieB:cookieB animations:animations];
-        didCombineSameCookies = YES;
         
-        //Take care of breaking out of the tile if necessary
-        if (cookieB.isInStaticTile) {
-            [self breakOutOfStaticTile:combo];
+        BBQComboAnimation *combo;
+        
+        if (!cookieB.isInStaticTile) {
+            combo = [self combineCookieA:cookieA withcookieB:cookieB animations:animations];
+            didCombineSameCookies = YES;
         }
-        //check whether the cookies in front of it (that have already been processed) are of the same type so we can do a 3+ cookie combo in special tiles
         
-        BOOL finishedChecking = NO;
-        
-        if ([direction isEqualToString:@"Up"]) {
+        //Logic to take care of combining longer chains in static tiles
+        else {
             
-            while (!finishedChecking) {
-                //Find the new tile B
-                if (combo.cookieB.row < NumRows - 1) {
-                    BBQCookie *newCookieB = [self.level cookieAtColumn:combo.cookieB.column row:combo.cookieB.row + 1];
-                    BBQTile *newTileB = [self.level tileAtColumn:combo.cookieB.column row:combo.cookieB.row + 1];
+            if ([direction isEqualToString:@"Up"]) {
+                
+                BOOL finishedCheckingBelowTileA = NO;
+                
+                while (!finishedCheckingBelowTileA) {
+                    
+                    //Check to see if there is a loose cookie below cookieA that will need combining, then start the combos there.
+                    BBQCookie *newCookieA = [self.level cookieAtColumn:cookieA.column row:cookieA.row - 1];
+                    BBQTile *newTileA = [self.level tileAtColumn:cookieA.column row:cookieA.row - 1];
                     int x = 2;
-                    while (newTileB != nil && newCookieB == nil && combo.cookieB.row + x < NumRows) {
-                        newTileB = [self.level tileAtColumn:combo.cookieB.column row:combo.cookieB.row + x];
-                        newCookieB = [self.level cookieAtColumn:combo.cookieB.column row:combo.cookieB.row + x];
+                    while (newTileA != nil && newCookieA == nil && x <= cookieA.row) {
+                        newTileA = [self.level tileAtColumn:cookieA.column row:cookieA.row - x];
+                        newCookieA = [self.level cookieAtColumn:cookieA.column row:cookieA.row - x];
                         x++;
                     }
                     
-                    //Check whether it is the same cookie type
-                    if (combo.cookieB.cookieType == newCookieB.cookieType) {
-                        BBQComboAnimation *newCombo = [self combineCookieA:combo.cookieB withcookieB:newCookieB animations:animations];
-                        
-                        if (newCombo.cookieB.isInStaticTile) {
-                            [self breakOutOfStaticTile:newCombo];
-                        }
-                        
-                        combo = newCombo;
-                        finishedChecking = NO;
+                    if (cookieA.cookieType == newCookieA.cookieType) {
+                        cookieA = newCookieA;
+                        cookieB = cookieA;
+                        finishedCheckingBelowTileA = NO;
                     }
                     
+                    else {
+                        finishedCheckingBelowTileA = YES;
+                    }
+                }
+                
+                combo = [self combineCookieA:cookieA withcookieB:cookieB animations:animations];
+                didCombineSameCookies = YES;
+                
+                [self breakOutOfStaticTile:combo];
+
+                
+                
+                
+                //check whether the cookies in front of it (that have already been processed) are of the same type so we can do a 3+ cookie combo in special tiles
+                
+                BOOL finishedChecking = NO;
+                while (!finishedChecking) {
+                    //Find the new tile B
+                    if (combo.cookieB.row < NumRows - 1) {
+                        BBQCookie *newCookieB = [self.level cookieAtColumn:combo.cookieB.column row:combo.cookieB.row + 1];
+                        BBQTile *newTileB = [self.level tileAtColumn:combo.cookieB.column row:combo.cookieB.row + 1];
+                        int x = 2;
+                        while (newTileB != nil && newCookieB == nil && combo.cookieB.row + x < NumRows) {
+                            newTileB = [self.level tileAtColumn:combo.cookieB.column row:combo.cookieB.row + x];
+                            newCookieB = [self.level cookieAtColumn:combo.cookieB.column row:combo.cookieB.row + x];
+                            x++;
+                        }
+                        
+                        //Check whether it is the same cookie type
+                        if (combo.cookieB.cookieType == newCookieB.cookieType) {
+                            BBQComboAnimation *newCombo = [self combineCookieA:combo.cookieB withcookieB:newCookieB animations:animations];
+                            
+                            if (newCombo.cookieB.isInStaticTile) {
+                                [self breakOutOfStaticTile:newCombo];
+                            }
+                            
+                            combo = newCombo;
+                            finishedChecking = NO;
+                        }
+                        
+                        else {
+                            finishedChecking = YES;
+                        }
+                    }
+                    
+                    //make sure it doesnt get stuck in a loop if row < numrows - 1
                     else {
                         finishedChecking = YES;
                     }
                 }
-                
-                //make sure it doesnt get stuck in a loop if row < numrows - 1
-                else {
-                    finishedChecking = YES;
-                }
             }
-        }
-        
-        else if ([direction isEqualToString:@"Down"]) {
             
-        }
-        
-        else if ([direction isEqualToString:@"Left"]) {
+            else if ([direction isEqualToString:@"Down"]) {
+                
+            }
             
-        }
-        
-        else if ([direction isEqualToString:@"Right"]) {
+            else if ([direction isEqualToString:@"Left"]) {
+                
+            }
             
+            else if ([direction isEqualToString:@"Right"]) {
+                
+            }
+
         }
         
     }
