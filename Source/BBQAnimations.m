@@ -204,8 +204,11 @@
                 //If it is a static tile, break the tile
                 if (combo.didBreakOutOfStaticTile == YES) {
                     BBQTile *tileB = [gameLogic.level tileAtColumn:combo.cookieB.column row:combo.cookieB.row];
-                    CCSprite *specialTile = tileB.sprite.children[0];
-                    [specialTile removeFromParent];
+                    
+                    if ([tileB.sprite.children count] > 0) {
+                        CCSprite *specialTile = tileB.sprite.children[0];
+                        [specialTile removeFromParent];
+                    }
                 }
                 
                 

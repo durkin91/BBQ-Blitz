@@ -11,6 +11,7 @@
 
 #define COMBOS @"Combos"
 #define MOVEMENTS @"Movements"
+#define COOKIES_ON_BROKEN_TILES @"Cookies On Broken Tiles"
 
 @interface BBQGameLogic : NSObject
 
