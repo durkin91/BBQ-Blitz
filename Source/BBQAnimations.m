@@ -173,7 +173,7 @@
                 }
                 
                 else {
-                    combo.cookieB.sprite.countCircle.visible = YES;
+                    //combo.cookieB.sprite.countCircle.visible = YES;
                     combo.cookieB.sprite.countLabel.string = [NSString stringWithFormat:@"%ld", (long)combo.cookieB.count];
                 }
                 
@@ -194,12 +194,6 @@
                     [cookiesLayer addChild:scoreLabel];
                     [scoreLabel runAction:[self animateScoreLabel:scoreLabel]];
                 }
-                
-                //Update total score and moves left
-                NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-                [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
-                scoreLabel.string = [formatter stringFromNumber:@(currentScore)];
-                movesLabel.string = [NSString stringWithFormat:@"%ld", (long)movesLeft];
                 
                 //If it is a static tile, break the tile
                 if (combo.didBreakOutOfStaticTile == YES) {
@@ -229,14 +223,17 @@
     }];
     
     
-    ////**** UPDATE SCORE & MOVES ****
-//    CCActionCallBlock *updateScoreBlock = [CCActionCallBlock actionWithBlock:^{
-//        scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)currentScore];
-//        movesLabel.string = [NSString stringWithFormat:@"%ld", (long)movesLeft];
-//    }];
+    //**** UPDATE SCORE & MOVES ****
+    CCActionCallBlock *updateScoreBlock = [CCActionCallBlock actionWithBlock:^{
+        NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+        [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
+        scoreLabel.string = [formatter stringFromNumber:@(currentScore)];
+        movesLabel.string = [NSString stringWithFormat:@"%ld", (long)movesLeft];
+        NSLog(@"Moves left label: %@", movesLabel.string);
+    }];
     
     ////**** FINAL SEQUENCE ****
-    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, [CCActionCallBlock actionWithBlock:completion], nil];
+    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, updateScoreBlock, [CCActionCallBlock actionWithBlock:completion], nil];
     [cookiesLayer runAction:finalSequence];
 }
 
