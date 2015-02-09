@@ -261,23 +261,13 @@
                 lowestCookieIndex = [cookiesInChain indexOfObjectIdenticalTo:lowestCookie];
             }
         }
-
-
-        //If the beginning cookie isn't in a static tile, break all the cookies out of their static tiles
-//        if (beginningCookieA.isInStaticTile == NO) {
-//            for (BBQCookie *cookie in cookiesInChain) {
-//                if (cookie.isInStaticTile) {
-//                    [self breakOutOfStaticTile:cookie brokenTilesArray:animations[COOKIES_ON_BROKEN_TILES]];
-//                }
-//            }
-//        }
         
         //Move up the chain creating combos
         if (lowestCookie) {
             for (int i = lowestCookieIndex; i >= 1; i--) {
-                BBQCookie *cookieA = cookiesInChain[i];
-                BBQCookie *cookieB = cookiesInChain[i - 1];
-                [self combineCookieA:cookieA withcookieB:cookieB animations:animations];
+                BBQCookie *localCookieA = cookiesInChain[i];
+                BBQCookie *localCookieB = cookiesInChain[i - 1];
+                [self combineCookieA:localCookieA withcookieB:localCookieB destinationColumn:cookieB.column destinationRow:cookieB.row animations:animations];
                 didCombineSameCookies = YES;
             }
         }
@@ -287,10 +277,10 @@
 }
 
 
-- (void)combineCookieA:(BBQCookie *)cookieA withcookieB:(BBQCookie *)cookieB animations:(NSDictionary *)animations {
+- (void)combineCookieA:(BBQCookie *)cookieA withcookieB:(BBQCookie *)cookieB destinationColumn:(NSInteger)destinationColumn destinationRow:(NSInteger)destinationRow animations:(NSDictionary *)animations {
     //Upgrade count and check whether the new count will turn it into an upgrade
     cookieB.count = cookieB.count + cookieA.count;
-    BBQComboAnimation *combo = [[BBQComboAnimation alloc] initWithCookieA:cookieA cookieB:cookieB destinationColumn:cookieB.column destinationRow:cookieB.row];
+    BBQComboAnimation *combo = [[BBQComboAnimation alloc] initWithCookieA:cookieA cookieB:cookieB destinationColumn:destinationColumn destinationRow:destinationRow];
     
     combo.cookieB.isFinalCookie = [self isFinalCookie:combo];
     
