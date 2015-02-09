@@ -49,7 +49,6 @@
     NSDictionary *animationsToPerform = @{
                                           COMBOS : [@[] mutableCopy],
                                           MOVEMENTS : [@[] mutableCopy],
-                                          COOKIES_ON_BROKEN_TILES : [@[] mutableCopy],
                                           };
     
     [self startSwipeInDirection:swipeDirection animations:animationsToPerform];
@@ -215,15 +214,6 @@
             }
         }
     }
-    
-    //Go through the broken tiles, and match them up with the correct combo object
-    for (BBQCookie *cookie in animationsToPerform[COOKIES_ON_BROKEN_TILES]) {
-        for (BBQComboAnimation *combo in animationsToPerform[COMBOS]) {
-            if ([cookie isEqual:combo.cookieB]) {
-                combo.didBreakOutOfStaticTile = YES;
-            }
-        }
-    }
 }
 
 - (void)createCookieMovements:(NSDictionary *)animationsToPerform column:(NSInteger)column row:(NSInteger)row {
@@ -242,8 +232,8 @@
         
         BOOL finishedCheckingForBeginningCookieA = NO;
         NSMutableArray *cookiesInChain = [@[] mutableCopy];
-        [cookiesInChain addObject:cookieA];
         [cookiesInChain addObject:cookieB];
+        [cookiesInChain addObject:cookieA];
         BBQCookie *beginningCookieA = cookieA;
         
         //Find all cookies in the chain and put them in an array
@@ -259,26 +249,37 @@
             
             else {
                 finishedCheckingForBeginningCookieA = YES;
-                if (numberOfChecks == 1) {
-                    beginningCookieA = cookieA;
-                }
+            }
+        }
+        
+        //Find the lowest cookie in the chain that ISNT in a static tile
+        BBQCookie *lowestCookie;
+        NSInteger lowestCookieIndex;
+        for (BBQCookie *cookie in cookiesInChain) {
+            if (cookie.isInStaticTile == NO) {
+                lowestCookie = cookie;
+                lowestCookieIndex = [cookiesInChain indexOfObjectIdenticalTo:lowestCookie];
             }
         }
 
 
         //If the beginning cookie isn't in a static tile, break all the cookies out of their static tiles
-        if (beginningCookieA.isInStaticTile == NO) {
-            for (BBQCookie *cookie in cookiesInChain) {
-                if (cookie.isInStaticTile) {
-                    [self breakOutOfStaticTile:cookie brokenTilesArray:animations[COOKIES_ON_BROKEN_TILES]];
-                }
+//        if (beginningCookieA.isInStaticTile == NO) {
+//            for (BBQCookie *cookie in cookiesInChain) {
+//                if (cookie.isInStaticTile) {
+//                    [self breakOutOfStaticTile:cookie brokenTilesArray:animations[COOKIES_ON_BROKEN_TILES]];
+//                }
+//            }
+//        }
+        
+        //Move up the chain creating combos
+        if (lowestCookie) {
+            for (int i = lowestCookieIndex; i >= 1; i--) {
+                BBQCookie *cookieA = cookiesInChain[i];
+                BBQCookie *cookieB = cookiesInChain[i - 1];
+                [self combineCookieA:cookieA withcookieB:cookieB animations:animations];
+                didCombineSameCookies = YES;
             }
-        }
-                
-        //Now combine cookie A and B
-        if (!cookieA.isInStaticTile) {
-            [self combineCookieA:cookieA withcookieB:cookieB animations:animations];
-            didCombineSameCookies = YES;
         }
     }
     
@@ -296,15 +297,19 @@
     NSMutableArray *combos = animations[COMBOS];
     [combos addObject:combo];
     [self.level replaceCookieAtColumn:cookieA.column row:cookieA.row withCookie:nil];
+    
+    //take care of static tile
+    if (cookieB.isInStaticTile) {
+        [self breakOutOfStaticTile:combo];
+    }
 }
 
-- (void)breakOutOfStaticTile:(BBQCookie *)cookie brokenTilesArray:(NSMutableArray *)brokenTilesArray {
+- (void)breakOutOfStaticTile:(BBQComboAnimation *)combo {
     //Break cookie B out of the tile
-    cookie.isInStaticTile = NO;
-    BBQTile *tile = [self.level tileAtColumn:cookie.column row:cookie.row];
-    cookie.staticTileToBreakOutOf = tile;
-    tile.tileType = 1;
-    [brokenTilesArray addObject:cookie];
+    combo.cookieB.isInStaticTile = NO;
+    BBQTile *tileB = [self.level tileAtColumn:combo.cookieB.column row:combo.cookieB.row];
+    tileB.tileType = 1;
+    combo.didBreakOutOfStaticTile = YES;
 }
 
 //Only moves the cookie in the model. Doesn't create the BBQCookieMovement object
