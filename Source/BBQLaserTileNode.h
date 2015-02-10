@@ -10,6 +10,7 @@
 
 @interface BBQLaserTileNode : CCNode
 
-@property (strong, nonatomic) CCLabelTTF *countLabel;
+
+@property (nonatomic) CCLabelTTF *countLabel;
 
 @end

@@ -121,6 +121,10 @@
                     _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:2];
                 }
                 
+                else if ([value integerValue] == 3) {
+                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:3];
+                }
+                
             }];
         }];
         

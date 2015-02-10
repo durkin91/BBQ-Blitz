@@ -10,6 +10,7 @@
 #import "BBQAnimations.h"
 #import "WorldsScene.h"
 #import "BBQCookieNode.h"
+#import "BBQLaserTileNode.h"
 
 
 static const CGFloat TileWidth = 32.0;
@@ -20,6 +21,7 @@ static const CGFloat TileHeight = 36.0;
 @property (strong, nonatomic) CCNode *gameLayer;
 @property (strong, nonatomic) CCNode *cookiesLayer;
 @property (strong, nonatomic) CCNode *tilesLayer;
+@property (strong, nonatomic) CCNode *overlayTilesLayer;
 @property (strong, nonatomic) BBQGameLogic *gameLogic;
 
 @end
@@ -148,13 +150,20 @@ static const CGFloat TileHeight = 36.0;
 
     tile.sprite = tileSprite;
     
-    if (tile.tileType >= 2) {
+    if (tile.tileType == 2) {
         NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [tile spriteName]];
         CCSprite *specialTileSprite = [CCSprite spriteWithImageNamed:directory];
         specialTileSprite.anchorPoint = CGPointMake(0, 0);
         specialTileSprite.position = CGPointMake(0, 0);
         [tileSprite addChild:specialTileSprite];
         specialTileSprite.zOrder = 20;
+    }
+    
+    else if (tile.tileType == 3) {
+        BBQLaserTileNode *laserTileOverlay = (BBQLaserTileNode *)[CCBReader load:@"LaserTile"];
+        laserTileOverlay.position = [GameplayScene pointForColumn:column row:row];
+        [self.overlayTilesLayer addChild:laserTileOverlay];
+        tile.overlayTile = laserTileOverlay;
     }
 
 }

@@ -266,9 +266,14 @@
 
 - (void)breakOutOfStaticTile:(BBQComboAnimation *)combo {
     //Break cookie B out of the tile
-    combo.cookieB.isInStaticTile = NO;
     BBQTile *tileB = [self.level tileAtColumn:combo.cookieB.column row:combo.cookieB.row];
+    tileB.staticTileCountdown = tileB.staticTileCountdown - 1;
+    
+    if (tileB.staticTileCountdown <= 0) {
+    combo.cookieB.isInStaticTile = NO;
     tileB.tileType = 1;
+    }
+    
     combo.didBreakOutOfStaticTile = YES;
 }
 

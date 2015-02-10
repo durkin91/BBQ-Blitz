@@ -30,6 +30,13 @@
                 
             case 2:
                 self.isABlocker = YES;
+                self.staticTileCountdown = 1;
+                break;
+                
+            case 3:
+                self.isABlocker = YES;
+                self.staticTileCountdown = 2;
+                break;
                 
             default:
                 break;

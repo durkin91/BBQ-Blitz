@@ -203,8 +203,18 @@
                         CCSprite *specialTile = tileB.sprite.children[0];
                         [specialTile removeFromParent];
                     }
+                    
+                    else if (tileB.overlayTile) {
+                        if (tileB.staticTileCountdown > 0) {
+                            tileB.overlayTile.countLabel.string = [NSString stringWithFormat:@"%ld", (long)tileB.staticTileCountdown];
+                        }
+                        
+                        else if (tileB.staticTileCountdown <= 0) {
+                            [tileB.overlayTile removeFromParent];
+                            tileB.overlayTile = nil;
+                        }
+                    }
                 }
-                
                 
             }];
             
