@@ -138,28 +138,15 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)createSpriteForTile:(BBQTile *)tile column:(NSInteger)column row:(NSInteger)row {
     
-    CCSprite *tileSprite = [CCSprite spriteWithImageNamed:@"sprites/Tile.png"];
+    NSString *directory = [NSString stringWithFormat:@"Tiles/%@", [tile spriteName]];
+    CCNode *tileSprite = [CCBReader load:directory];
     tileSprite.position = [GameplayScene pointForColumn:column row:row];
     tileSprite.zOrder = 10;
-    tileSprite.anchorPoint = CGPointMake(0.5, 0.5);
+    //tileSprite.anchorPoint = CGPointMake(0.5, 0.5);
     [self.tilesLayer addChild:tileSprite];
-    
-    if (tile.sprite) {
-        [tile.sprite removeFromParent];
-    }
-
     tile.sprite = tileSprite;
     
-    if (tile.tileType == 2) {
-        NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [tile spriteName]];
-        CCSprite *specialTileSprite = [CCSprite spriteWithImageNamed:directory];
-        specialTileSprite.anchorPoint = CGPointMake(0, 0);
-        specialTileSprite.position = CGPointMake(0, 0);
-        [tileSprite addChild:specialTileSprite];
-        specialTileSprite.zOrder = 20;
-    }
-    
-    else if (tile.tileType == 3) {
+    if (tile.tileType == 3) {
         BBQLaserTileNode *laserTileOverlay = (BBQLaserTileNode *)[CCBReader load:@"LaserTile"];
         laserTileOverlay.position = [GameplayScene pointForColumn:column row:row];
         [self.overlayTilesLayer addChild:laserTileOverlay];
@@ -204,7 +191,7 @@ static const CGFloat TileHeight = 36.0;
     NSLog(@"Swipe %@", direction);
     self.userInteractionEnabled = NO;
     NSDictionary *animations = [self.gameLogic swipe:direction];
-    [BBQAnimations animateSwipe:animations scoreLabel:_scoreLabel movesLabel:_movesLabel cookiesLayer:_cookiesLayer currentScore:self.gameLogic.currentScore movesLeft:self.gameLogic.movesLeft gameLogic:self.gameLogic completion:^{
+    [BBQAnimations animateSwipe:animations scoreLabel:_scoreLabel movesLabel:_movesLabel cookiesLayer:_cookiesLayer tilesLayer:_tilesLayer currentScore:self.gameLogic.currentScore movesLeft:self.gameLogic.movesLeft gameLogic:self.gameLogic completion:^{
         self.userInteractionEnabled = YES;
         
         //check whether the player has finished the level

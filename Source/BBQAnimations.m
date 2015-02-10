@@ -147,7 +147,7 @@
 
 #pragma mark - Gameplay Scene Animations
 
-+ (void)animateSwipe:(NSDictionary *)animations scoreLabel:(CCLabelTTF *)scoreLabel movesLabel:(CCLabelTTF *)movesLabel cookiesLayer:(CCNode *)cookiesLayer currentScore:(NSInteger)currentScore movesLeft:(NSInteger)movesLeft gameLogic:(BBQGameLogic *)gameLogic completion:(dispatch_block_t)completion {
++ (void)animateSwipe:(NSDictionary *)animations scoreLabel:(CCLabelTTF *)scoreLabel movesLabel:(CCLabelTTF *)movesLabel cookiesLayer:(CCNode *)cookiesLayer tilesLayer:(CCNode *)tilesLayer currentScore:(NSInteger)currentScore movesLeft:(NSInteger)movesLeft gameLogic:(BBQGameLogic *)gameLogic completion:(dispatch_block_t)completion {
     
     const NSTimeInterval duration = 0.4;
     
@@ -199,12 +199,7 @@
                 if (combo.didBreakOutOfStaticTile == YES) {
                     BBQTile *tileB = [gameLogic.level tileAtColumn:combo.cookieB.column row:combo.cookieB.row];
                     
-                    if ([tileB.sprite.children count] > 0) {
-                        CCSprite *specialTile = tileB.sprite.children[0];
-                        [specialTile removeFromParent];
-                    }
-                    
-                    else if (tileB.overlayTile) {
+                    if (tileB.overlayTile) {
                         if (tileB.staticTileCountdown > 0) {
                             tileB.overlayTile.countLabel.string = [NSString stringWithFormat:@"%ld", (long)tileB.staticTileCountdown];
                         }
@@ -213,6 +208,14 @@
                             [tileB.overlayTile removeFromParent];
                             tileB.overlayTile = nil;
                         }
+                    }
+                    
+                    else if (tileB.tileType == 1) {
+                        [tileB.sprite removeFromParent];
+                        CCNode *newSprite = [CCBReader load:@"Tiles/RegularTile"];
+                        newSprite.position = [GameplayScene pointForColumn:combo.cookieB.column row:combo.cookieB.row];
+                        [tilesLayer addChild:newSprite];
+                        tileB.sprite = newSprite;
                     }
                 }
                 

@@ -12,10 +12,11 @@
 @interface BBQTile : NSObject
 
 @property (assign, nonatomic) NSInteger tileType;
-@property (strong, nonatomic) CCSprite *sprite;
+@property (strong, nonatomic) CCNode *sprite;
 @property (strong, nonatomic) BBQLaserTileNode *overlayTile;
 @property (nonatomic) BOOL isABlocker;
 @property (nonatomic) NSInteger staticTileCountdown;
+@property (nonatomic) BOOL requiresACookie;
 
 - (NSString *)spriteName;
 - (instancetype)initWithTileType:(NSInteger)type;

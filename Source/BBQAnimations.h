@@ -19,6 +19,6 @@
 + (void)dismissMenuWithoutTouchingBackground:(CCNode *)background popover:(CCNode *)popover;
 + (void)dismissMenu:(CCNode *)menu1 andShowMenu:(CCNode *)menu2 background:(CCNode *)background;
 + (void)animateProgressToNextLevelWithGreySteppingStones:(NSArray *)greySteppingStones yellowSteppingStones:(NSArray *)yellowSteppingStones greyLandingPad:(CCSprite *)greyLandingPad activeLandingPad:(CCNode *)activeLandingPad marker:(CCSprite *)marker;
-+ (void)animateSwipe:(NSDictionary *)animations scoreLabel:(CCLabelTTF *)scoreLabel movesLabel:(CCLabelTTF *)movesLabel cookiesLayer:(CCNode *)cookiesLayer currentScore:(NSInteger)currentScore movesLeft:(NSInteger)movesLeft gameLogic:(BBQGameLogic *)gameLogic completion:(dispatch_block_t)completion;
++ (void)animateSwipe:(NSDictionary *)animations scoreLabel:(CCLabelTTF *)scoreLabel movesLabel:(CCLabelTTF *)movesLabel cookiesLayer:(CCNode *)cookiesLayer tilesLayer:(CCNode *)tilesLayer currentScore:(NSInteger)currentScore movesLeft:(NSInteger)movesLeft gameLogic:(BBQGameLogic *)gameLogic completion:(dispatch_block_t)completion;
 
 @end

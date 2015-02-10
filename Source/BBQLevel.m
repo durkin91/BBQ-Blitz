@@ -40,7 +40,7 @@
     for (NSInteger row = 0; row < NumRows; row++) {
         for (NSInteger column = 0; column < NumColumns; column++) {
             BBQTile *tile = _tiles[column][row];
-            if (tile != nil && _cookies[column][row] == nil) {
+            if (tile != nil && _cookies[column][row] == nil && tile.requiresACookie) {
                 
                 //choose a random cookie number
                 NSUInteger cookieType = arc4random_uniform(NumStartingCookies) + 1;
@@ -123,6 +123,10 @@
                 
                 else if ([value integerValue] == 3) {
                     _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:3];
+                }
+                
+                else if ([value integerValue] == 4) {
+                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:4];
                 }
                 
             }];
