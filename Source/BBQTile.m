@@ -43,6 +43,12 @@
         self.tileType = type;
         
         switch (self.tileType) {
+                
+            case 0:
+                self.isABlocker = YES;
+                self.requiresACookie = NO;
+                break;
+                
             case 1:
                 self.isABlocker = NO;
                 self.requiresACookie = YES;

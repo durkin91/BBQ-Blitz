@@ -68,7 +68,7 @@
         for (int column = 0; column < NumColumns ; column++) {
             for (int row = NumRows - 1; row > 0; row--) {
                 BBQTile *tileB = [self.level tileAtColumn:column  row:row];
-                if (tileB != nil) {
+                if (tileB.requiresACookie) {
                     //Find cookie B and if it is nil, move what would be cookie A to B's tile
                     BBQCookie *cookieB = [self.level cookieAtColumn:column row:row];
                     if (cookieB == nil) {
@@ -99,7 +99,7 @@
         for (int column = 0; column < NumColumns ; column++) {
             for (int row = 0; row < NumRows - 1; row++) {
                 BBQTile *tileB = [self.level tileAtColumn:column  row:row];
-                if (tileB != nil) {
+                if (tileB.requiresACookie) {
                     //Find cookie B and if it is nil move what would be cookie A to B's tile
                     BBQCookie *cookieB = [self.level cookieAtColumn:column row:row];
                     if (cookieB == nil) {
@@ -131,7 +131,7 @@
         for (int row = 0; row < NumRows ; row++) {
             for (int column = 0; column < NumColumns - 1; column++) {
                 BBQTile *tileB = [self.level tileAtColumn:column  row:row];
-                if (tileB != nil) {
+                if (tileB.requiresACookie) {
                     //Find cookie B and if it is nil move what would be cookie A to B's tile
                     BBQCookie *cookieB = [self.level cookieAtColumn:column row:row];
                     if (cookieB == nil) {
@@ -163,7 +163,7 @@
         for (int row = 0; row < NumRows ; row++) {
             for (int column = NumColumns - 1; column > 0; column--) {
                 BBQTile *tileB = [self.level tileAtColumn:column  row:row];
-                if (tileB != nil) {
+                if (tileB.requiresACookie) {
                     //Find cookie B and if it is nil (as is case if its a shark tile underneath a blank tile), move what would be cookie A to B's tile
                     BBQCookie *cookieB = [self.level cookieAtColumn:column row:row];
                     if (cookieB == nil) {
@@ -298,7 +298,7 @@
         BBQCookie *cookieA = [self.level cookieAtColumn:columnB row:rowB - 1];
         BBQTile *tileA = [self.level tileAtColumn:columnB row:rowB - 1];
         int x = 2;
-        while (tileA != nil && cookieA == nil && x <= rowB) {
+        while (tileA.requiresACookie && cookieA == nil && x <= rowB) {
             tileA = [self.level tileAtColumn:columnB row:rowB - x];
             cookieA = [self.level cookieAtColumn:columnB row:rowB - x];
             x ++;
@@ -319,7 +319,7 @@
         BBQCookie *cookieA = [self.level cookieAtColumn:columnB row:rowB + 1];
         BBQTile *tileA = [self.level tileAtColumn:columnB row:rowB + 1];
         int x = 2;
-        while (tileA != nil && cookieA == nil && rowB + x < NumRows) {
+        while (tileA.requiresACookie && cookieA == nil && rowB + x < NumRows) {
             tileA = [self.level tileAtColumn:columnB row:rowB + x];
             cookieA = [self.level cookieAtColumn:columnB row:rowB + x];
             x ++;
@@ -340,7 +340,7 @@
         BBQCookie *cookieA = [self.level cookieAtColumn:columnB + 1 row:rowB];
         BBQTile *tileA = [self.level tileAtColumn:columnB + 1 row:rowB];
         int x = 2;
-        while (tileA != nil && cookieA == nil && columnB + x < NumColumns) {
+        while (tileA.requiresACookie && cookieA == nil && columnB + x < NumColumns) {
             tileA = [self.level tileAtColumn:columnB + x row:rowB];
             cookieA = [self.level cookieAtColumn:columnB + x row:rowB];
             x ++;
@@ -361,7 +361,7 @@
         BBQCookie *cookieA = [self.level cookieAtColumn:columnB - 1 row:rowB];
         BBQTile *tileA = [self.level tileAtColumn:columnB - 1 row:rowB];
         int x = 2;
-        while (tileA != nil && cookieA == nil && x <= columnB) {
+        while (tileA.requiresACookie && cookieA == nil && x <= columnB) {
             tileA = [self.level tileAtColumn:columnB - x row:rowB];
             cookieA = [self.level cookieAtColumn:columnB - x row:rowB];
             x ++;
@@ -485,7 +485,7 @@
             cookieA = [self.level cookieAtColumn:column row:row - 1];
             tileA = [self.level tileAtColumn:column row:row - 1];
             int x = 2;
-            while (tileA != nil && cookieA == nil && x <= row) {
+            while (tileA.requiresACookie && cookieA == nil && x <= row) {
                 tileA = [self.level tileAtColumn:column row:row - x];
                 cookieA = [self.level cookieAtColumn:column row:row - x];
                 x++;
@@ -498,7 +498,7 @@
             cookieA = [self.level cookieAtColumn:column row:row + 1];
             tileA = [self.level tileAtColumn:column row:row + 1];
             int x = 2;
-            while (tileA != nil && cookieA == nil && row + x < NumRows) {
+            while (tileA.requiresACookie && cookieA == nil && row + x < NumRows) {
                 tileA = [self.level tileAtColumn:column row:row + x];
                 cookieA = [self.level cookieAtColumn:column row:row + x];
                 x++;
@@ -511,7 +511,7 @@
             cookieA = [self.level cookieAtColumn:column + 1 row:row];
             tileA = [self.level tileAtColumn:column + 1 row:row];
             int x = 2;
-            while (tileA != nil && cookieA == nil && column + x < NumColumns) {
+            while (tileA.requiresACookie && cookieA == nil && column + x < NumColumns) {
                 tileA = [self.level tileAtColumn:column + x row:row];
                 cookieA = [self.level cookieAtColumn:column + x row:row];
                 x++;
@@ -524,7 +524,7 @@
             cookieA = [self.level cookieAtColumn:column - 1 row:row];
             tileA = [self.level tileAtColumn:column - 1 row:row];
             int x = 2;
-            while (tileA != nil && cookieA == nil && x <= column) {
+            while (tileA.requiresACookie && cookieA == nil && x <= column) {
                 tileA = [self.level tileAtColumn:column - x row:row];
                 cookieA = [self.level cookieAtColumn:column - x row:row];
                 x++;
