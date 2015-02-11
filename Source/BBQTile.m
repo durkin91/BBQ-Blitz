@@ -31,6 +31,10 @@
             spriteName = @"GoldenGooseTile";
             break;
             
+        case 5:
+            spriteName = @"SteelBlockerTile";
+            break;
+            
         default:
             break;
     }
@@ -43,42 +47,52 @@
         self.tileType = type;
         self.column = column;
         self.row = row;
-        
-        switch (self.tileType) {
-                
-            case 0:
-                self.isABlocker = YES;
-                self.requiresACookie = NO;
-                break;
-                
-            case 1:
-                self.isABlocker = NO;
-                self.requiresACookie = YES;
-                self.staticTileCountdown = 0;
-                break;
-                
-            case 2:
-                self.isABlocker = YES;
-                self.staticTileCountdown = 1;
-                self.requiresACookie = YES;
-                break;
-                
-            case 3:
-                self.isABlocker = YES;
-                self.staticTileCountdown = 2;
-                self.requiresACookie = YES;
-                break;
-                
-            case 4:
-                self.isABlocker = YES;
-                self.requiresACookie = NO;
-                self.goldenGooseTileCountdown = 3;
-                
-            default:
-                break;
-        }
     }
     return self;
+}
+
+- (void)setTileType:(NSInteger)tileType {
+    _tileType = tileType;
+    
+    switch (_tileType) {
+            
+        case 0:
+            self.isABlocker = YES;
+            self.requiresACookie = NO;
+            break;
+            
+        case 1:
+            self.isABlocker = NO;
+            self.requiresACookie = YES;
+            self.staticTileCountdown = 0;
+            break;
+            
+        case 2:
+            self.isABlocker = YES;
+            self.staticTileCountdown = 1;
+            self.requiresACookie = YES;
+            break;
+            
+        case 3:
+            self.isABlocker = YES;
+            self.staticTileCountdown = 2;
+            self.requiresACookie = YES;
+            break;
+            
+        case 4:
+            self.isABlocker = YES;
+            self.requiresACookie = NO;
+            self.goldenGooseTileCountdown = 3;
+            break;
+            
+        case 5:
+            self.isABlocker = YES;
+            self.requiresACookie = NO;
+            break;
+            
+        default:
+            break;
+    }
 }
 
 @end

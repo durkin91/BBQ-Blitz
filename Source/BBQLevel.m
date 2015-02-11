@@ -135,6 +135,10 @@
                     [self.goldenGooseTiles addObject:[self tileAtColumn:column row:tileRow]];
                 }
                 
+                else if ([value integerValue] == 5) {
+                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:5 column:column row:tileRow];
+                }
+                
             }];
         }];
         

@@ -42,6 +42,14 @@
     self.cookieTypeCount = sortedCookies;
 }
 
+- (void)sortGoldenGooseCookies:(NSArray *)goldenGooseCookies {
+    for (BBQCookie *cookie in goldenGooseCookies) {
+        NSNumber *count = self.cookieTypeCount[cookie.cookieType - 1];
+        NSInteger newCount = [count integerValue] + 1;
+        self.cookieTypeCount[cookie.cookieType - 1] = [NSNumber numberWithInteger:newCount];
+    }
+}
+
 #pragma mark - Swipe Logic
 
 - (NSDictionary *)swipe:(NSString *)swipeDirection {
@@ -50,6 +58,7 @@
                                           COMBOS : [@[] mutableCopy],
                                           MOVEMENTS : [@[] mutableCopy],
                                           GOLDEN_GOOSE_COOKIES : [@[] mutableCopy],
+                                          STEEL_BLOCKER_TILES : [@[] mutableCopy],
                                           };
     
     [self startSwipeInDirection:swipeDirection animations:animationsToPerform];
@@ -58,8 +67,13 @@
     [self scoreTheCombos:animationsToPerform[COMBOS]];
     NSLog(@"Moves left: %@", [NSString stringWithFormat:@"%ld", (long)self.movesLeft]);
     
+    //take care of golden goose cookies
     NSMutableArray *goldenGooseCookies = animationsToPerform[GOLDEN_GOOSE_COOKIES];
     [goldenGooseCookies addObjectsFromArray:[self layGoldenGooseEggs]];
+    [self sortGoldenGooseCookies:goldenGooseCookies];
+    
+    //Take care of steel blocker tiles
+    [self explodeSteelBlockerTiles:animationsToPerform];
     
     return animationsToPerform;
 }
@@ -573,6 +587,42 @@
     }
     
     return cookieA;
+}
+
+- (void)explodeSteelBlockerTiles:(NSDictionary *)animations {
+    NSArray *combos = animations[COMBOS];
+    NSMutableArray *steelBlockerTiles = animations[STEEL_BLOCKER_TILES];
+    
+    for (BBQComboAnimation *combo in combos) {
+        NSMutableArray *adjacentTiles = [@[] mutableCopy];
+        
+        if (combo.cookieB.row < NumRows - 1) {
+            BBQTile *above = [self.level tileAtColumn:combo.cookieB.column row:combo.cookieB.row + 1];
+            [adjacentTiles addObject:above];
+        }
+        
+        if (combo.cookieB.row > 0) {
+            BBQTile *below = [self.level tileAtColumn:combo.cookieB.column row:combo.cookieB.row - 1];
+            [adjacentTiles addObject:below];
+        }
+        
+        if (combo.cookieB.column > 0) {
+            BBQTile *left = [self.level tileAtColumn:combo.cookieB.column - 1 row:combo.cookieB.row];
+            [adjacentTiles addObject:left];
+        }
+        
+        if (combo.cookieB.column < NumColumns - 1) {
+            BBQTile *right = [self.level tileAtColumn:combo.cookieB.column + 1 row:combo.cookieB.row];
+            [adjacentTiles addObject:right];
+        }
+        
+        for (BBQTile *tile in adjacentTiles) {
+            if (tile.tileType == 5) {
+                tile.tileType = 1;
+                [steelBlockerTiles addObject:tile];
+            }
+        }
+    }
 }
 
 

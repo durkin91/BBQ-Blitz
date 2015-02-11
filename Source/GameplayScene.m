@@ -142,7 +142,6 @@ static const CGFloat TileHeight = 36.0;
     CCNode *tileSprite = [CCBReader load:directory];
     tileSprite.position = [GameplayScene pointForColumn:column row:row];
     tileSprite.zOrder = 10;
-    //tileSprite.anchorPoint = CGPointMake(0.5, 0.5);
     [self.tilesLayer addChild:tileSprite];
     tile.sprite = tileSprite;
     
@@ -323,8 +322,22 @@ static const CGFloat TileHeight = 36.0;
         }
     }];
     
+    //**** EXPLODE STEEL BLOCKER TILES ****
+    CCActionCallBlock *explodeSteelBlockers = [CCActionCallBlock actionWithBlock:^{
+        NSArray *steelBlockerTiles = animations[STEEL_BLOCKER_TILES];
+        for (BBQTile *tile in steelBlockerTiles) {
+            CCParticleSystem *explosion = (CCParticleSystem *)[CCBReader load:@"SteelBlockersEffect"];
+            explosion.autoRemoveOnFinish = TRUE;
+            explosion.position = tile.sprite.position;
+            [_cookiesLayer addChild:explosion];
+            [tile.sprite removeFromParent];
+            [self createSpriteForTile:tile column:tile.column row:tile.row];
+            
+        }
+    }];
+    
     ////**** FINAL SEQUENCE ****
-    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, updateScoreBlock, newCookieSprites, [CCActionCallBlock actionWithBlock:completion], nil];
+    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, updateScoreBlock, explodeSteelBlockers, newCookieSprites, [CCActionCallBlock actionWithBlock:completion], nil];
     [_cookiesLayer runAction:finalSequence];
 }
 
