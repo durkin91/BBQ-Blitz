@@ -12,7 +12,6 @@
 #define COMBOS @"Combos"
 #define MOVEMENTS @"Movements"
 #define GOLDEN_GOOSE_COOKIES @"Golden Goose Cookies"
-#define STEEL_BLOCKER_TILES @"Steel Blocker Tiles"
 
 @interface BBQGameLogic : NSObject
 

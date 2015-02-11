@@ -288,6 +288,17 @@ static const CGFloat TileHeight = 36.0;
                     }
                 }
                 
+                //Take care of steel blocker tiles
+                for (BBQTile *tile in combo.steelBlockerTiles) {
+                    CCParticleSystem *explosion = (CCParticleSystem *)[CCBReader load:@"SteelBlockersEffect"];
+                    explosion.autoRemoveOnFinish = TRUE;
+                    explosion.position = tile.sprite.position;
+                    [_cookiesLayer addChild:explosion];
+                    [tile.sprite removeFromParent];
+                    [self createSpriteForTile:tile column:tile.column row:tile.row];
+                    
+                }
+
             }];
             
             CCActionSequence *sequenceA = [CCActionSequence actions:moveA, removeA, updateCountCircle, nil];
@@ -321,23 +332,9 @@ static const CGFloat TileHeight = 36.0;
             [self spriteForCookie:cookie];
         }
     }];
-    
-    //**** EXPLODE STEEL BLOCKER TILES ****
-    CCActionCallBlock *explodeSteelBlockers = [CCActionCallBlock actionWithBlock:^{
-        NSArray *steelBlockerTiles = animations[STEEL_BLOCKER_TILES];
-        for (BBQTile *tile in steelBlockerTiles) {
-            CCParticleSystem *explosion = (CCParticleSystem *)[CCBReader load:@"SteelBlockersEffect"];
-            explosion.autoRemoveOnFinish = TRUE;
-            explosion.position = tile.sprite.position;
-            [_cookiesLayer addChild:explosion];
-            [tile.sprite removeFromParent];
-            [self createSpriteForTile:tile column:tile.column row:tile.row];
-            
-        }
-    }];
-    
+
     ////**** FINAL SEQUENCE ****
-    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, updateScoreBlock, explodeSteelBlockers, newCookieSprites, [CCActionCallBlock actionWithBlock:completion], nil];
+    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, updateScoreBlock, newCookieSprites, [CCActionCallBlock actionWithBlock:completion], nil];
     [_cookiesLayer runAction:finalSequence];
 }
 

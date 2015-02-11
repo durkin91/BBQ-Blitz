@@ -23,6 +23,7 @@ static const NSInteger startingScoreForCombo = 400;
 @property (assign, nonatomic) NSInteger score;
 @property (assign, nonatomic) NSInteger numberOfCookiesInCombo;
 @property (nonatomic) BOOL didBreakOutOfStaticTile;
+@property (strong, nonatomic) NSMutableArray *steelBlockerTiles;
 
 - (instancetype)initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB destinationColumn:(NSInteger)destinationColumn destinationRow:(NSInteger)destinationRow;
 
