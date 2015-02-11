@@ -46,6 +46,7 @@
             case 1:
                 self.isABlocker = NO;
                 self.requiresACookie = YES;
+                self.staticTileCountdown = 0;
                 break;
                 
             case 2:

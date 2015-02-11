@@ -207,20 +207,31 @@
         [cookiesInChain addObject:cookieB];
         [cookiesInChain addObject:cookieA];
         BBQCookie *beginningCookieA = cookieA;
+        BBQTile *beginningTileA = [self.level tileAtColumn:cookieA.column row:cookieA.row];
         
-        //Find all cookies in the chain and put them in an array
-        NSInteger numberOfChecks = 0;
-        while (!finishedCheckingForBeginningCookieA) {
-            beginningCookieA = [self findCookieABelowColumn:beginningCookieA.column row:beginningCookieA.row swipeDirection:direction];
-            numberOfChecks ++;
+        if (beginningTileA.staticTileCountdown <= 1) {
             
-            if (cookieA.cookieType == beginningCookieA.cookieType) {
-                [cookiesInChain addObject:beginningCookieA];
-                finishedCheckingForBeginningCookieA = NO;
-            }
-            
-            else {
-                finishedCheckingForBeginningCookieA = YES;
+            //Find all cookies in the chain and put them in an array. 
+            NSInteger numberOfChecks = 0;
+            while (!finishedCheckingForBeginningCookieA) {
+                beginningCookieA = [self findCookieABelowColumn:beginningCookieA.column row:beginningCookieA.row swipeDirection:direction];
+                beginningTileA = [self.level tileAtColumn:beginningCookieA.column row:beginningCookieA.row];
+                numberOfChecks ++;
+                
+                if (cookieA.cookieType == beginningCookieA.cookieType) {
+                    [cookiesInChain addObject:beginningCookieA];
+                    
+                    if (beginningTileA.staticTileCountdown <= 1) {
+                        finishedCheckingForBeginningCookieA = NO;
+                    }
+                    else {
+                        finishedCheckingForBeginningCookieA = YES;
+                    }
+                }
+                
+                else {
+                    finishedCheckingForBeginningCookieA = YES;
+                }
             }
         }
         
