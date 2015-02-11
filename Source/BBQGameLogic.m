@@ -49,14 +49,17 @@
     NSDictionary *animationsToPerform = @{
                                           COMBOS : [@[] mutableCopy],
                                           MOVEMENTS : [@[] mutableCopy],
+                                          GOLDEN_GOOSE_COOKIES : [@[] mutableCopy],
                                           };
     
     [self startSwipeInDirection:swipeDirection animations:animationsToPerform];
     self.movesLeft = self.movesLeft - 1;
-    
     [self findComboChains:animationsToPerform[COMBOS]];
     [self scoreTheCombos:animationsToPerform[COMBOS]];
     NSLog(@"Moves left: %@", [NSString stringWithFormat:@"%ld", (long)self.movesLeft]);
+    
+    NSMutableArray *goldenGooseCookies = animationsToPerform[GOLDEN_GOOSE_COOKIES];
+    [goldenGooseCookies addObjectsFromArray:[self layGoldenGooseEggs]];
     
     return animationsToPerform;
 }
@@ -473,6 +476,43 @@
     //check if its the final cookie of its type
     if (newCount == 1) return YES;
     else return NO;
+}
+
+- (NSArray *)layGoldenGooseEggs {
+    
+    NSMutableArray *newCookies = [@[] mutableCopy];
+    
+    for (BBQTile *goldenGooseTile in self.level.goldenGooseTiles) {
+        goldenGooseTile.goldenGooseTileCountdown --;
+        
+        if (goldenGooseTile.goldenGooseTileCountdown <= 0) {
+            
+            //find the blank tiles
+            NSMutableArray *blankTiles = [@[] mutableCopy];
+            for (NSInteger row = 0; row < NumRows; row++) {
+                for (NSInteger column = 0; column < NumColumns; column++) {
+                    BBQTile *tile = [self.level tileAtColumn:column row:row];
+                    if ([self.level cookieAtColumn:column row:row] == nil && tile.requiresACookie == YES) {
+                        [blankTiles addObject:tile];
+                    }
+                }
+            }
+            
+            //pick a blank tile at random
+            NSUInteger randomTileIndex = arc4random_uniform([blankTiles count]);
+            BBQTile *chosenTile = [blankTiles objectAtIndex:randomTileIndex];
+
+            //create the cookie
+            NSUInteger cookieType = arc4random_uniform(NumStartingCookies) + 1;
+            BBQCookie *newCookie = [self.level createCookieAtColumn:chosenTile.column row:chosenTile.row withType:cookieType];
+            [newCookies addObject:newCookie];
+            
+            //reset the countdown
+            goldenGooseTile.goldenGooseTileCountdown = goldenGooseMax;
+        }
+    }
+    
+    return newCookies;
 }
 
 - (BBQCookie *)findCookieABelowColumn:(NSInteger)column row:(NSInteger)row swipeDirection:(NSString *)direction {

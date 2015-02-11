@@ -102,6 +102,7 @@
     self = [super init];
     if (self != nil) {
         NSDictionary *dictionary = [self loadJSON:filename];
+        self.goldenGooseTiles = [@[] mutableCopy];
         
         //Loop through the rows
         [dictionary[@"tiles"] enumerateObjectsUsingBlock:^(NSArray *array, NSUInteger row, BOOL *stop) {
@@ -114,23 +115,24 @@
                 
                 //create a tile object depending on the type of tile
                 if ([value integerValue] == 0) {
-                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:0];
+                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:0 column:column row:tileRow];
                 }
                 
                 else if ([value integerValue] == 1) {
-                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:1];
+                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:1 column:column row:tileRow];
                 }
                 
                 else if ([value integerValue] == 2) {
-                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:2];
+                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:2 column:column row:tileRow];
                 }
                 
                 else if ([value integerValue] == 3) {
-                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:3];
+                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:3 column:column row:tileRow];
                 }
                 
                 else if ([value integerValue] == 4) {
-                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:4];
+                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:4 column:column row:tileRow];
+                    [self.goldenGooseTiles addObject:[self tileAtColumn:column row:tileRow]];
                 }
                 
             }];
@@ -148,6 +150,7 @@
     
     return _tiles[column][row];
 }
+
 
 
 

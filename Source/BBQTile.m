@@ -37,10 +37,12 @@
     return spriteName;
 }
 
-- (instancetype)initWithTileType:(NSInteger)type {
+- (instancetype)initWithTileType:(NSInteger)type column:(NSInteger)column row:(NSInteger)row {
     self = [super init];
     if (self) {
         self.tileType = type;
+        self.column = column;
+        self.row = row;
         
         switch (self.tileType) {
                 
@@ -70,6 +72,7 @@
             case 4:
                 self.isABlocker = YES;
                 self.requiresACookie = NO;
+                self.goldenGooseTileCountdown = 3;
                 
             default:
                 break;

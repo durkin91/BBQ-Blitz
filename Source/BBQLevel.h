@@ -19,6 +19,7 @@ static const NSInteger NumRows = 9;
 
 @property (assign, nonatomic) NSUInteger targetScore;
 @property (assign, nonatomic) NSUInteger maximumMoves;
+@property (strong, nonatomic) NSMutableArray *goldenGooseTiles;
 
 - (NSSet *)shuffle;
 
@@ -27,5 +28,6 @@ static const NSInteger NumRows = 9;
 - (BBQTile *)tileAtColumn:(NSInteger)column row:(NSInteger)row;
 - (void)replaceCookieAtColumn:(int)column row:(int)row withCookie:(BBQCookie *)cookie;
 - (NSSet *)createCookiesInBlankTiles;
+- (BBQCookie *)createCookieAtColumn:(NSInteger)column row:(NSInteger)row withType:(NSUInteger)cookieType;
 
 @end

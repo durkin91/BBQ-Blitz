@@ -11,6 +11,7 @@
 
 #define COMBOS @"Combos"
 #define MOVEMENTS @"Movements"
+#define GOLDEN_GOOSE_COOKIES @"Golden Goose Cookies"
 
 @interface BBQGameLogic : NSObject
 
