@@ -35,6 +35,18 @@
             spriteName = @"SteelBlockerTile";
             break;
             
+        case 6:
+            spriteName = @"SteelBlockerFactoryTile";
+            break;
+            
+        case 7:
+            spriteName = @"RegularTile";
+            break;
+            
+        case 8:
+            spriteName = @"RegularTile";
+            break;
+            
         default:
             break;
     }
@@ -88,6 +100,23 @@
         case 5:
             self.isABlocker = YES;
             self.requiresACookie = NO;
+            break;
+            
+        case 6:
+            self.isABlocker = YES;
+            self.requiresACookie = NO;
+            break;
+            
+        case 7:
+            self.isABlocker = NO;
+            self.requiresACookie = YES;
+            self.staticTileCountdown = 0;
+            break;
+            
+        case 8:
+            self.isABlocker = NO;
+            self.requiresACookie = YES;
+            self.staticTileCountdown = 0;
             break;
             
         default:

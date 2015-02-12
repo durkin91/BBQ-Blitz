@@ -20,21 +20,63 @@
 }
 
 - (NSString *)spriteName {
-    static NSString * const spriteNames[] = {
-        @"Croissant",
-        @"Cupcake",
-        @"Danish",
-        @"Donut",
-        @"Macaroon",
-        @"SugarCookie",
-    };
+    NSString *spriteName;
     
-    return spriteNames[self.cookieType - 1];
+    switch (self.cookieType) {
+        case 1:
+            spriteName = @"Croissant";
+            break;
+            
+        case 2:
+            spriteName = @"Cupcake";
+            break;
+            
+        case 3:
+            spriteName = @"Danish";
+            break;
+            
+        case 4:
+            spriteName = @"Donut";
+            break;
+            
+        case 5:
+            spriteName = @"Macaroon";
+            break;
+            
+        case 6:
+            spriteName = @"SugarCookie";
+            break;
+            
+        case 10:
+            spriteName = @"SecurityGuard";
+            break;
+            
+        case 11:
+            spriteName = @"Rope";
+            break;
+            
+        default:
+            break;
+    }
+    
+    return spriteName;
     
 }
 
 - (NSString *)description {
     return [NSString stringWithFormat:@"type:%ld square:(%ld, %ld)", (long)self.cookieType, (long)self.column, (long)self.row];
+}
+
+- (void)setCookieType:(NSUInteger)cookieType {
+    _cookieType = cookieType;
+    
+    if (_cookieType == 10 || _cookieType == 11) {
+        self.isRopeOrSecurityGuard = YES;
+    }
+    
+    else {
+        self.isRopeOrSecurityGuard = NO;
+    }
 }
 
 

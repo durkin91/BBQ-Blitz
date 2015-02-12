@@ -20,6 +20,9 @@ static const NSInteger NumRows = 9;
 @property (assign, nonatomic) NSUInteger targetScore;
 @property (assign, nonatomic) NSUInteger maximumMoves;
 @property (strong, nonatomic) NSMutableArray *goldenGooseTiles;
+@property (strong, nonatomic) NSMutableArray *steelBlockerFactoryTiles;
+@property (strong, nonatomic) NSMutableArray *securityGuardTiles;
+@property (strong, nonatomic) NSMutableArray *ropeTiles;
 
 - (NSSet *)shuffle;
 

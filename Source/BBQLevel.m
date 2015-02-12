@@ -42,8 +42,22 @@
             BBQTile *tile = _tiles[column][row];
             if (_cookies[column][row] == nil && tile.requiresACookie == YES) {
                 
-                //choose a random cookie number
-                NSUInteger cookieType = arc4random_uniform(NumStartingCookies) + 1;
+                NSUInteger cookieType;
+                switch (tile.tileType) {
+                    case 7:
+                        cookieType = 10;
+                        tile.tileType = 1;
+                        break;
+                        
+                    case 8:
+                        cookieType = 11;
+                        tile.tileType = 1;
+                        break;
+                        
+                    default:
+                        cookieType = arc4random_uniform(NumStartingCookies) + 1;
+                        break;
+                }
                 
                 BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
                 
@@ -102,7 +116,6 @@
     self = [super init];
     if (self != nil) {
         NSDictionary *dictionary = [self loadJSON:filename];
-        self.goldenGooseTiles = [@[] mutableCopy];
         
         //Loop through the rows
         [dictionary[@"tiles"] enumerateObjectsUsingBlock:^(NSArray *array, NSUInteger row, BOOL *stop) {
@@ -132,11 +145,39 @@
                 
                 else if ([value integerValue] == 4) {
                     _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:4 column:column row:tileRow];
+                    if (!self.goldenGooseTiles) {
+                        self.goldenGooseTiles = [@[] mutableCopy];
+                    }
+                    
                     [self.goldenGooseTiles addObject:[self tileAtColumn:column row:tileRow]];
                 }
                 
                 else if ([value integerValue] == 5) {
                     _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:5 column:column row:tileRow];
+                }
+                
+                else if ([value integerValue] == 6) {
+                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:6 column:column row:tileRow];
+                    if (!self.steelBlockerFactoryTiles) {
+                        self.steelBlockerFactoryTiles = [@[] mutableCopy];
+                    }
+                    [self.steelBlockerFactoryTiles addObject:[self tileAtColumn:column row:tileRow]];
+                }
+                
+                else if ([value integerValue] == 7) {
+                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:7 column:column row:tileRow];
+                    if (!self.securityGuardTiles) {
+                        self.securityGuardTiles = [@[] mutableCopy];
+                    }
+                    [self.securityGuardTiles addObject:[self tileAtColumn:column row:tileRow]];
+                }
+                
+                else if ([value integerValue] == 8) {
+                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:8 column:column row:tileRow];
+                    if (!self.ropeTiles) {
+                        self.ropeTiles = [@[] mutableCopy];
+                    }
+                    [self.ropeTiles addObject:[self tileAtColumn:column row:tileRow]];
                 }
                 
             }];

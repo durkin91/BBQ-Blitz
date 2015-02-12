@@ -241,11 +241,6 @@ static const CGFloat TileHeight = 36.0;
                     combo.cookieB.sprite.tickSprite.visible = YES;
                 }
                 
-                else {
-                    //combo.cookieB.sprite.countCircle.visible = YES;
-                    combo.cookieB.sprite.countLabel.string = [NSString stringWithFormat:@"%ld", (long)combo.cookieB.count];
-                }
-                
                 //scale up and down
                 CCActionScaleTo *scaleUp = [CCActionScaleTo actionWithDuration:0.1 scale:1.2];
                 CCActionScaleTo *scaleDown = [CCActionScaleTo actionWithDuration:0.1 scale:1.0];
@@ -253,7 +248,7 @@ static const CGFloat TileHeight = 36.0;
                 [combo.cookieB.sprite runAction:scaleSequence];
                 
                 //Display score label
-                if (combo.score > 0) {
+                if (combo.score > 0 && !combo.cookieB.isRopeOrSecurityGuard) {
                     NSString *scoreString = [NSString stringWithFormat:@"%ld", (long)combo.score];
                     CCLabelTTF *scoreLabel = [CCLabelTTF labelWithString:scoreString fontName:@"GillSans-BoldItalic" fontSize:12.0];
                     scoreLabel.position = [GameplayScene pointForColumn:combo.destinationColumn row:combo.destinationRow];
@@ -325,16 +320,23 @@ static const CGFloat TileHeight = 36.0;
         NSLog(@"Moves left label: %@", _movesLabel.string);
     }];
     
-    //**** CREATE SPRITES FOR NEW GOOSE EGG COOKIES ****
-    CCActionCallBlock *newCookieSprites = [CCActionCallBlock actionWithBlock:^{
+    //**** CREATE SPRITES FOR NEW GOOSE EGG COOKIES AND STEEL BLOCKER TILES ****
+    CCActionCallBlock *newSprites = [CCActionCallBlock actionWithBlock:^{
         NSArray *newCookies = animations[GOLDEN_GOOSE_COOKIES];
         for (BBQCookie *cookie in newCookies) {
             [self spriteForCookie:cookie];
         }
+        
+        NSArray *newSteelBlockerTiles = animations[NEW_STEEL_BLOCKER_TILES];
+        for (BBQTile *tile in newSteelBlockerTiles) {
+            [tile.sprite removeFromParent];
+            [self createSpriteForTile:tile column:tile.column row:tile.row];
+        }
     }];
+    
 
     ////**** FINAL SEQUENCE ****
-    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, updateScoreBlock, newCookieSprites, [CCActionCallBlock actionWithBlock:completion], nil];
+    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, updateScoreBlock, newSprites, [CCActionCallBlock actionWithBlock:completion], nil];
     [_cookiesLayer runAction:finalSequence];
 }
 

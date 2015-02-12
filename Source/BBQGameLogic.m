@@ -34,9 +34,11 @@
     }
     
     for (BBQCookie *cookie in cookieSet) {
-        NSNumber *count = sortedCookies[cookie.cookieType - 1];
-        NSInteger newCount = [count integerValue] + 1;
-        sortedCookies[cookie.cookieType - 1] = [NSNumber numberWithInteger:newCount];
+        if (cookie.cookieType <= NumCookieTypes) {
+            NSNumber *count = sortedCookies[cookie.cookieType - 1];
+            NSInteger newCount = [count integerValue] + 1;
+            sortedCookies[cookie.cookieType - 1] = [NSNumber numberWithInteger:newCount];
+        }
     }
     
     self.cookieTypeCount = sortedCookies;
@@ -58,6 +60,7 @@
                                           COMBOS : [@[] mutableCopy],
                                           MOVEMENTS : [@[] mutableCopy],
                                           GOLDEN_GOOSE_COOKIES : [@[] mutableCopy],
+                                          NEW_STEEL_BLOCKER_TILES : [@[] mutableCopy],
                                           };
     
     [self startSwipeInDirection:swipeDirection animations:animationsToPerform];
@@ -66,12 +69,23 @@
     [self scoreTheCombos:animationsToPerform[COMBOS]];
     NSLog(@"Moves left: %@", [NSString stringWithFormat:@"%ld", (long)self.movesLeft]);
     
-    //take care of golden goose cookies
-    NSMutableArray *goldenGooseCookies = animationsToPerform[GOLDEN_GOOSE_COOKIES];
-    [goldenGooseCookies addObjectsFromArray:[self layGoldenGooseEggs]];
-    [self sortGoldenGooseCookies:goldenGooseCookies];
-    
-    //take care of steel blocker tiles
+    //take care of new golden goose cookies or new steel blocker tiles
+    if (self.level.goldenGooseTiles || self.level.steelBlockerFactoryTiles) {
+        NSArray *blankTiles = [self findBlankTiles];
+        
+        if (self.level.goldenGooseTiles) {
+            NSMutableArray *goldenGooseCookies = animationsToPerform[GOLDEN_GOOSE_COOKIES];
+            [goldenGooseCookies addObjectsFromArray:[self layGoldenGooseEggs:blankTiles]];
+            [self sortGoldenGooseCookies:goldenGooseCookies];
+        }
+        
+        if (self.level.steelBlockerFactoryTiles) {
+            NSMutableArray *newSteelBlockerTiles = animationsToPerform[NEW_STEEL_BLOCKER_TILES];
+            [newSteelBlockerTiles addObjectsFromArray:[self createNewSteelBlockerTilesWithBlankTiles:blankTiles]];
+        }
+    }
+
+    //turn steel blocker tiles from combos into regular tiles
     NSArray *combos = animationsToPerform[COMBOS];
     [self turnSteelBlockerIntoRegularTilesForCombos:combos];
     
@@ -217,7 +231,9 @@
 
 - (void)tryCombineCookieA:(BBQCookie *)cookieA withCookieB:(BBQCookie *)cookieB animations:(NSDictionary *)animations direction:(NSString *)direction {
     
-    if (cookieA.cookieType == cookieB.cookieType) {
+    if (cookieA.cookieType == cookieB.cookieType ||
+        (cookieA.cookieType == 10 && cookieB.cookieType == 11) ||
+        (cookieA.cookieType == 11 && cookieB.cookieType == 10)) {
         
         BOOL finishedCheckingForBeginningCookieA = NO;
         NSMutableArray *cookiesInChain = [@[] mutableCopy];
@@ -277,10 +293,20 @@
 
 - (void)combineCookieA:(BBQCookie *)cookieA withcookieB:(BBQCookie *)cookieB destinationColumn:(NSInteger)destinationColumn destinationRow:(NSInteger)destinationRow animations:(NSDictionary *)animations {
     //Upgrade count and check whether the new count will turn it into an upgrade
-    cookieB.count = cookieB.count + cookieA.count;
-    BBQComboAnimation *combo = [[BBQComboAnimation alloc] initWithCookieA:cookieA cookieB:cookieB destinationColumn:destinationColumn destinationRow:destinationRow];
+    BBQComboAnimation *combo;
+    if (cookieB.isRopeOrSecurityGuard || cookieA.isRopeOrSecurityGuard) {
+        combo = [[BBQComboAnimation alloc] initWithCookieA:cookieA cookieB:cookieB destinationColumn:destinationColumn destinationRow:destinationRow];
+        cookieB.isInStaticTile = YES;
+        BBQTile *tileB = [self.level tileAtColumn:cookieB.column row:cookieB.row];
+        tileB.tileType = 2;
+        
+    }
     
-    combo.cookieB.isFinalCookie = [self isFinalCookie:combo];
+    else {
+        cookieB.count = cookieB.count + cookieA.count;
+        combo = [[BBQComboAnimation alloc] initWithCookieA:cookieA cookieB:cookieB destinationColumn:destinationColumn destinationRow:destinationRow];
+        combo.cookieB.isFinalCookie = [self isFinalCookie:combo];
+    }
     
     NSMutableArray *combos = animations[COMBOS];
     [combos addObject:combo];
@@ -540,7 +566,7 @@
     else return NO;
 }
 
-- (NSArray *)layGoldenGooseEggs {
+- (NSArray *)layGoldenGooseEggs:(NSArray *)blankTiles {
     
     NSMutableArray *newCookies = [@[] mutableCopy];
     
@@ -548,17 +574,6 @@
         goldenGooseTile.goldenGooseTileCountdown --;
         
         if (goldenGooseTile.goldenGooseTileCountdown <= 0) {
-            
-            //find the blank tiles
-            NSMutableArray *blankTiles = [@[] mutableCopy];
-            for (NSInteger row = 0; row < NumRows; row++) {
-                for (NSInteger column = 0; column < NumColumns; column++) {
-                    BBQTile *tile = [self.level tileAtColumn:column row:row];
-                    if ([self.level cookieAtColumn:column row:row] == nil && tile.requiresACookie == YES) {
-                        [blankTiles addObject:tile];
-                    }
-                }
-            }
             
             //pick a blank tile at random
             NSUInteger randomTileIndex = arc4random_uniform([blankTiles count]);
@@ -575,6 +590,32 @@
     }
     
     return newCookies;
+}
+
+- (NSArray *)createNewSteelBlockerTilesWithBlankTiles:(NSArray *)blankTiles {
+    NSMutableArray *newTiles = [@[] mutableCopy];
+    
+    for (int i = 0; i < [self.level.steelBlockerFactoryTiles count]; i ++) {
+        NSUInteger randomTileIndex = arc4random_uniform([blankTiles count]);
+        BBQTile *chosenTile = [blankTiles objectAtIndex:randomTileIndex];
+        chosenTile.tileType = 5;
+        [newTiles addObject:chosenTile];
+    }
+    return newTiles;
+}
+
+- (NSArray *)findBlankTiles {
+    //find the blank tiles
+    NSMutableArray *blankTiles = [@[] mutableCopy];
+    for (NSInteger row = 0; row < NumRows; row++) {
+        for (NSInteger column = 0; column < NumColumns; column++) {
+            BBQTile *tile = [self.level tileAtColumn:column row:row];
+            if ([self.level cookieAtColumn:column row:row] == nil && tile.requiresACookie == YES) {
+                [blankTiles addObject:tile];
+            }
+        }
+    }
+    return blankTiles;
 }
 
 - (BBQCookie *)findCookieABelowColumn:(NSInteger)column row:(NSInteger)row swipeDirection:(NSString *)direction {
