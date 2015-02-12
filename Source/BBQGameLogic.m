@@ -71,6 +71,10 @@
     [goldenGooseCookies addObjectsFromArray:[self layGoldenGooseEggs]];
     [self sortGoldenGooseCookies:goldenGooseCookies];
     
+    //take care of steel blocker tiles
+    NSArray *combos = animationsToPerform[COMBOS];
+    [self turnSteelBlockerIntoRegularTilesForCombos:combos];
+    
     return animationsToPerform;
 }
 
@@ -282,13 +286,13 @@
     [combos addObject:combo];
     [self.level replaceCookieAtColumn:cookieA.column row:cookieA.row withCookie:nil];
     
+    //Explode steel blocker tiles
+    [self explodeSteelBlockerTiles:combo];
+    
     //take care of static tile
     if (cookieB.isInStaticTile) {
         [self breakOutOfStaticTile:combo];
     }
-    
-    //take care of steel blocker tiles
-    [self explodeSteelBlockerTiles:combo];
 }
 
 - (void)breakOutOfStaticTile:(BBQComboAnimation *)combo {
@@ -306,7 +310,8 @@
 
 - (void)explodeSteelBlockerTiles:(BBQComboAnimation *)combo {
     
-        NSMutableArray *adjacentTiles = [@[] mutableCopy];
+    NSMutableArray *adjacentTiles = [@[] mutableCopy];
+    if (!combo.cookieB.isInStaticTile) {
         
         if (combo.cookieB.row < NumRows - 1) {
             BBQTile *above = [self.level tileAtColumn:combo.cookieB.column row:combo.cookieB.row + 1];
@@ -330,13 +335,21 @@
         
         for (BBQTile *tile in adjacentTiles) {
             if (tile.tileType == 5) {
-                tile.tileType = 1;
                 if (!combo.steelBlockerTiles) {
                     combo.steelBlockerTiles = [@[] mutableCopy];
                 }
                 [combo.steelBlockerTiles addObject:tile];
             }
         }
+    }
+}
+
+- (void)turnSteelBlockerIntoRegularTilesForCombos:(NSArray *)combos {
+    for (BBQComboAnimation *combo in combos) {
+        for (BBQTile *tile in combo.steelBlockerTiles) {
+            tile.tileType = 1;
+        }
+    }
 }
 
 
