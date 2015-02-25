@@ -160,6 +160,10 @@ static const CGFloat TileHeight = 36.0;
     CCSprite *sprite = [CCSprite spriteWithImageNamed:directory];
     [cookieNode.cookieSprite addChild:sprite];
     cookieNode.position = [GameplayScene pointForColumn:column row:row];
+    if (cookie.cookieType == 10) {
+        cookieNode.countCircle.visible = YES;
+        cookieNode.countLabel.string = [NSString stringWithFormat:@"%ld", (long)cookie.countdown];
+    }
     [self.cookiesLayer addChild:cookieNode];
     return cookieNode;
 }
@@ -196,6 +200,11 @@ static const CGFloat TileHeight = 36.0;
     NSDictionary *animations = [self.gameLogic swipe:direction];
     [self animateSwipe:animations completion:^{
         self.userInteractionEnabled = YES;
+        
+        //check whether security guards have caused the level to be finished
+        if ([self.gameLogic isSecurityGuardAtZero]) {
+            NSLog(@"Security guard menu is triggered");
+        }
         
         //check whether the player has finished the level
         if ([self.gameLogic isLevelComplete]) {
@@ -237,8 +246,14 @@ static const CGFloat TileHeight = 36.0;
             CCActionCallBlock *updateCountCircle = [CCActionCallBlock actionWithBlock:^{
                 
                 if (combo.cookieB.isFinalCookie) {
-                    combo.cookieB.sprite.countCircle.visible = NO;
-                    combo.cookieB.sprite.tickSprite.visible = YES;
+                    [combo.cookieB.sprite removeFromParent];
+                }
+                
+                if (combo.cookieB.isRopeOrSecurityGuard) {
+                    [combo.cookieB.sprite removeFromParent];
+                    BBQTile *tileB = [self.gameLogic.level tileAtColumn:combo.cookieB.column row:combo.cookieB.row];
+                    [tileB.sprite removeFromParent];
+                    [self createSpriteForTile:tileB column:combo.cookieB.column row:combo.cookieB.row];
                 }
                 
                 //scale up and down
@@ -320,7 +335,7 @@ static const CGFloat TileHeight = 36.0;
         NSLog(@"Moves left label: %@", _movesLabel.string);
     }];
     
-    //**** CREATE SPRITES FOR NEW GOOSE EGG COOKIES AND STEEL BLOCKER TILES ****
+    //**** CREATE SPRITES FOR NEW GOOSE EGG COOKIES AND STEEL BLOCKER TILES && SECURITY GUARD COUNTDOWN UPDATE ****
     CCActionCallBlock *newSprites = [CCActionCallBlock actionWithBlock:^{
         NSArray *newCookies = animations[GOLDEN_GOOSE_COOKIES];
         for (BBQCookie *cookie in newCookies) {
@@ -332,7 +347,20 @@ static const CGFloat TileHeight = 36.0;
             [tile.sprite removeFromParent];
             [self createSpriteForTile:tile column:tile.column row:tile.row];
         }
+        
+        for (BBQCookie *guard in self.gameLogic.level.securityGuardCookies) {
+            guard.sprite.countLabel.string = [NSString stringWithFormat:@"%ld", (long)guard.countdown];
+        }
+
+        
     }];
+    
+    //**** UPDATE COUNTDOWN ON SECURITY TILES ****//
+//    CCActionCallBlock *updateSecurityGuards = [CCActionCallBlock actionWithBlock:^{
+//        for (BBQCookie *guard in self.gameLogic.level.securityGuardCookies) {
+//            guard.sprite.countLabel.string = [NSString stringWithFormat:@"%ld", (long)guard.countdown];
+//        }
+//    }];
     
 
     ////**** FINAL SEQUENCE ****

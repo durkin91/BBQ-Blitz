@@ -89,6 +89,11 @@
     NSArray *combos = animationsToPerform[COMBOS];
     [self turnSteelBlockerIntoRegularTilesForCombos:combos];
     
+    //Get rid of final cookies
+    [self removeCompletedCookies:combos];
+    
+    [self updateSecurityGuardCountdowns];
+    
     return animationsToPerform;
 }
 
@@ -231,7 +236,7 @@
 
 - (void)tryCombineCookieA:(BBQCookie *)cookieA withCookieB:(BBQCookie *)cookieB animations:(NSDictionary *)animations direction:(NSString *)direction {
     
-    if (cookieA.cookieType == cookieB.cookieType ||
+    if ((cookieA.cookieType == cookieB.cookieType && cookieA.cookieType != 11 && cookieA.cookieType != 10) ||
         (cookieA.cookieType == 10 && cookieB.cookieType == 11) ||
         (cookieA.cookieType == 11 && cookieB.cookieType == 10)) {
         
@@ -296,14 +301,21 @@
     BBQComboAnimation *combo;
     if (cookieB.isRopeOrSecurityGuard || cookieA.isRopeOrSecurityGuard) {
         combo = [[BBQComboAnimation alloc] initWithCookieA:cookieA cookieB:cookieB destinationColumn:destinationColumn destinationRow:destinationRow];
-        cookieB.isInStaticTile = YES;
         BBQTile *tileB = [self.level tileAtColumn:cookieB.column row:cookieB.row];
-        tileB.tileType = 2;
+        tileB.tileType = 9;
+        [self.level replaceCookieAtColumn:cookieB.column row:cookieB.row withCookie:nil];
+        [self.level replaceCookieAtColumn:cookieA.column row:cookieA.row withCookie:nil];
         
+        //Remove the security guard from the array
+        if (cookieB.cookieType == 10) {
+            [self.level.securityGuardCookies removeObject:cookieB];
+        }
+        else {
+            [self.level.securityGuardCookies removeObject:cookieA];
+        }
     }
     
     else {
-        cookieB.count = cookieB.count + cookieA.count;
         combo = [[BBQComboAnimation alloc] initWithCookieA:cookieA cookieB:cookieB destinationColumn:destinationColumn destinationRow:destinationRow];
         combo.cookieB.isFinalCookie = [self isFinalCookie:combo];
     }
@@ -374,6 +386,14 @@
     for (BBQComboAnimation *combo in combos) {
         for (BBQTile *tile in combo.steelBlockerTiles) {
             tile.tileType = 1;
+        }
+    }
+}
+
+- (void)removeCompletedCookies:(NSArray *)combos {
+    for (BBQComboAnimation *combo in combos) {
+        if (combo.cookieB.isFinalCookie) {
+            [self.level replaceCookieAtColumn:combo.cookieB.column row:combo.cookieB.row withCookie:nil];
         }
     }
 }
@@ -515,6 +535,22 @@
         movesLeft = YES;
     }
     return movesLeft;
+}
+
+- (void)updateSecurityGuardCountdowns {
+    for (BBQCookie *securityGuard in self.level.securityGuardCookies) {
+        securityGuard.countdown--;
+    }
+}
+
+- (BOOL)isSecurityGuardAtZero {
+    for (BBQCookie *securityGuard in self.level.securityGuardCookies) {
+        if (securityGuard.countdown <=0) {
+            return YES;
+            
+        }
+    }
+    return NO;
 }
 
 - (void)findComboChains:(NSArray *)combos {

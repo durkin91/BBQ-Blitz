@@ -26,6 +26,7 @@
 - (NSDictionary *)swipe:(NSString *)swipeDirection;
 - (BOOL)isLevelComplete;
 - (BOOL)areThereMovesLeft;
+- (BOOL)isSecurityGuardAtZero;
 
 
 @end

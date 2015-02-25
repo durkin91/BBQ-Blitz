@@ -66,6 +66,16 @@
                 }
                 else cookie.isInStaticTile = NO;
                 
+                //Set countdown on security guard
+                if (cookie.cookieType == 10) {
+                    if (!self.securityGuardCookies) {
+                        self.securityGuardCookies = [@[] mutableCopy];
+                    }
+                    
+                    cookie.countdown = self.securityGuardCountdown;
+                    [self.securityGuardCookies addObject:cookie];
+                }
+                
                 [set addObject:cookie];
             }
             
@@ -166,18 +176,10 @@
                 
                 else if ([value integerValue] == 7) {
                     _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:7 column:column row:tileRow];
-                    if (!self.securityGuardTiles) {
-                        self.securityGuardTiles = [@[] mutableCopy];
-                    }
-                    [self.securityGuardTiles addObject:[self tileAtColumn:column row:tileRow]];
                 }
                 
                 else if ([value integerValue] == 8) {
                     _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:8 column:column row:tileRow];
-                    if (!self.ropeTiles) {
-                        self.ropeTiles = [@[] mutableCopy];
-                    }
-                    [self.ropeTiles addObject:[self tileAtColumn:column row:tileRow]];
                 }
                 
             }];
@@ -185,6 +187,9 @@
         
         self.targetScore = [dictionary[@"targetScore"] unsignedIntegerValue];
         self.maximumMoves = [dictionary[@"moves"] unsignedIntegerValue];
+        if (dictionary[@"securityGuardCountdown"]) {
+            self.securityGuardCountdown = [dictionary[@"securityGuardCountdown"] unsignedIntegerValue];
+        }
     }
     return self;
 }

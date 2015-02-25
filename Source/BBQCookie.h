@@ -19,11 +19,11 @@ static const NSUInteger NumCookiesToUpgrade = 40;
 @property (assign, nonatomic) NSInteger column;
 @property (assign, nonatomic) NSInteger row;
 @property (assign, nonatomic) NSUInteger cookieType;
-@property (assign, nonatomic) NSInteger count;
 @property (strong, nonatomic) BBQCookieNode *sprite;
 @property (assign, nonatomic) BOOL isFinalCookie;
 @property (assign, nonatomic) BOOL isInStaticTile;
 @property (assign, nonatomic) BOOL isRopeOrSecurityGuard;
+@property (assign, nonatomic) NSInteger countdown;
 
 
 

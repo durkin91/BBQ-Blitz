@@ -47,6 +47,10 @@
             spriteName = @"RegularTile";
             break;
             
+        case 9:
+            spriteName = @"RopeAndGuardTile";
+            break;
+            
         default:
             break;
     }
@@ -117,6 +121,11 @@
             self.isABlocker = NO;
             self.requiresACookie = YES;
             self.staticTileCountdown = 0;
+            break;
+            
+        case 9:
+            self.isABlocker = YES;
+            self.requiresACookie = NO;
             break;
             
         default:
