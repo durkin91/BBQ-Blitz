@@ -23,6 +23,8 @@ static const CGFloat TileHeight = 36.0;
 @property (strong, nonatomic) CCNode *tilesLayer;
 @property (strong, nonatomic) CCNode *overlayTilesLayer;
 @property (strong, nonatomic) BBQGameLogic *gameLogic;
+@property (assign, nonatomic) NSInteger swipeFromColumn;
+@property (assign, nonatomic) NSInteger swipeFromRow;
 
 @end
 
@@ -32,54 +34,19 @@ static const CGFloat TileHeight = 36.0;
     CCSprite *_orderDisplayNode;
     CCSprite *_scoreboardBackground;
     BBQMenu *_menuNode;
-    NSMutableArray *_gestureRecognizers;
 }
 
 #pragma mark - Setting Up
 
 -(void)didLoadFromCCB {
-    
-    ////****GESTURE RECOGNIZERS****
-    _gestureRecognizers = [@[] mutableCopy];
-    
-    //Swipe Up
-    UISwipeGestureRecognizer *swipeUpGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeUpFrom:)];
-    swipeUpGestureRecognizer.direction = UISwipeGestureRecognizerDirectionUp;
-    [_gestureRecognizers addObject:swipeUpGestureRecognizer];
-    
-    //Swipe Down
-    UISwipeGestureRecognizer *swipeDownGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeDownFrom:)];
-    swipeDownGestureRecognizer.direction = UISwipeGestureRecognizerDirectionDown;
-    [_gestureRecognizers addObject:swipeDownGestureRecognizer];
-    
-    //Swipe Left
-    UISwipeGestureRecognizer *swipeLeftGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeLeftFrom:)];
-    swipeLeftGestureRecognizer.direction = UISwipeGestureRecognizerDirectionLeft;
-    [_gestureRecognizers addObject:swipeLeftGestureRecognizer];
-    
-    //Swipe Right
-    UISwipeGestureRecognizer *swipeRightGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeRightFrom:)];
-    swipeRightGestureRecognizer.direction = UISwipeGestureRecognizerDirectionRight;
-    [_gestureRecognizers addObject:swipeRightGestureRecognizer];
-    
-    [self addGestureRecognizers];
     _menuNode.delegate = self;
+    
+    self.swipeFromColumn = self.swipeFromRow = NSNotFound;
+    self.userInteractionEnabled = TRUE;
 
 }
 
 #pragma mark - Helper methods
-
-- (void)addGestureRecognizers {
-    for (UISwipeGestureRecognizer *gesture in _gestureRecognizers) {
-        [[UIApplication sharedApplication].delegate.window addGestureRecognizer:gesture];
-    }
-}
-
-- (void)removeGestureRecognizers {
-    for (UISwipeGestureRecognizer *gesture in _gestureRecognizers) {
-        [[UIApplication sharedApplication].delegate.window removeGestureRecognizer:gesture];
-    }
-}
 
 - (void)setupGameWithLevel:(NSInteger)level {
     
@@ -194,10 +161,80 @@ static const CGFloat TileHeight = 36.0;
     return CGPointMake(column*TileWidth + TileWidth/2, row*TileHeight + TileHeight / 2);
 }
 
+- (BOOL)convertPoint:(CGPoint)point toColumn:(NSInteger *)column row:(NSInteger *)row {
+    NSParameterAssert(column);
+    NSParameterAssert(row);
+    
+    if (point.x >= 0 && point.y < NumColumns * TileWidth &&
+        point.y >= 0 && point.y < NumRows * TileHeight) {
+        *column = point.x / TileWidth;
+        *row = point.y / TileHeight;
+        return YES;
+    }
+    
+    else {
+        *column = NSNotFound;
+        *row = NSNotFound;
+        return NO;
+    }
+}
+
+#pragma  mark - Swipe Methods
+
+- (void)touchBegan:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
+    NSLog(@"Received a touch");
+    
+    CGPoint location = [touch locationInNode:self.cookiesLayer];
+    
+    NSInteger column, row;
+    if ([self convertPoint:location toColumn:&column row:&row]) {
+        BBQTile *tile = [self.gameLogic.level tileAtColumn:column row:row];
+        if (tile.tileType != 0) {
+            self.swipeFromColumn = column;
+            self.swipeFromRow = row;
+        }
+    }
+}
+
+- (void)touchMoved:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
+    if (self.swipeFromColumn == NSNotFound) return;
+    
+    CGPoint location = [touch locationInNode:self.cookiesLayer];
+    
+    NSInteger column, row;
+    if ([self convertPoint:location toColumn:&column row:&row]) {
+        
+        NSString *swipeDirection;
+        if (column < self.swipeFromColumn) {
+            swipeDirection = @"Left";
+        }
+        else if (column > self.swipeFromColumn) {
+            swipeDirection = @"Right";
+        }
+        else if (row < self.swipeFromRow) {
+            swipeDirection = @"Down";
+        }
+        else if (row > self.swipeFromRow) {
+            swipeDirection = @"Up";
+        }
+        
+        [self swipeDirection:swipeDirection];
+        self.swipeFromColumn = NSNotFound;
+    }
+}
+
+- (void)touchEnded:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
+    self.swipeFromColumn = self.swipeFromRow = NSNotFound;
+}
+
+- (void)touchCancelled:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
+    [self touchEnded:touch withEvent:event];
+}
+
 - (void)swipeDirection:(NSString *)direction {
     NSLog(@"Swipe %@", direction);
     self.userInteractionEnabled = NO;
-    NSDictionary *animations = [self.gameLogic swipe:direction];
+    NSDictionary *animations = [self.gameLogic swipe:direction column:self.swipeFromColumn row:self.swipeFromRow];
     [self animateSwipe:animations completion:^{
         self.userInteractionEnabled = YES;
         
@@ -208,14 +245,12 @@ static const CGFloat TileHeight = 36.0;
         
         //check whether the player has finished the level
         if ([self.gameLogic isLevelComplete]) {
-            [self removeGestureRecognizers];
             [_menuNode displayMenuFor:LEVEL_COMPLETE];
             
         }
         
         //check whether player has run out of moves
         else if (![self.gameLogic areThereMovesLeft]) {
-            [self removeGestureRecognizers];
             [_menuNode displayMenuFor:NO_MORE_MOVES];
         }
 

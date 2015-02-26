@@ -39,7 +39,6 @@
 
     
     [BBQAnimations animateMenuWithBackground:_background popover:popover];
-    [self.delegate removeGestureRecognizers];
     
 }
 
@@ -48,7 +47,6 @@
     
     if (wantsFadeOut) {
         [BBQAnimations dismissMenuWithBackground:_background popover:popover];
-        [self.delegate addGestureRecognizers];
     }
     else [BBQAnimations dismissMenuWithoutTouchingBackground:_background popover:popover];
 }
