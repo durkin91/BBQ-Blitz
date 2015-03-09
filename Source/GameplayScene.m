@@ -42,7 +42,8 @@ static const CGFloat TileHeight = 36.0;
     _menuNode.delegate = self;
     
     self.swipeFromColumn = self.swipeFromRow = NSNotFound;
-    self.userInteractionEnabled = TRUE;
+    self.userInteractionEnabled = YES;
+    
 
 }
 
@@ -56,9 +57,15 @@ static const CGFloat TileHeight = 36.0;
     NSSet *cookies = [self.gameLogic setupGameLogicWithLevel:level];
     _movesLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.movesLeft];
     _scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.currentScore];
+    NSLog(@"Interaction enabled from setup game: %hhd", self.userInteractionEnabled);
+    
     [self addSpritesForCookies:cookies];
+    NSLog(@"Interaction enabled from setup game: %hhd", self.userInteractionEnabled);
     [self addTiles];
+    NSLog(@"Interaction enabled from setup game: %hhd", self.userInteractionEnabled);
     [_menuNode displayMenuFor:START_LEVEL];
+    NSLog(@"Interaction enabled from setup game: %hhd", self.userInteractionEnabled);
+    
 }
 
 - (void)replayGame {
@@ -177,6 +184,11 @@ static const CGFloat TileHeight = 36.0;
         *row = NSNotFound;
         return NO;
     }
+}
+
+- (void)enableInteraction {
+    self.userInteractionEnabled = TRUE;
+    NSLog(@"User interaction enabled: %hhd", self.userInteractionEnabled);
 }
 
 #pragma  mark - Swipe Methods
@@ -402,27 +414,6 @@ static const CGFloat TileHeight = 36.0;
     CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, updateScoreBlock, newSprites, [CCActionCallBlock actionWithBlock:completion], nil];
     [_cookiesLayer runAction:finalSequence];
 }
-
-
-
-#pragma mark - Gesture Recognizers
-
-- (void)handleSwipeUpFrom:(UIGestureRecognizer *)recognizer {
-    [self swipeDirection:@"Up"];
-}
-
-- (void)handleSwipeDownFrom:(UIGestureRecognizer *)recognizer {
-    [self swipeDirection:@"Down"];
-}
-
-- (void)handleSwipeLeftFrom:(UIGestureRecognizer *)recognizer {
-    [self swipeDirection:@"Left"];
-}
-
-- (void)handleSwipeRightFrom:(UIGestureRecognizer *)recognizer {
-    [self swipeDirection:@"Right"];
-}
-
 
 #pragma mark - Popover methods
 

@@ -24,6 +24,7 @@
 - (void)replayGame;
 - (void)startNextLevel;
 - (void)progressToNextMaxLevel;
+- (void)enableInteraction;
 
 @end
 
