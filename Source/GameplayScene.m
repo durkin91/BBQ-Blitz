@@ -44,6 +44,8 @@ static const CGFloat TileHeight = 36.0;
     self.swipeFromColumn = self.swipeFromRow = NSNotFound;
     self.userInteractionEnabled = YES;
     
+    [self setupGameWithLevel:1];
+    
 
 }
 
@@ -61,12 +63,15 @@ static const CGFloat TileHeight = 36.0;
     
     [self addSpritesForCookies:cookies];
     NSLog(@"Interaction enabled from setup game: %hhd", self.userInteractionEnabled);
+    
     [self addTiles];
     NSLog(@"Interaction enabled from setup game: %hhd", self.userInteractionEnabled);
+    
     [_menuNode displayMenuFor:START_LEVEL];
     NSLog(@"Interaction enabled from setup game: %hhd", self.userInteractionEnabled);
     
 }
+
 
 - (void)replayGame {
     [self clearOutAllCookiesAndTiles];
@@ -230,7 +235,10 @@ static const CGFloat TileHeight = 36.0;
             swipeDirection = @"Up";
         }
         
-        [self swipeDirection:swipeDirection];
+        NSLog(@"Swipe direction: %@", swipeDirection);
+        if (swipeDirection) {
+            [self swipeDirection:swipeDirection];
+        }
         self.swipeFromColumn = NSNotFound;
     }
 }
