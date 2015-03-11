@@ -25,6 +25,7 @@ static const CGFloat TileHeight = 36.0;
 @property (strong, nonatomic) BBQGameLogic *gameLogic;
 @property (assign, nonatomic) NSInteger swipeFromColumn;
 @property (assign, nonatomic) NSInteger swipeFromRow;
+@property (assign, nonatomic) CGPoint swipeFromLocation;
 
 @end
 
@@ -44,8 +45,6 @@ static const CGFloat TileHeight = 36.0;
     self.swipeFromColumn = self.swipeFromRow = NSNotFound;
     self.userInteractionEnabled = YES;
     
-    [self setupGameWithLevel:1];
-    
 
 }
 
@@ -59,17 +58,10 @@ static const CGFloat TileHeight = 36.0;
     NSSet *cookies = [self.gameLogic setupGameLogicWithLevel:level];
     _movesLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.movesLeft];
     _scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.currentScore];
-    NSLog(@"Interaction enabled from setup game: %hhd", self.userInteractionEnabled);
     
     [self addSpritesForCookies:cookies];
-    NSLog(@"Interaction enabled from setup game: %hhd", self.userInteractionEnabled);
-    
     [self addTiles];
-    NSLog(@"Interaction enabled from setup game: %hhd", self.userInteractionEnabled);
-    
     [_menuNode displayMenuFor:START_LEVEL];
-    NSLog(@"Interaction enabled from setup game: %hhd", self.userInteractionEnabled);
-    
 }
 
 
@@ -92,7 +84,6 @@ static const CGFloat TileHeight = 36.0;
 }
 
 - (void)clearOutAllCookiesAndTiles {
-    //Clear out all of the existing cookies and tiles
     NSMutableArray *cookies = [_cookiesLayer.children mutableCopy];
     for (CCSprite *sprite in cookies) {
         [sprite removeFromParent];
@@ -177,7 +168,7 @@ static const CGFloat TileHeight = 36.0;
     NSParameterAssert(column);
     NSParameterAssert(row);
     
-    if (point.x >= 0 && point.y < NumColumns * TileWidth &&
+    if (point.x >= 0 && point.x < NumColumns * TileWidth &&
         point.y >= 0 && point.y < NumRows * TileHeight) {
         *column = point.x / TileWidth;
         *row = point.y / TileHeight;
@@ -199,7 +190,6 @@ static const CGFloat TileHeight = 36.0;
 #pragma  mark - Swipe Methods
 
 - (void)touchBegan:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
-    NSLog(@"Received a touch");
     
     CGPoint location = [touch locationInNode:self.cookiesLayer];
     
@@ -209,6 +199,7 @@ static const CGFloat TileHeight = 36.0;
         if (tile.tileType != 0) {
             self.swipeFromColumn = column;
             self.swipeFromRow = row;
+            self.swipeFromLocation = location;
         }
     }
 }
@@ -222,16 +213,16 @@ static const CGFloat TileHeight = 36.0;
     if ([self convertPoint:location toColumn:&column row:&row]) {
         
         NSString *swipeDirection;
-        if (column < self.swipeFromColumn) {
+        if (location.x < self.swipeFromLocation.x) {
             swipeDirection = @"Left";
         }
-        else if (column > self.swipeFromColumn) {
+        else if (location.x > self.swipeFromLocation.x) {
             swipeDirection = @"Right";
         }
-        else if (row < self.swipeFromRow) {
+        else if (location.y < self.swipeFromLocation.y) {
             swipeDirection = @"Down";
         }
-        else if (row > self.swipeFromRow) {
+        else if (location.y > self.swipeFromLocation.y) {
             swipeDirection = @"Up";
         }
         
@@ -245,6 +236,7 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)touchEnded:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
     self.swipeFromColumn = self.swipeFromRow = NSNotFound;
+    self.swipeFromLocation = CGPointMake(0, 0);
 }
 
 - (void)touchCancelled:(CCTouch *)touch withEvent:(CCTouchEvent *)event {

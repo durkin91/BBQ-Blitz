@@ -25,10 +25,9 @@
     
     CCScene *scene = [CCBReader loadAsScene:@"Gameplay"];
     GameplayScene *gamePlay = (GameplayScene *)[scene.children objectAtIndex:0];
-//    [gamePlay setupGameWithLevel:self.level];
-//    [[CCDirector sharedDirector] replaceScene:(CCScene *)gamePlay];
-    
+    [gamePlay setupGameWithLevel:self.level];
     [[CCDirector sharedDirector] replaceScene:scene];
+    
 }
 
 @end
