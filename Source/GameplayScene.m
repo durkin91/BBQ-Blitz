@@ -345,6 +345,13 @@ static const CGFloat TileHeight = 36.0;
                     }
                 }
                 
+                //Take care of powerups
+                if (combo.powerup) {
+                    for (BBQCookie *cookie in combo.powerup.disappearingCookies) {
+                        [cookie.sprite removeFromParent];
+                    }
+                }
+                
                 //Take care of steel blocker tiles
                 for (BBQTile *tile in combo.steelBlockerTiles) {
                     CCParticleSystem *explosion = (CCParticleSystem *)[CCBReader load:@"SteelBlockersEffect"];

@@ -23,27 +23,23 @@
     
     switch (self.cookieType) {
         case 1:
-            spriteName = @"Croissant";
+            spriteName = @"blue";
             break;
             
         case 2:
-            spriteName = @"Cupcake";
+            spriteName = @"green";
             break;
             
         case 3:
-            spriteName = @"Danish";
+            spriteName = @"yellow";
             break;
             
         case 4:
-            spriteName = @"Donut";
+            spriteName = @"red";
             break;
             
         case 5:
-            spriteName = @"Macaroon";
-            break;
-            
-        case 6:
-            spriteName = @"SugarCookie";
+            spriteName = @"purple";
             break;
             
         case 10:

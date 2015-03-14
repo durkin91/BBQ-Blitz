@@ -11,6 +11,7 @@
 
 #define COMBOS @"Combos"
 #define MOVEMENTS @"Movements"
+#define POWERUPS @"Powerups"
 #define GOLDEN_GOOSE_COOKIES @"Golden Goose Cookies"
 #define NEW_STEEL_BLOCKER_TILES @"New Steel Blocker Tiles"
 

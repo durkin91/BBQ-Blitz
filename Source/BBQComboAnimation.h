@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "BBQCookie.h"
+#import "BBQPowerup.h"
 
 #define SAME_TYPE_UPGRADE @"Same"
 #define DIFFERENT_TYPE_UPGRADE @"Different"
@@ -22,6 +23,7 @@ static const NSInteger startingScoreForCombo = 400;
 @property (assign, nonatomic) NSInteger destinationRow;
 @property (assign, nonatomic) NSInteger score;
 @property (assign, nonatomic) NSInteger numberOfCookiesInCombo;
+@property (strong, nonatomic) BBQPowerup *powerup;
 @property (nonatomic) BOOL didBreakOutOfStaticTile;
 @property (strong, nonatomic) NSMutableArray *steelBlockerTiles;
 
