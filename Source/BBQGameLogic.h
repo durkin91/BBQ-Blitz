@@ -11,6 +11,7 @@
 
 #define COMBOS @"Combos"
 #define MOVEMENTS @"Movements"
+#define POWERUPS @"Powerups"
 #define GOLDEN_GOOSE_COOKIES @"Golden Goose Cookies"
 #define NEW_STEEL_BLOCKER_TILES @"New Steel Blocker Tiles"
 
@@ -23,7 +24,7 @@
 
 
 - (NSSet *)setupGameLogicWithLevel:(NSInteger)level;
-- (NSDictionary *)swipe:(NSString *)swipeDirection;
+- (NSDictionary *)swipe:(NSString *)swipeDirection column:(NSInteger)columnToSwipe row:(NSInteger)rowToSwipe;
 - (BOOL)isLevelComplete;
 - (BOOL)areThereMovesLeft;
 - (BOOL)isSecurityGuardAtZero;

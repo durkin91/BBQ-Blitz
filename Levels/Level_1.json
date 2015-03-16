@@ -10,6 +10,6 @@
               [1, 1, 1, 1, 1, 1, 1, 1, 0 ] ],
 
     "targetScore" : 1000,
-    "moves" : 50,
+    "moves" : 80,
     "securityGuardCountdown" : 10,
 }

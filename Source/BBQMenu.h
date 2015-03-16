@@ -21,11 +21,10 @@
 
 @protocol BBQMenuDelegate <NSObject>
 
-- (void)addGestureRecognizers;
-- (void)removeGestureRecognizers;
 - (void)replayGame;
 - (void)startNextLevel;
 - (void)progressToNextMaxLevel;
+- (void)enableInteraction;
 
 @end
 

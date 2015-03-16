@@ -25,7 +25,7 @@
 
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"%@ combine cookieA: %@ with cookieB: %@", [super description], self.cookieA, self.cookieB];
+    return [NSString stringWithFormat:@"%@ combine cookieA: %@ with cookieB: %@ number in combo: %ld", [super description], self.cookieA, self.cookieB, (long)self.numberOfCookiesInCombo];
 }
 
 - (void)setNumberOfCookiesInCombo:(NSInteger)numberOfCookiesInCombo {

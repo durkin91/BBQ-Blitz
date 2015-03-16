@@ -24,6 +24,8 @@
     _levelCompletePopover.delegate = self;
     _noMoreMovesPopover.delegate = self;
     _replayPopover.delegate = self;
+    
+    NSLog(@"Interaction enabled on menu: %hhd", self.userInteractionEnabled);
 }
 
 
@@ -39,7 +41,6 @@
 
     
     [BBQAnimations animateMenuWithBackground:_background popover:popover];
-    [self.delegate removeGestureRecognizers];
     
 }
 
@@ -48,9 +49,11 @@
     
     if (wantsFadeOut) {
         [BBQAnimations dismissMenuWithBackground:_background popover:popover];
-        [self.delegate addGestureRecognizers];
     }
-    else [BBQAnimations dismissMenuWithoutTouchingBackground:_background popover:popover];
+    else {
+       [BBQAnimations dismissMenuWithoutTouchingBackground:_background popover:popover];
+    }
+    [self.delegate enableInteraction];
 }
 
 - (void)dismissMenu:(NSString *)menu1 andShowMenu:(NSString *)menu2 {
