@@ -288,6 +288,10 @@
                 [self combineCookieA:localCookieA withcookieB:localCookieB destinationColumn:cookieB.column destinationRow:cookieB.row animations:animations];
             }
         }
+        
+        //Remove the root cookie
+        BBQCookie *rootCookie = [cookiesInChain objectAtIndex:0];
+        [self.level replaceCookieAtColumn:rootCookie.column row:rootCookie.row withCookie:nil];
     }
     
 }

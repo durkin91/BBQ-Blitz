@@ -289,6 +289,10 @@ static const CGFloat TileHeight = 36.0;
             
             CCActionMoveTo *moveA = [CCActionMoveTo actionWithDuration:duration position:[GameplayScene pointForColumn:combo.destinationColumn row:combo.destinationRow]];
             CCActionRemove *removeA = [CCActionRemove action];
+            CCActionCallBlock *removeB = [CCActionCallBlock actionWithBlock:^{
+                CCActionRemove *remove = [CCActionRemove action];
+                [combo.cookieB.sprite runAction:remove];
+            }];
             
             CCActionCallBlock *updateCountCircle = [CCActionCallBlock actionWithBlock:^{
                 
@@ -365,7 +369,7 @@ static const CGFloat TileHeight = 36.0;
 
             }];
             
-            CCActionSequence *sequenceA = [CCActionSequence actions:moveA, removeA, updateCountCircle, nil];
+            CCActionSequence *sequenceA = [CCActionSequence actions:moveA, removeA, removeB, updateCountCircle, nil];
             [combo.cookieA.sprite runAction:sequenceA];
             
         }
