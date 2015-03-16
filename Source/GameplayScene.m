@@ -290,8 +290,11 @@ static const CGFloat TileHeight = 36.0;
             CCActionMoveTo *moveA = [CCActionMoveTo actionWithDuration:duration position:[GameplayScene pointForColumn:combo.destinationColumn row:combo.destinationRow]];
             CCActionRemove *removeA = [CCActionRemove action];
             CCActionCallBlock *removeB = [CCActionCallBlock actionWithBlock:^{
-                CCActionRemove *remove = [CCActionRemove action];
-                [combo.cookieB.sprite runAction:remove];
+                if (combo.isRootCombo) {
+                    CCActionRemove *remove = [CCActionRemove action];
+                    [combo.cookieB.sprite runAction:remove];
+                }
+
             }];
             
             CCActionCallBlock *updateCountCircle = [CCActionCallBlock actionWithBlock:^{
@@ -383,6 +386,16 @@ static const CGFloat TileHeight = 36.0;
         
     }];
     
+    //**** DROP EXISTING COOKIES ****
+    CCActionCallBlock *dropExistingCookies = [CCActionCallBlock actionWithBlock:^{
+        NSArray *dropMovements = animations[DROP_MOVEMENTS];
+        for (BBQMoveCookie *movement in dropMovements) {
+            CGPoint position = [GameplayScene pointForColumn:movement.destinationColumn row:movement.destinationRow];
+            CCActionMoveTo *moveAnimation = [CCActionMoveTo actionWithDuration:duration position:position];
+            [movement.cookieA.sprite runAction:moveAnimation];
+        }
+    }];
+    
     
     //**** UPDATE SCORE & MOVES ****
     CCActionCallBlock *updateScoreBlock = [CCActionCallBlock actionWithBlock:^{
@@ -422,7 +435,7 @@ static const CGFloat TileHeight = 36.0;
     
 
     ////**** FINAL SEQUENCE ****
-    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, updateScoreBlock, newSprites, [CCActionCallBlock actionWithBlock:completion], nil];
+    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, dropExistingCookies, updateScoreBlock, newSprites, [CCActionCallBlock actionWithBlock:completion], nil];
     [_cookiesLayer runAction:finalSequence];
 }
 

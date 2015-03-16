@@ -26,6 +26,7 @@ static const NSInteger startingScoreForCombo = 400;
 @property (strong, nonatomic) BBQPowerup *powerup;
 @property (nonatomic) BOOL didBreakOutOfStaticTile;
 @property (strong, nonatomic) NSMutableArray *steelBlockerTiles;
+@property (nonatomic) BOOL isRootCombo;
 
 - (instancetype)initWithCookieA:(BBQCookie *)cookieA cookieB:(BBQCookie *)cookieB destinationColumn:(NSInteger)destinationColumn destinationRow:(NSInteger)destinationRow;
 
