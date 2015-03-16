@@ -94,7 +94,7 @@
 
 - (void)destroyOneCookieVertically {
     NSInteger rootRow = self.rootCookie.row;
-    if (rootRow < NumRows - 2) {
+    if (rootRow < NumRows - 1) {
         [self destroyCookieAtColumn:self.rootCookie.column row:rootRow + 1];
     }
     if (rootRow >= 1) {
@@ -104,7 +104,7 @@
 
 - (void)destroyOneCookieHorizontally {
     NSInteger rootColumn = self.rootCookie.column;
-    if (rootColumn < NumColumns - 2) {
+    if (rootColumn < NumColumns - 1) {
         [self destroyCookieAtColumn:rootColumn + 1 row:self.rootCookie.row];
     }
     if (rootColumn >= 1) {
