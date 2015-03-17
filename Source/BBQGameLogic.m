@@ -242,7 +242,7 @@
         for (NSInteger row = 0; row <= NumRows - 2; row ++) {
             BBQTile *tile = [self.level tileAtColumn:column row:row];
             BBQCookie *cookie = [self.level cookieAtColumn:column row:row];
-            if (tile.tileType != 0 && cookie != nil) {
+            if (tile.tileType != 0 && cookie == nil) {
                 //Find the next cookie above it
                 BBQCookie *cookieAbove = [self.level cookieAtColumn:column row:row + 1];
                 NSInteger x = 2;
@@ -252,7 +252,7 @@
                 }
                 
                 //Put this cookie into its new spot
-                [self.level replaceCookieAtColumn:column row:row + x withCookie:nil];
+                [self.level replaceCookieAtColumn:column row:row + x - 1 withCookie:nil];
                 [self.level replaceCookieAtColumn:column row:row withCookie:cookieAbove];
                 
                 //Create the cookie movements

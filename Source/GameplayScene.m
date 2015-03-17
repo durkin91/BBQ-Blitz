@@ -386,6 +386,9 @@ static const CGFloat TileHeight = 36.0;
         
     }];
     
+    //**** DELAY ****
+    CCActionDelay *delay = [CCActionDelay actionWithDuration:duration + 0.01];
+    
     //**** DROP EXISTING COOKIES ****
     CCActionCallBlock *dropExistingCookies = [CCActionCallBlock actionWithBlock:^{
         NSArray *dropMovements = animations[DROP_MOVEMENTS];
@@ -435,7 +438,7 @@ static const CGFloat TileHeight = 36.0;
     
 
     ////**** FINAL SEQUENCE ****
-    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, dropExistingCookies, updateScoreBlock, newSprites, [CCActionCallBlock actionWithBlock:completion], nil];
+    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, delay, dropExistingCookies, updateScoreBlock, newSprites, [CCActionCallBlock actionWithBlock:completion], nil];
     [_cookiesLayer runAction:finalSequence];
 }
 
