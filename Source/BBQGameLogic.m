@@ -60,6 +60,7 @@
     NSDictionary *animationsToPerform = @{
                                           COMBOS : [@[] mutableCopy],
                                           MOVEMENTS : [@[] mutableCopy],
+                                          MOVEMENTS_BATCH_2 : [@[] mutableCopy],
                                           DROP_MOVEMENTS : [@[] mutableCopy],
                                           POWERUPS : [@[] mutableCopy],
                                           GOLDEN_GOOSE_COOKIES : [@[] mutableCopy],
@@ -70,6 +71,11 @@
     self.movesLeft = self.movesLeft - 1;
     [self findComboChains:animationsToPerform[COMBOS] swipeDirection:swipeDirection];
     [self scoreTheCombos:animationsToPerform[COMBOS]];
+    
+    //Move over the rest of the cookies
+    NSMutableArray *movementsTwo = animationsToPerform[MOVEMENTS_BATCH_2];
+    [movementsTwo addObjectsFromArray:[self batchTwoMovementsInDirection:swipeDirection column:columnToSwipe row:rowToSwipe]];
+    
     
     //Drop existing cookies
     NSMutableArray *dropMovements = animationsToPerform[DROP_MOVEMENTS];
@@ -131,7 +137,7 @@
         
         //Now create the cookie movements for the sprites to match where the cookies are located in the model
         for (int row = NumRows - 1; row > 0; row--) {
-            [self createCookieMovements:animationsToPerform column:column row:row];
+            [self createCookieMovements:animationsToPerform[MOVEMENTS] column:column row:row];
         }
     }
     
@@ -161,7 +167,7 @@
         
         //Now create the cookie movements for the sprites to match where the cookies are located in the model
         for (int row = 0; row < NumRows - 1; row++) {
-            [self createCookieMovements:animationsToPerform column:column row:row];
+            [self createCookieMovements:animationsToPerform[MOVEMENTS] column:column row:row];
         }
     }
     
@@ -191,7 +197,7 @@
         
         //Now create the cookie movements for the sprites to match where the cookies are located in the model
         for (int column = 0; column < NumColumns - 1; column ++) {
-            [self createCookieMovements:animationsToPerform column:column row:row];
+            [self createCookieMovements:animationsToPerform[MOVEMENTS] column:column row:row];
         }
         
     }
@@ -222,16 +228,97 @@
         
         //Now create the cookie movements for the sprites to match where the cookies are located in the model
         for (int column = NumColumns - 1; column > 0; column--) {
-            [self createCookieMovements:animationsToPerform column:column row:row];
+            [self createCookieMovements:animationsToPerform[MOVEMENTS] column:column row:row];
         }
     }
 }
 
-- (void)createCookieMovements:(NSDictionary *)animationsToPerform column:(NSInteger)column row:(NSInteger)row {
+- (void)createCookieMovements:(NSMutableArray *)array column:(NSInteger)column row:(NSInteger)row {
     BBQCookie *cookie = [self.level cookieAtColumn:column row:row];
     if (cookie != nil) {
         BBQMoveCookie *movement = [[BBQMoveCookie alloc] initWithCookieA:cookie destinationColumn:cookie.column destinationRow:cookie.row];
-        [animationsToPerform[MOVEMENTS] addObject:movement];
+        [array addObject:movement];
+    }
+}
+
+- (NSMutableArray *)batchTwoMovementsInDirection:(NSString *)swipeDirection column:(NSInteger)columnToSwipe row:(NSInteger)rowToSwipe {
+    NSMutableArray *batchTwoMovements = [@[] mutableCopy];
+    
+    //UP swipe
+    if ([swipeDirection isEqualToString:@"Up"]) {
+        NSInteger column = columnToSwipe;
+        for (int row = NumRows - 1; row > 0; row--) {
+            BBQTile *tile = [self.level tileAtColumn:column row:row];
+            if (tile.requiresACookie) {
+                BBQCookie *cookie = [self.level cookieAtColumn:column row:row];
+                if (cookie == nil) {
+                    [self moveASingleCookieInDirection:swipeDirection toColumn:column row:row + 1];
+                }
+            }
+            
+            [self createCookieMovements:batchTwoMovements column:column row:row];
+        }
+    }
+    
+    //DOWN swipe
+    if ([swipeDirection isEqualToString:@"Down"]) {
+        NSInteger column = columnToSwipe;
+        for (int row = 0; row < NumRows - 1; row++) {
+            BBQTile *tile = [self.level tileAtColumn:column row:row];
+            if (tile.requiresACookie) {
+                BBQCookie *cookie = [self.level cookieAtColumn:column row:row];
+                if (cookie == nil) {
+                    [self moveASingleCookieInDirection:swipeDirection toColumn:column row:row - 1];
+                }
+            }
+            
+            [self createCookieMovements:batchTwoMovements column:column row:row];
+        }
+    }
+    
+    //LEFT swipe
+    if ([swipeDirection isEqualToString:@"Left"]) {
+        NSInteger row = rowToSwipe;
+        for (int column = 0; column < NumColumns - 1; column++) {
+            BBQTile *tile = [self.level tileAtColumn:column row:row];
+            if (tile.requiresACookie) {
+                BBQCookie *cookie = [self.level cookieAtColumn:column row:row];
+                if (cookie == nil) {
+                    [self moveASingleCookieInDirection:swipeDirection toColumn:column - 1 row:row];
+                }
+            }
+            [self createCookieMovements:batchTwoMovements column:column row:row];
+        }
+    }
+    
+    //RIGHT swipe
+    if ([swipeDirection isEqualToString:@"Right"]) {
+        NSInteger row = rowToSwipe;
+        for (int column = NumColumns - 1; column > 0; column--) {
+            BBQTile *tile = [self.level tileAtColumn:column row:row];
+            if (tile.requiresACookie) {
+                BBQCookie *cookie = [self.level cookieAtColumn:column row:row];
+                if (cookie == nil) {
+                    [self moveASingleCookieInDirection:swipeDirection toColumn:column + 1 row:row];
+                }
+            }
+            
+            [self createCookieMovements:batchTwoMovements column:column row:row];
+        }
+        
+    }
+    
+    return batchTwoMovements;
+
+}
+
+- (void)checkForMovementsColumn:(NSInteger)column row:(NSInteger)row swipeDirection:(NSString *)swipeDirection {
+    BBQTile *tile = [self.level tileAtColumn:column row:row];
+    if (tile.requiresACookie) {
+        BBQCookie *cookie = [self.level cookieAtColumn:column row:row];
+        if (cookie == nil) {
+            [self moveASingleCookieInDirection:swipeDirection toColumn:column row:row];
+        }
     }
 }
 

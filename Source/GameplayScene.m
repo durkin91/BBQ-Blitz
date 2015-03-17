@@ -387,7 +387,20 @@ static const CGFloat TileHeight = 36.0;
     }];
     
     //**** DELAY ****
-    CCActionDelay *delay = [CCActionDelay actionWithDuration:duration + 0.3];
+    CCActionDelay *delayOne = [CCActionDelay actionWithDuration:duration + 0.3];
+    
+    //**** MOVEMENT BATCH TWO ****
+    CCActionCallBlock *movementsBatchTwo = [CCActionCallBlock actionWithBlock:^{
+        NSArray *movements = animations[MOVEMENTS_BATCH_2];
+        for (BBQMoveCookie *movement in movements) {
+            CGPoint position = [GameplayScene pointForColumn:movement.destinationColumn row:movement.destinationRow];
+            CCActionMoveTo *moveAnimation = [CCActionMoveTo actionWithDuration:duration position:position];
+            [movement.cookieA.sprite runAction:moveAnimation];
+        }
+    }];
+    
+    //**** DELAY ****
+    CCActionDelay *delayTwo = [CCActionDelay actionWithDuration:duration + 0.3];
     
     //**** DROP EXISTING COOKIES ****
     CCActionCallBlock *dropExistingCookies = [CCActionCallBlock actionWithBlock:^{
@@ -438,7 +451,7 @@ static const CGFloat TileHeight = 36.0;
     
 
     ////**** FINAL SEQUENCE ****
-    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, delay, dropExistingCookies, updateScoreBlock, newSprites, [CCActionCallBlock actionWithBlock:completion], nil];
+    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, delayOne, movementsBatchTwo, delayTwo, dropExistingCookies, updateScoreBlock, newSprites, [CCActionCallBlock actionWithBlock:completion], nil];
     [_cookiesLayer runAction:finalSequence];
 }
 

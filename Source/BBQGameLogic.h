@@ -11,6 +11,7 @@
 
 #define COMBOS @"Combos"
 #define MOVEMENTS @"Movements"
+#define MOVEMENTS_BATCH_2 @"Movements Batch 2"
 #define DROP_MOVEMENTS @"Drop Movements"
 #define POWERUPS @"Powerups"
 #define GOLDEN_GOOSE_COOKIES @"Golden Goose Cookies"
