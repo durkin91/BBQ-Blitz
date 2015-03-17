@@ -387,7 +387,7 @@ static const CGFloat TileHeight = 36.0;
     }];
     
     //**** DELAY ****
-    CCActionDelay *delay = [CCActionDelay actionWithDuration:duration + 0.01];
+    CCActionDelay *delay = [CCActionDelay actionWithDuration:duration + 0.3];
     
     //**** DROP EXISTING COOKIES ****
     CCActionCallBlock *dropExistingCookies = [CCActionCallBlock actionWithBlock:^{
