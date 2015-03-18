@@ -9,7 +9,6 @@
 #import "BBQLevelCompleteNode.h"
 #import "BBQAnimations.h"
 #import "WorldsScene.h"
-#import "BBQCookieNode.h"
 #import "BBQLaserTileNode.h"
 
 
@@ -19,8 +18,8 @@ static const CGFloat TileHeight = 36.0;
 @interface GameplayScene ()
 
 @property (strong, nonatomic) CCNode *gameLayer;
-@property (strong, nonatomic) CCNode *cookiesLayer;
 @property (strong, nonatomic) CCNode *tilesLayer;
+@property (strong, nonatomic) CCNode *cookiesLayer;
 @property (strong, nonatomic) CCNode *overlayTilesLayer;
 @property (strong, nonatomic) BBQGameLogic *gameLogic;
 @property (assign, nonatomic) NSInteger swipeFromColumn;
@@ -250,24 +249,27 @@ static const CGFloat TileHeight = 36.0;
     [self animateSwipe:animations completion:^{
         NSArray *columns = [self.gameLogic.level fillHoles];
         [BBQAnimations animateFallingCookies:columns tileHeight:TileHeight gameplayScene:self completion:^{
-            self.userInteractionEnabled = YES;
-            
-            //check whether security guards have caused the level to be finished
-            if ([self.gameLogic isSecurityGuardAtZero]) {
-                NSLog(@"Security guard menu is triggered");
-            }
-            
-            //check whether the player has finished the level
-            if ([self.gameLogic isLevelComplete]) {
-                [_menuNode displayMenuFor:LEVEL_COMPLETE];
+            NSArray *columns = [self.gameLogic.level topUpCookies];
+            [self animateNewCookies:columns completion:^{
+                self.userInteractionEnabled = YES;
                 
-            }
-            
-            //check whether player has run out of moves
-            else if (![self.gameLogic areThereMovesLeft]) {
-                [_menuNode displayMenuFor:NO_MORE_MOVES];
-            }
+                //check whether security guards have caused the level to be finished
+                if ([self.gameLogic isSecurityGuardAtZero]) {
+                    NSLog(@"Security guard menu is triggered");
+                }
+                
+                //check whether the player has finished the level
+                if ([self.gameLogic isLevelComplete]) {
+                    [_menuNode displayMenuFor:LEVEL_COMPLETE];
+                    
+                }
+                
+                //check whether player has run out of moves
+                else if (![self.gameLogic areThereMovesLeft]) {
+                    [_menuNode displayMenuFor:NO_MORE_MOVES];
+                }
 
+            }];
         }];
     }];
     
@@ -457,6 +459,38 @@ static const CGFloat TileHeight = 36.0;
     CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, delayOne, movementsBatchTwo, delayTwo, dropExistingCookies, updateScoreBlock, newSprites, [CCActionCallBlock actionWithBlock:completion], nil];
     [_cookiesLayer runAction:finalSequence];
 }
+
+- (void)animateNewCookies:(NSArray *)columns completion:(dispatch_block_t)completion {
+    __block NSTimeInterval longestDuration = 0;
+    
+    for (NSArray *array in columns) {
+        NSInteger startRow = ((BBQCookie *)[array firstObject]).row + 1;
+        
+        [array enumerateObjectsUsingBlock:^(BBQCookie *cookie, NSUInteger idx, BOOL *stop) {
+            BBQCookieNode *sprite = [self createCookieNodeForCookie:cookie column:cookie.column row:startRow];
+            cookie.sprite = sprite;
+            
+            NSTimeInterval delay = 0.1 + 0.2*([array count] - idx - 1);
+            
+            NSTimeInterval duration = (startRow - cookie.row) * 0.1;
+            longestDuration = MAX(longestDuration, duration + delay);
+            
+            CGPoint newPosition = [GameplayScene pointForColumn:cookie.column row:cookie.row];
+            CCActionMoveTo *moveAction = [CCActionMoveTo actionWithDuration:duration position:newPosition];
+            cookie.sprite.opacity = 0;
+            [cookie.sprite runAction:[CCActionSequence actions:[CCActionDelay actionWithDuration:delay],
+                [CCActionSpawn actions:[CCActionFadeIn actionWithDuration:0.05], moveAction, nil],
+                nil]];
+        }];
+    }
+    
+    [self runAction:[CCActionSequence actions:
+        [CCActionDelay actionWithDuration:longestDuration],
+        [CCActionCallBlock actionWithBlock:completion], nil]];
+}
+
+
+
 
 #pragma mark - Popover methods
 

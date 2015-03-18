@@ -130,6 +130,35 @@
     return columns;
 }
 
+- (NSArray *)topUpCookies {
+    NSMutableArray *columns = [NSMutableArray array];
+    NSUInteger cookieType = 0;
+    
+    for (NSInteger column = 0; column < NumColumns; column++) {
+        NSMutableArray *array;
+        for (NSInteger row = NumRows - 1; row >= 0 && _cookies[column][row] == nil; row--) {
+            BBQTile *tile = _tiles[column][row];
+            if (tile.tileType != 0) {
+                NSUInteger newCookieType;
+                do {
+                    newCookieType = arc4random_uniform(NumStartingCookies) + 1;
+                }
+                while (newCookieType == cookieType);
+                cookieType = newCookieType;
+                
+                BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
+                
+                if (!array) {
+                    array = [NSMutableArray array];
+                    [columns addObject:array];
+                }
+                [array addObject:cookie];
+            }
+        }
+    }
+    return columns;
+}
+
 #pragma mark - Level loading methods
 
 //Load the level JSON files

@@ -1,5 +1,6 @@
 
 #import "BBQMenu.h"
+#import "BBQCookieNode.h"
 
 @class BBQLevel;
 @class BBQComboAnimation;
@@ -18,10 +19,12 @@
 @property (nonatomic) NSInteger level;
 
 
+
 - (void)addSpritesForCookies:(NSSet *)cookies;
 + (CGPoint)pointForColumn:(NSInteger)column row:(NSInteger)row;
 - (void)setupGameWithLevel:(NSInteger)level;
 - (void)progressToNextMaxLevel;
+
 
 
 @end

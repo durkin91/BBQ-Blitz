@@ -34,5 +34,6 @@ static const NSInteger NumRows = 9;
 - (NSSet *)createCookiesInBlankTiles;
 - (BBQCookie *)createCookieAtColumn:(NSInteger)column row:(NSInteger)row withType:(NSUInteger)cookieType;
 - (NSArray *)fillHoles;
+- (NSArray *)topUpCookies;
 
 @end
