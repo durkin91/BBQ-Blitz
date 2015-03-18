@@ -21,7 +21,7 @@
     NSString *directory = [NSString stringWithFormat:@"Level_%ld", (long)level];
     self.level = [[BBQLevel alloc] initWithFile:directory];
     self.movesLeft = self.level.maximumMoves;
-    NSSet *cookies = [self.level createCookiesInBlankTiles];
+    NSSet *cookies = [self.level shuffle];
     [self sortCookieSetIntoTypes:cookies];
     NSLog(@"in setup: %@", self.cookieTypeCount);
     return cookies;
