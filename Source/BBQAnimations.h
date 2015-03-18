@@ -20,6 +20,6 @@
 + (void)dismissMenuWithoutTouchingBackground:(CCNode *)background popover:(CCNode *)popover;
 + (void)dismissMenu:(CCNode *)menu1 andShowMenu:(CCNode *)menu2 background:(CCNode *)background;
 + (void)animateProgressToNextLevelWithGreySteppingStones:(NSArray *)greySteppingStones yellowSteppingStones:(NSArray *)yellowSteppingStones greyLandingPad:(CCSprite *)greyLandingPad activeLandingPad:(CCNode *)activeLandingPad marker:(CCSprite *)marker;
-+ (void)animateFallingCookies:(NSArray *)columns tileHeight:(CGFloat)tileHeight gameplayScene:(CCNode *)gameplayScene completion:(dispatch_block_t)completion;
+
 
 @end

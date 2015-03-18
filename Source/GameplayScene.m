@@ -248,7 +248,7 @@ static const CGFloat TileHeight = 36.0;
     NSDictionary *animations = [self.gameLogic swipe:direction column:self.swipeFromColumn row:self.swipeFromRow];
     [self animateSwipe:animations completion:^{
         NSArray *columns = [self.gameLogic.level fillHoles];
-        [BBQAnimations animateFallingCookies:columns tileHeight:TileHeight gameplayScene:self completion:^{
+        [self animateFallingCookies:columns completion:^{
             NSArray *columns = [self.gameLogic.level topUpCookies];
             [self animateNewCookies:columns completion:^{
                 self.userInteractionEnabled = YES;
@@ -488,6 +488,30 @@ static const CGFloat TileHeight = 36.0;
         [CCActionDelay actionWithDuration:longestDuration],
         [CCActionCallBlock actionWithBlock:completion], nil]];
 }
+
+- (void)animateFallingCookies:(NSArray *)columns completion:(dispatch_block_t)completion {
+    
+    __block NSTimeInterval longestDuration = 0;
+    
+    for (NSArray *array in columns) {
+        [array enumerateObjectsUsingBlock:^(BBQCookie *cookie, NSUInteger idx, BOOL *stop) {
+            CGPoint newPosition = [GameplayScene pointForColumn:cookie.column row: cookie.row];
+            NSTimeInterval delay = 0.5 + 0.15*idx;
+            
+            NSTimeInterval duration = ((cookie.sprite.position.y - newPosition.y) / TileHeight) * 0.1;
+            longestDuration = MAX(longestDuration, duration + delay);
+            
+            CCActionMoveTo *moveAction = [CCActionMoveTo actionWithDuration:duration position:newPosition];
+            CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:delay], moveAction, nil];
+            [cookie.sprite runAction:sequence];
+        }];
+    }
+    
+    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil];
+    [self runAction:sequence];
+    
+}
+
 
 
 
