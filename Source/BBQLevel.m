@@ -51,29 +51,12 @@
 - (void)detectPossibleChains {
     NSMutableSet *allChains;
     
+    //Vertical Chains
     for (NSInteger column = 0; column < NumColumns; column ++) {
         for (NSInteger row = NumRows - 1; row >= 0; row --) {
             NSUInteger cookieType = _cookies[column][row].cookieType;
             
             if (cookieType > 0) {
-                
-                //Check for chains to the left
-                BBQChain *horzChain;
-                for (NSInteger i = column - 1; i >= 0 && _cookies[i][row].cookieType == cookieType; i--) {
-                    
-                    if (!allChains) {
-                        allChains = [NSMutableSet set];
-                    }
-                    
-                    if (!horzChain) {
-                        horzChain = [[BBQChain alloc] init];
-                        horzChain.cookiesInChain = [NSMutableArray array];
-                        [allChains addObject:horzChain];
-                        [horzChain.cookiesInChain addObject:_cookies[column][row]];
-                    }
-
-                    [horzChain.cookiesInChain addObject:_cookies[i][row]];
-                }
                 
                 //Check for chains going down
                 BBQChain *vertChain;
@@ -95,40 +78,41 @@
                     //subtract a row from the loop, because otherwise vertical chains of 3 or more are recorded twice
                     row --;
                 }
+
             }
         }
     }
     
-    //Clean out the duplicate chains
-    NSMutableSet *cleanedChains = [allChains mutableCopy];
-    NSMutableSet *chainsToRemove = [NSMutableSet set];
-    for (BBQChain *chain in allChains) {
-        if ([chain.cookiesInChain count] >= 3) {
-            //Find all chains with the same cookie as the last and second last object
-            NSInteger longestChainCount = [chain.cookiesInChain count];
-            BBQCookie *lastCookieLong = [chain.cookiesInChain lastObject];
-            BBQCookie *secondLastCookieLong = chain.cookiesInChain[longestChainCount - 2];
-            for (BBQChain *shortChain in cleanedChains) {
-                if ([shortChain.cookiesInChain count] < longestChainCount) {
-                    NSInteger count = [shortChain.cookiesInChain count];
-                    BBQCookie *lastCookie = [shortChain.cookiesInChain lastObject];
-                    BBQCookie *secondLastCookie = shortChain.cookiesInChain[count - 2];
+    //Horizontal Chains
+    for (NSInteger row = 0; row < NumRows; row ++) {
+        for (NSInteger column = 0; column < NumColumns; column++) {
+            NSUInteger cookieType = _cookies[column][row].cookieType;
+            
+            if (cookieType > 0) {
+                //Check for chains to the left
+                BBQChain *horzChain;
+                for (NSInteger i = column - 1; i >= 0 && _cookies[i][row].cookieType == cookieType; i--) {
                     
-                    if ([lastCookieLong isEqual:lastCookie] && [secondLastCookieLong isEqual:secondLastCookie]) {
-                        [chainsToRemove addObject:shortChain];
+                    if (!allChains) {
+                        allChains = [NSMutableSet set];
                     }
+                    
+                    if (!horzChain) {
+                        horzChain = [[BBQChain alloc] init];
+                        horzChain.cookiesInChain = [NSMutableArray array];
+                        [allChains addObject:horzChain];
+                        [horzChain.cookiesInChain addObject:_cookies[column][row]];
+                    }
+                    
+                    [horzChain.cookiesInChain addObject:_cookies[i][row]];
+                    
+                    column++;
                 }
-                
             }
         }
     }
-    
-    //Remove the duplicates
-    for (BBQChain *chain in chainsToRemove) {
-        [cleanedChains removeObject:chain];
-    }
-    
-    self.possibleChains = [cleanedChains copy];
+        
+    self.possibleChains = [allChains copy];
 }
 
 - (NSSet *)createCookiesInBlankTiles {
