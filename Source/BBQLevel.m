@@ -96,6 +96,40 @@
     return cookie;
 }
 
+- (NSArray *)fillHoles {
+    NSMutableArray *columns = [NSMutableArray array];
+    
+    for (NSInteger column = 0; column < NumColumns; column ++) {
+        NSMutableArray *array;
+        
+        for (NSInteger row = 0; row < NumRows; row++) {
+            
+            BBQTile *tile = _tiles[column][row];
+            if (tile.tileType != 0 && _cookies[column][row] == nil) {
+                for (NSInteger lookup = row + 1; lookup < NumRows; lookup ++) {
+                    BBQCookie *cookie = _cookies[column][lookup];
+                    
+                    if (cookie != nil) {
+                        _cookies[column][lookup] = nil;
+                        _cookies[column][row] = cookie;
+                        cookie.row = row;
+                        
+                        if (!array) {
+                            array = [NSMutableArray array];
+                            [columns addObject:array];
+                        }
+                        [array addObject:cookie];
+                        
+                        break;
+                    }
+                    
+                }
+            }
+        }
+    }
+    return columns;
+}
+
 #pragma mark - Level loading methods
 
 //Load the level JSON files

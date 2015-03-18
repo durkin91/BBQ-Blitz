@@ -248,24 +248,27 @@ static const CGFloat TileHeight = 36.0;
     self.userInteractionEnabled = NO;
     NSDictionary *animations = [self.gameLogic swipe:direction column:self.swipeFromColumn row:self.swipeFromRow];
     [self animateSwipe:animations completion:^{
-        self.userInteractionEnabled = YES;
-        
-        //check whether security guards have caused the level to be finished
-        if ([self.gameLogic isSecurityGuardAtZero]) {
-            NSLog(@"Security guard menu is triggered");
-        }
-        
-        //check whether the player has finished the level
-        if ([self.gameLogic isLevelComplete]) {
-            [_menuNode displayMenuFor:LEVEL_COMPLETE];
+        NSArray *columns = [self.gameLogic.level fillHoles];
+        [BBQAnimations animateFallingCookies:columns tileHeight:TileHeight gameplayScene:self completion:^{
+            self.userInteractionEnabled = YES;
             
-        }
-        
-        //check whether player has run out of moves
-        else if (![self.gameLogic areThereMovesLeft]) {
-            [_menuNode displayMenuFor:NO_MORE_MOVES];
-        }
+            //check whether security guards have caused the level to be finished
+            if ([self.gameLogic isSecurityGuardAtZero]) {
+                NSLog(@"Security guard menu is triggered");
+            }
+            
+            //check whether the player has finished the level
+            if ([self.gameLogic isLevelComplete]) {
+                [_menuNode displayMenuFor:LEVEL_COMPLETE];
+                
+            }
+            
+            //check whether player has run out of moves
+            else if (![self.gameLogic areThereMovesLeft]) {
+                [_menuNode displayMenuFor:NO_MORE_MOVES];
+            }
 
+        }];
     }];
     
 }

@@ -78,8 +78,8 @@
     
     
     //Drop existing cookies
-    NSMutableArray *dropMovements = animationsToPerform[DROP_MOVEMENTS];
-    [dropMovements addObjectsFromArray:[self dropExistingCookiesIntoBlankSpaces]];
+//    NSMutableArray *dropMovements = animationsToPerform[DROP_MOVEMENTS];
+//    [dropMovements addObjectsFromArray:[self dropExistingCookiesIntoBlankSpaces]];
     
     //take care of new golden goose cookies or new steel blocker tiles
     if (self.level.goldenGooseTiles || self.level.steelBlockerFactoryTiles) {
