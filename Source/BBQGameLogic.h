@@ -22,7 +22,6 @@
 @property (strong, nonatomic) BBQLevel *level;
 @property (nonatomic) NSInteger currentScore;
 @property (nonatomic) NSInteger movesLeft;
-@property (strong, nonatomic) NSMutableArray *cookieTypeCount;
 
 
 - (NSSet *)setupGameLogicWithLevel:(NSInteger)level;

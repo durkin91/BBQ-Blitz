@@ -22,36 +22,9 @@
     self.level = [[BBQLevel alloc] initWithFile:directory];
     self.movesLeft = self.level.maximumMoves;
     NSSet *cookies = [self.level shuffle];
-    [self sortCookieSetIntoTypes:cookies];
-    NSLog(@"in setup: %@", self.cookieTypeCount);
     return cookies;
 }
 
-- (void)sortCookieSetIntoTypes:(NSSet *)cookieSet {
-    
-    NSMutableArray *sortedCookies = [@[] mutableCopy];
-    for (int i = 0; i < NumStartingCookies; i++) {
-        [sortedCookies addObject:@(0)];
-    }
-    
-    for (BBQCookie *cookie in cookieSet) {
-        if (cookie.cookieType <= NumCookieTypes) {
-            NSNumber *count = sortedCookies[cookie.cookieType - 1];
-            NSInteger newCount = [count integerValue] + 1;
-            sortedCookies[cookie.cookieType - 1] = [NSNumber numberWithInteger:newCount];
-        }
-    }
-    
-    self.cookieTypeCount = sortedCookies;
-}
-
-- (void)sortGoldenGooseCookies:(NSArray *)goldenGooseCookies {
-    for (BBQCookie *cookie in goldenGooseCookies) {
-        NSNumber *count = self.cookieTypeCount[cookie.cookieType - 1];
-        NSInteger newCount = [count integerValue] + 1;
-        self.cookieTypeCount[cookie.cookieType - 1] = [NSNumber numberWithInteger:newCount];
-    }
-}
 
 #pragma mark - Swipe Logic
 
@@ -82,14 +55,8 @@
 //    [dropMovements addObjectsFromArray:[self dropExistingCookiesIntoBlankSpaces]];
     
     //take care of new golden goose cookies or new steel blocker tiles
-    if (self.level.goldenGooseTiles || self.level.steelBlockerFactoryTiles) {
+    if (self.level.steelBlockerFactoryTiles) {
         NSArray *blankTiles = [self findBlankTiles];
-        
-        if (self.level.goldenGooseTiles) {
-            NSMutableArray *goldenGooseCookies = animationsToPerform[GOLDEN_GOOSE_COOKIES];
-            [goldenGooseCookies addObjectsFromArray:[self layGoldenGooseEggs:blankTiles]];
-            [self sortGoldenGooseCookies:goldenGooseCookies];
-        }
         
         if (self.level.steelBlockerFactoryTiles) {
             NSMutableArray *newSteelBlockerTiles = animationsToPerform[NEW_STEEL_BLOCKER_TILES];
@@ -442,7 +409,6 @@
     
     else {
         combo = [[BBQComboAnimation alloc] initWithCookieA:cookieA cookieB:cookieB destinationColumn:destinationColumn destinationRow:destinationRow];
-        combo.cookieB.isFinalCookie = [self isFinalCookie:combo];
         combo.isRootCombo = isRootCombo;
     }
     
@@ -727,14 +693,9 @@
 
 
 - (BOOL)isLevelComplete {
-    BOOL isComplete = YES;
-    
-    for (NSNumber *number in self.cookieTypeCount) {
-        if ([number integerValue] > 1) {
-            isComplete = NO;
-            break;
-        }
-    }
+    //Put logic in here
+    BOOL isComplete = NO;
+
     
     return isComplete;
 }
@@ -769,18 +730,6 @@
             [self.level replaceCookieAtColumn:combo.cookieB.column row:combo.cookieB.row withCookie:nil];
         }
     }
-}
-
-- (BOOL)isFinalCookie:(BBQComboAnimation *)combo {
-    
-    //adjust the count
-    NSNumber *count = self.cookieTypeCount[combo.cookieA.cookieType - 1];
-    NSInteger newCount = [count integerValue] - 1;
-    self.cookieTypeCount[combo.cookieA.cookieType - 1] = [NSNumber numberWithInteger:newCount];
-    
-    //check if its the final cookie of its type
-    if (newCount == 1) return YES;
-    else return NO;
 }
 
 #pragma mark - Combos
