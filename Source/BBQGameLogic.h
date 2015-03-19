@@ -28,7 +28,6 @@
 - (NSDictionary *)swipe:(NSString *)swipeDirection column:(NSInteger)columnToSwipe row:(NSInteger)rowToSwipe;
 - (BOOL)isLevelComplete;
 - (BOOL)areThereMovesLeft;
-- (BOOL)isSecurityGuardAtZero;
 
 
 @end

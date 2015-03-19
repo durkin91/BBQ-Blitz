@@ -27,10 +27,6 @@
             spriteName = @"RegularTile";
             break;
             
-        case 4:
-            spriteName = @"GoldenGooseTile";
-            break;
-            
         case 5:
             spriteName = @"SteelBlockerTile";
             break;
@@ -45,10 +41,6 @@
             
         case 8:
             spriteName = @"RegularTile";
-            break;
-            
-        case 9:
-            spriteName = @"RopeAndGuardTile";
             break;
             
         default:
@@ -95,12 +87,6 @@
             self.requiresACookie = YES;
             break;
             
-        case 4:
-            self.isABlocker = YES;
-            self.requiresACookie = NO;
-            self.goldenGooseTileCountdown = 3;
-            break;
-            
         case 5:
             self.isABlocker = YES;
             self.requiresACookie = NO;
@@ -121,11 +107,6 @@
             self.isABlocker = NO;
             self.requiresACookie = YES;
             self.staticTileCountdown = 0;
-            break;
-            
-        case 9:
-            self.isABlocker = YES;
-            self.requiresACookie = NO;
             break;
             
         default:

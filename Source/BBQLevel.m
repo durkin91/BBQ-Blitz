@@ -125,21 +125,7 @@
             if (_cookies[column][row] == nil && tile.requiresACookie == YES) {
                 
                 NSUInteger cookieType;
-                switch (tile.tileType) {
-                    case 7:
-                        cookieType = 10;
-                        tile.tileType = 1;
-                        break;
-                        
-                    case 8:
-                        cookieType = 11;
-                        tile.tileType = 1;
-                        break;
-                        
-                    default:
-                        cookieType = arc4random_uniform(NumStartingCookies) + 1;
-                        break;
-                }
+                cookieType = arc4random_uniform(NumStartingCookies) + 1;
                 
                 BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
                 
@@ -147,16 +133,6 @@
                     cookie.isInStaticTile = YES;
                 }
                 else cookie.isInStaticTile = NO;
-                
-                //Set countdown on security guard
-                if (cookie.cookieType == 10) {
-                    if (!self.securityGuardCookies) {
-                        self.securityGuardCookies = [@[] mutableCopy];
-                    }
-                    
-                    cookie.countdown = self.securityGuardCountdown;
-                    [self.securityGuardCookies addObject:cookie];
-                }
                 
                 [set addObject:cookie];
             }
@@ -296,15 +272,6 @@
                 
                 else if ([value integerValue] == 3) {
                     _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:3 column:column row:tileRow];
-                }
-                
-                else if ([value integerValue] == 4) {
-                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:4 column:column row:tileRow];
-                    if (!self.goldenGooseTiles) {
-                        self.goldenGooseTiles = [@[] mutableCopy];
-                    }
-                    
-                    [self.goldenGooseTiles addObject:[self tileAtColumn:column row:tileRow]];
                 }
                 
                 else if ([value integerValue] == 5) {

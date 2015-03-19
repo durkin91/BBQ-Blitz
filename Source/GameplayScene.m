@@ -253,11 +253,6 @@ static const CGFloat TileHeight = 36.0;
             [self animateNewCookies:columns completion:^{
                 self.userInteractionEnabled = YES;
                 
-                //check whether security guards have caused the level to be finished
-                if ([self.gameLogic isSecurityGuardAtZero]) {
-                    NSLog(@"Security guard menu is triggered");
-                }
-                
                 //check whether the player has finished the level
                 if ([self.gameLogic isLevelComplete]) {
                     [_menuNode displayMenuFor:LEVEL_COMPLETE];
@@ -304,17 +299,6 @@ static const CGFloat TileHeight = 36.0;
             
             CCActionCallBlock *updateCountCircle = [CCActionCallBlock actionWithBlock:^{
                 
-                if (combo.cookieB.isFinalCookie) {
-                    [combo.cookieB.sprite removeFromParent];
-                }
-                
-                if (combo.cookieB.isRopeOrSecurityGuard) {
-                    [combo.cookieB.sprite removeFromParent];
-                    BBQTile *tileB = [self.gameLogic.level tileAtColumn:combo.cookieB.column row:combo.cookieB.row];
-                    [tileB.sprite removeFromParent];
-                    [self createSpriteForTile:tileB column:combo.cookieB.column row:combo.cookieB.row];
-                }
-                
                 //scale up and down
                 CCActionScaleTo *scaleUp = [CCActionScaleTo actionWithDuration:0.1 scale:1.2];
                 CCActionScaleTo *scaleDown = [CCActionScaleTo actionWithDuration:0.1 scale:1.0];
@@ -322,7 +306,7 @@ static const CGFloat TileHeight = 36.0;
                 [combo.cookieB.sprite runAction:scaleSequence];
                 
                 //Display score label
-                if (combo.score > 0 && !combo.cookieB.isRopeOrSecurityGuard) {
+                if (combo.score > 0) {
                     NSString *scoreString = [NSString stringWithFormat:@"%ld", (long)combo.score];
                     CCLabelTTF *scoreLabel = [CCLabelTTF labelWithString:scoreString fontName:@"GillSans-BoldItalic" fontSize:12.0];
                     scoreLabel.position = [GameplayScene pointForColumn:combo.destinationColumn row:combo.destinationRow];

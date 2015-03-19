@@ -10,14 +10,6 @@
 
 @implementation BBQCookie
 
-- (instancetype)init {
-    self = [super init];
-    if (self) {
-        self.isFinalCookie = NO;
-    }
-    return self;
-}
-
 - (NSString *)spriteName {
     NSString *spriteName;
     
@@ -42,14 +34,6 @@
             spriteName = @"Macaroon";
             break;
             
-        case 10:
-            spriteName = @"SecurityGuard";
-            break;
-            
-        case 11:
-            spriteName = @"Rope";
-            break;
-            
         default:
             break;
     }
@@ -62,17 +46,6 @@
     return [NSString stringWithFormat:@"type:%ld square:(%ld, %ld)", (long)self.cookieType, (long)self.column, (long)self.row];
 }
 
-- (void)setCookieType:(NSUInteger)cookieType {
-    _cookieType = cookieType;
-    
-    if (_cookieType == 10 || _cookieType == 11) {
-        self.isRopeOrSecurityGuard = YES;
-    }
-    
-    else {
-        self.isRopeOrSecurityGuard = NO;
-    }
-}
 
 
 @end

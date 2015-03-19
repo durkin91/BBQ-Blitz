@@ -36,7 +36,6 @@
                                           MOVEMENTS_BATCH_2 : [@[] mutableCopy],
                                           DROP_MOVEMENTS : [@[] mutableCopy],
                                           POWERUPS : [@[] mutableCopy],
-                                          GOLDEN_GOOSE_COOKIES : [@[] mutableCopy],
                                           NEW_STEEL_BLOCKER_TILES : [@[] mutableCopy],
                                           };
     
@@ -49,12 +48,7 @@
     NSMutableArray *movementsTwo = animationsToPerform[MOVEMENTS_BATCH_2];
     [movementsTwo addObjectsFromArray:[self batchTwoMovementsInDirection:swipeDirection column:columnToSwipe row:rowToSwipe]];
     
-    
-    //Drop existing cookies
-//    NSMutableArray *dropMovements = animationsToPerform[DROP_MOVEMENTS];
-//    [dropMovements addObjectsFromArray:[self dropExistingCookiesIntoBlankSpaces]];
-    
-    //take care of new golden goose cookies or new steel blocker tiles
+    //take care of new new steel blocker tiles
     if (self.level.steelBlockerFactoryTiles) {
         NSArray *blankTiles = [self findBlankTiles];
         
@@ -67,11 +61,6 @@
     //turn steel blocker tiles from combos into regular tiles
     NSArray *combos = animationsToPerform[COMBOS];
     [self turnSteelBlockerIntoRegularTilesForCombos:combos];
-    
-    //Get rid of final cookies
-    [self removeCompletedCookies:combos];
-    
-    [self updateSecurityGuardCountdowns];
     
     return animationsToPerform;
 }
@@ -289,36 +278,6 @@
     }
 }
 
--(NSArray *)dropExistingCookiesIntoBlankSpaces {
-    NSMutableArray *cookieMovements = [@[] mutableCopy];
-    
-    for (NSInteger column = 0; column < NumColumns; column ++) {
-        for (NSInteger row = 0; row <= NumRows - 2; row ++) {
-            BBQTile *tile = [self.level tileAtColumn:column row:row];
-            BBQCookie *cookie = [self.level cookieAtColumn:column row:row];
-            if (tile.tileType != 0 && cookie == nil) {
-                //Find the next cookie above it
-                BBQCookie *cookieAbove = [self.level cookieAtColumn:column row:row + 1];
-                NSInteger x = 2;
-                while (cookieAbove == nil && row + x < NumRows) {
-                    cookieAbove = [self.level cookieAtColumn:column row:row + x];
-                    x ++;
-                }
-                
-                //Put this cookie into its new spot
-                [self.level replaceCookieAtColumn:column row:row + x - 1 withCookie:nil];
-                [self.level replaceCookieAtColumn:column row:row withCookie:cookieAbove];
-                
-                //Create the cookie movements
-                BBQMoveCookie *movement = [[BBQMoveCookie alloc] initWithCookieA:cookieAbove destinationColumn:column destinationRow:row];
-                [cookieMovements addObject:movement];
-            }
-            
-        }
-    }
-    
-    return [cookieMovements copy];
-}
 
 - (void)tryCombineCookieA:(BBQCookie *)cookieA withCookieB:(BBQCookie *)cookieB animations:(NSDictionary *)animations direction:(NSString *)direction {
     
@@ -391,26 +350,9 @@
 - (void)combineCookieA:(BBQCookie *)cookieA withcookieB:(BBQCookie *)cookieB destinationColumn:(NSInteger)destinationColumn destinationRow:(NSInteger)destinationRow animations:(NSDictionary *)animations isRootCombo:(BOOL)isRootCombo {
     //Upgrade count and check whether the new count will turn it into an upgrade
     BBQComboAnimation *combo;
-    if (cookieB.isRopeOrSecurityGuard || cookieA.isRopeOrSecurityGuard) {
-        combo = [[BBQComboAnimation alloc] initWithCookieA:cookieA cookieB:cookieB destinationColumn:destinationColumn destinationRow:destinationRow];
-        BBQTile *tileB = [self.level tileAtColumn:cookieB.column row:cookieB.row];
-        tileB.tileType = 9;
-        [self.level replaceCookieAtColumn:cookieB.column row:cookieB.row withCookie:nil];
-        [self.level replaceCookieAtColumn:cookieA.column row:cookieA.row withCookie:nil];
-        
-        //Remove the security guard from the array
-        if (cookieB.cookieType == 10) {
-            [self.level.securityGuardCookies removeObject:cookieB];
-        }
-        else {
-            [self.level.securityGuardCookies removeObject:cookieA];
-        }
-    }
     
-    else {
-        combo = [[BBQComboAnimation alloc] initWithCookieA:cookieA cookieB:cookieB destinationColumn:destinationColumn destinationRow:destinationRow];
-        combo.isRootCombo = isRootCombo;
-    }
+    combo = [[BBQComboAnimation alloc] initWithCookieA:cookieA cookieB:cookieB destinationColumn:destinationColumn destinationRow:destinationRow];
+    combo.isRootCombo = isRootCombo;
     
     NSMutableArray *combos = animations[COMBOS];
     [combos addObject:combo];
@@ -482,32 +424,6 @@
             tile.tileType = 1;
         }
     }
-}
-
-- (NSArray *)layGoldenGooseEggs:(NSArray *)blankTiles {
-    
-    NSMutableArray *newCookies = [@[] mutableCopy];
-    
-    for (BBQTile *goldenGooseTile in self.level.goldenGooseTiles) {
-        goldenGooseTile.goldenGooseTileCountdown --;
-        
-        if (goldenGooseTile.goldenGooseTileCountdown <= 0) {
-            
-            //pick a blank tile at random
-            NSUInteger randomTileIndex = arc4random_uniform([blankTiles count]);
-            BBQTile *chosenTile = [blankTiles objectAtIndex:randomTileIndex];
-            
-            //create the cookie
-            NSUInteger cookieType = arc4random_uniform(NumStartingCookies) + 1;
-            BBQCookie *newCookie = [self.level createCookieAtColumn:chosenTile.column row:chosenTile.row withType:cookieType];
-            [newCookies addObject:newCookie];
-            
-            //reset the countdown
-            goldenGooseTile.goldenGooseTileCountdown = goldenGooseMax;
-        }
-    }
-    
-    return newCookies;
 }
 
 - (NSArray *)createNewSteelBlockerTilesWithBlankTiles:(NSArray *)blankTiles {
@@ -708,29 +624,6 @@
     return movesLeft;
 }
 
-- (void)updateSecurityGuardCountdowns {
-    for (BBQCookie *securityGuard in self.level.securityGuardCookies) {
-        securityGuard.countdown--;
-    }
-}
-
-- (BOOL)isSecurityGuardAtZero {
-    for (BBQCookie *securityGuard in self.level.securityGuardCookies) {
-        if (securityGuard.countdown <=0) {
-            return YES;
-            
-        }
-    }
-    return NO;
-}
-
-- (void)removeCompletedCookies:(NSArray *)combos {
-    for (BBQComboAnimation *combo in combos) {
-        if (combo.cookieB.isFinalCookie) {
-            [self.level replaceCookieAtColumn:combo.cookieB.column row:combo.cookieB.row withCookie:nil];
-        }
-    }
-}
 
 #pragma mark - Combos
 
