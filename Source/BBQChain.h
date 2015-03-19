@@ -14,4 +14,6 @@
 @property (assign, nonatomic) NSInteger activeRow;
 @property (assign, nonatomic) NSInteger activeColumn;
 
+- (instancetype)initWithColumn:(NSInteger)column row:(NSInteger)row;
+
 @end

@@ -67,7 +67,7 @@
                     }
                     
                     if (!vertChain) {
-                        vertChain = [[BBQChain alloc] init];
+                        vertChain = [[BBQChain alloc] initWithColumn:column row:-1];
                         vertChain.cookiesInChain = [NSMutableArray array];
                         [allChains addObject:vertChain];
                         [vertChain.cookiesInChain addObject:_cookies[column][row]];
@@ -98,7 +98,7 @@
                     }
                     
                     if (!horzChain) {
-                        horzChain = [[BBQChain alloc] init];
+                        horzChain = [[BBQChain alloc] initWithColumn:-1 row:row];
                         horzChain.cookiesInChain = [NSMutableArray array];
                         [allChains addObject:horzChain];
                         [horzChain.cookiesInChain addObject:_cookies[column][row]];
