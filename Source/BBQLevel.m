@@ -208,6 +208,36 @@
     return columns;
 }
 
+- (NSArray *)topUpCookies {
+    NSMutableArray *columns = [NSMutableArray array];
+    NSUInteger cookieType = 0;
+    
+    for (NSInteger column = 0; column < NumColumns; column++) {
+        NSMutableArray *array;
+        for (NSInteger row = NumRows - 1; row >= 0 && _cookies[column][row] == nil; row--) {
+            BBQTile *tile = _tiles[column][row];
+            if (tile.tileType != 0) {
+                NSUInteger newCookieType;
+                do {
+                    newCookieType = arc4random_uniform(NumStartingCookies) + 1;
+                }
+                while (newCookieType == cookieType);
+                cookieType = newCookieType;
+                
+                BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
+                
+                if (!array) {
+                    array = [NSMutableArray array];
+                    [columns addObject:array];
+                }
+                [array addObject:cookie];
+            }
+        }
+    }
+    return columns;
+}
+
+
 - (NSArray *)breakColumnOrRowIntoSectionsForDirection:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow {
     NSMutableArray *allSections = [NSMutableArray array];
     
@@ -320,83 +350,6 @@
     return [allSections copy];
 }
 
-- (NSArray *)swipeInDirection:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow {
-    NSMutableArray *movements = [NSMutableArray array];
-    
-    if ([swipeDirection isEqualToString:DOWN]) {
-        NSInteger column = columnOrRow;
-        
-        //Break column up into sections seperated by blank tiles
-        NSMutableArray *allSections = [NSMutableArray array];
-        NSInteger row = 1;
-        while (row < NumRows) {
-            NSMutableArray *section = [NSMutableArray array];
-            for (row = row; row < NumRows; row ++) {
-                BBQTile *tile = _tiles[column][row];
-                
-                //If there is a gap, end the section
-                if (tile.tileType == 0) {
-                    row ++;
-                    break;
-                }
-                
-                //If there isn't a gap, add it to the section
-                else {
-                    BBQCookie *cookie = _cookies[column][row];
-                    [section addObject:cookie];
-                    if ([section count] == 1) {
-                        [allSections addObject:section];
-                    }
-                    row ++;
-                }
-            }
-        }
-        
-        
-        
-//        for (NSInteger row = 1; row < NumRows; row ++) {
-//            BBQTile *tile = _tiles[column][row];
-//            if (tile.tileType != 0) {
-//                BBQCookie *cookie = _cookies[column][row];
-//                BBQCookie *cookieBelow = _cookies[column][row - 1];
-//                if (cookie.cookieType == cookieBelow.cookieType) {
-//                    //Move all of the cookies above it down one row
-//                    
-//                }
-//            }
-//        }
-    }
-    return movements;
-}
-
-- (NSArray *)topUpCookies {
-    NSMutableArray *columns = [NSMutableArray array];
-    NSUInteger cookieType = 0;
-    
-    for (NSInteger column = 0; column < NumColumns; column++) {
-        NSMutableArray *array;
-        for (NSInteger row = NumRows - 1; row >= 0 && _cookies[column][row] == nil; row--) {
-            BBQTile *tile = _tiles[column][row];
-            if (tile.tileType != 0) {
-                NSUInteger newCookieType;
-                do {
-                    newCookieType = arc4random_uniform(NumStartingCookies) + 1;
-                }
-                while (newCookieType == cookieType);
-                cookieType = newCookieType;
-                
-                BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
-                
-                if (!array) {
-                    array = [NSMutableArray array];
-                    [columns addObject:array];
-                }
-                [array addObject:cookie];
-            }
-        }
-    }
-    return columns;
-}
 
 #pragma mark - Level loading methods
 
