@@ -17,6 +17,11 @@
 #define GOLDEN_GOOSE_COOKIES @"Golden Goose Cookies"
 #define NEW_STEEL_BLOCKER_TILES @"New Steel Blocker Tiles"
 
+#define UP @"Up"
+#define DOWN @"Down"
+#define LEFT @"Left"
+#define RIGHT @"Right"
+
 @interface BBQGameLogic : NSObject
 
 @property (strong, nonatomic) BBQLevel *level;

@@ -8,6 +8,7 @@
 
 #import "BBQLevel.h"
 #import "BBQChain.h"
+#import "BBQGameLogic.h"
 
 @interface BBQLevel ()
 
@@ -115,6 +116,25 @@
     self.possibleChains = [allChains copy];
 }
 
+- (NSSet *)chainsForColumnOrRow:(NSInteger)columnOrRow swipeDirection:(NSString *)swipeDirection {
+    NSMutableSet *set = [NSMutableSet set];
+    for (BBQChain *chain in self.possibleChains) {
+        if ([swipeDirection isEqualToString:UP] || [swipeDirection isEqualToString:DOWN]) {
+            if (chain.activeColumn == columnOrRow) {
+                [set addObject:chain];
+            }
+        }
+        else if ([swipeDirection isEqualToString:LEFT] || [swipeDirection isEqualToString:RIGHT]) {
+            if (chain.activeRow == columnOrRow) {
+                [set addObject:chain];
+            }
+        }
+    }
+    
+    return [set copy];
+
+}
+
 - (NSSet *)createCookiesInBlankTiles {
     NSMutableSet *set = [NSMutableSet set];
     
@@ -186,6 +206,167 @@
         }
     }
     return columns;
+}
+
+- (NSArray *)breakColumnOrRowIntoSectionsForDirection:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow {
+    NSMutableArray *allSections = [NSMutableArray array];
+    
+    if ([swipeDirection isEqualToString:UP]) {
+        NSInteger column = columnOrRow;
+        NSInteger row = NumRows;
+        while (row >= 0) {
+            NSMutableArray *section = [NSMutableArray array];
+            for (row = row; row >= 0; row --) {
+                BBQTile *tile = _tiles[column][row];
+                
+                //If there is a gap, end the section
+                if (tile.tileType == 0) {
+                    row --;
+                    break;
+                }
+                
+                //If there isn't a gap, add it to the section
+                else {
+                    BBQCookie *cookie = _cookies[column][row];
+                    [section addObject:cookie];
+                    if ([section count] == 1) {
+                        [allSections addObject:section];
+                    }
+                }
+            }
+        }
+
+    }
+    
+    if ([swipeDirection isEqualToString:DOWN]) {
+        NSInteger column = columnOrRow;
+        NSInteger row = 0;
+        while (row < NumRows) {
+            NSMutableArray *section = [NSMutableArray array];
+            for (row = row; row < NumRows; row ++) {
+                BBQTile *tile = _tiles[column][row];
+                
+                //If there is a gap, end the section
+                if (tile.tileType == 0) {
+                    row ++;
+                    break;
+                }
+                
+                //If there isn't a gap, add it to the section
+                else {
+                    BBQCookie *cookie = _cookies[column][row];
+                    [section addObject:cookie];
+                    if ([section count] == 1) {
+                        [allSections addObject:section];
+                    }
+                }
+            }
+        }
+    }
+    
+    if ([swipeDirection isEqualToString:RIGHT]) {
+        NSInteger row = columnOrRow;
+        NSInteger column = NumColumns;
+        while (column >= 0) {
+            NSMutableArray *section = [NSMutableArray array];
+            for (column = column; column >= 0; column --) {
+                BBQTile *tile = _tiles[column][row];
+                
+                //If there is a gap, end the section
+                if (tile.tileType == 0) {
+                    column --;
+                    break;
+                }
+                
+                //If there isn't a gap, add it to the section
+                else {
+                    BBQCookie *cookie = _cookies[column][row];
+                    [section addObject:cookie];
+                    if ([section count] == 1) {
+                        [allSections addObject:section];
+                    }
+                }
+            }
+        }
+        
+    }
+    
+    if ([swipeDirection isEqualToString:LEFT]) {
+        NSInteger row = columnOrRow;
+        NSInteger column = 0;
+        while (column < NumColumns) {
+            NSMutableArray *section = [NSMutableArray array];
+            for (column = column; column < NumColumns; column ++) {
+                BBQTile *tile = _tiles[column][row];
+                
+                //If there is a gap, end the section
+                if (tile.tileType == 0) {
+                    column ++;
+                    break;
+                }
+                
+                //If there isn't a gap, add it to the section
+                else {
+                    BBQCookie *cookie = _cookies[column][row];
+                    [section addObject:cookie];
+                    if ([section count] == 1) {
+                        [allSections addObject:section];
+                    }
+                }
+            }
+        }
+    }
+    
+    return [allSections copy];
+}
+
+- (NSArray *)swipeInDirection:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow {
+    NSMutableArray *movements = [NSMutableArray array];
+    
+    if ([swipeDirection isEqualToString:DOWN]) {
+        NSInteger column = columnOrRow;
+        
+        //Break column up into sections seperated by blank tiles
+        NSMutableArray *allSections = [NSMutableArray array];
+        NSInteger row = 1;
+        while (row < NumRows) {
+            NSMutableArray *section = [NSMutableArray array];
+            for (row = row; row < NumRows; row ++) {
+                BBQTile *tile = _tiles[column][row];
+                
+                //If there is a gap, end the section
+                if (tile.tileType == 0) {
+                    row ++;
+                    break;
+                }
+                
+                //If there isn't a gap, add it to the section
+                else {
+                    BBQCookie *cookie = _cookies[column][row];
+                    [section addObject:cookie];
+                    if ([section count] == 1) {
+                        [allSections addObject:section];
+                    }
+                    row ++;
+                }
+            }
+        }
+        
+        
+        
+//        for (NSInteger row = 1; row < NumRows; row ++) {
+//            BBQTile *tile = _tiles[column][row];
+//            if (tile.tileType != 0) {
+//                BBQCookie *cookie = _cookies[column][row];
+//                BBQCookie *cookieBelow = _cookies[column][row - 1];
+//                if (cookie.cookieType == cookieBelow.cookieType) {
+//                    //Move all of the cookies above it down one row
+//                    
+//                }
+//            }
+//        }
+    }
+    return movements;
 }
 
 - (NSArray *)topUpCookies {

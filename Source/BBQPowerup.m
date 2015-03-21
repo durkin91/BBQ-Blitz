@@ -8,6 +8,7 @@
 
 #import "BBQPowerup.h"
 #import "BBQLevel.h"
+#import "BBQGameLogic.h"
 
 @implementation BBQPowerup {
     BBQLevel *_level;
@@ -19,10 +20,10 @@
         self.rootCookie = cookie;
         self.type = type;
         
-        if ([swipeDirection isEqualToString:@"Right"] || [swipeDirection isEqualToString:@"Left"]) {
+        if ([swipeDirection isEqualToString:RIGHT] || [swipeDirection isEqualToString:LEFT]) {
             self.direction = HORIZONTAL;
         }
-        else if ([swipeDirection isEqualToString:@"Up"] || [swipeDirection isEqualToString:@"Down"]) {
+        else if ([swipeDirection isEqualToString:UP] || [swipeDirection isEqualToString:DOWN]) {
             self.direction = VERTICAL;
         }
     }
