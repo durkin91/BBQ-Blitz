@@ -505,8 +505,9 @@ static const CGFloat TileHeight = 36.0;
     
     __block NSTimeInterval longestDuration = 0;
     
-    [movements enumerateObjectsUsingBlock:^(NSArray *batch, NSUInteger idx, BOOL *stop) {
-        NSTimeInterval delay = 0.15*idx;
+    for (NSInteger i = 0; i < [movements count]; i++) {
+        NSMutableArray *batch = movements[i];
+        NSTimeInterval delay = 0.15*i;
         NSTimeInterval duration = 1.0;
         longestDuration = MAX(longestDuration, duration + delay);
         
@@ -520,12 +521,13 @@ static const CGFloat TileHeight = 36.0;
                 sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:delay], moveAction, remove, nil];
             }
             else {
-              sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:delay], moveAction, nil];
+                sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:delay], moveAction, nil];
             }
             [movement.cookieA.sprite runAction:sequence];
         }
-        
-    }];
+
+    }
+    
     
     CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil];
     [self runAction:sequence];
