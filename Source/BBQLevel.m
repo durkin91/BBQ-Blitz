@@ -247,17 +247,16 @@
         while (row >= 0) {
             NSMutableArray *section = [NSMutableArray array];
             for (row = row; row >= 0; row --) {
-                BBQTile *tile = _tiles[column][row];
+                BBQCookie *cookie = _cookies[column][row];
                 
                 //If there is a gap, end the section
-                if (tile.tileType == 0) {
+                if (cookie == nil) {
                     row --;
                     break;
                 }
                 
                 //If there isn't a gap, add it to the section
                 else {
-                    BBQCookie *cookie = _cookies[column][row];
                     [section addObject:cookie];
                     if ([section count] == 1) {
                         [allSections addObject:section];
@@ -274,17 +273,16 @@
         while (row < NumRows) {
             NSMutableArray *section = [NSMutableArray array];
             for (row = row; row < NumRows; row ++) {
-                BBQTile *tile = _tiles[column][row];
+                BBQCookie *cookie = _cookies[column][row];
                 
                 //If there is a gap, end the section
-                if (tile.tileType == 0) {
+                if (cookie == nil) {
                     row ++;
                     break;
                 }
                 
                 //If there isn't a gap, add it to the section
                 else {
-                    BBQCookie *cookie = _cookies[column][row];
                     [section addObject:cookie];
                     if ([section count] == 1) {
                         [allSections addObject:section];
@@ -300,17 +298,16 @@
         while (column >= 0) {
             NSMutableArray *section = [NSMutableArray array];
             for (column = column; column >= 0; column --) {
-                BBQTile *tile = _tiles[column][row];
+                BBQCookie *cookie = _cookies[column][row];
                 
                 //If there is a gap, end the section
-                if (tile.tileType == 0) {
+                if (cookie == nil) {
                     column --;
                     break;
                 }
                 
                 //If there isn't a gap, add it to the section
                 else {
-                    BBQCookie *cookie = _cookies[column][row];
                     [section addObject:cookie];
                     if ([section count] == 1) {
                         [allSections addObject:section];
@@ -327,17 +324,16 @@
         while (column < NumColumns) {
             NSMutableArray *section = [NSMutableArray array];
             for (column = column; column < NumColumns; column ++) {
-                BBQTile *tile = _tiles[column][row];
+                BBQCookie *cookie = _cookies[column][row];
                 
                 //If there is a gap, end the section
-                if (tile.tileType == 0) {
+                if (cookie == nil) {
                     column ++;
                     break;
                 }
                 
                 //If there isn't a gap, add it to the section
                 else {
-                    BBQCookie *cookie = _cookies[column][row];
                     [section addObject:cookie];
                     if ([section count] == 1) {
                         [allSections addObject:section];
