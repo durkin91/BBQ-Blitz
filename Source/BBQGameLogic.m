@@ -31,7 +31,7 @@
 - (NSDictionary *)swipe:(NSString *)swipeDirection column:(NSInteger)columnToSwipe row:(NSInteger)rowToSwipe {
     
     NSInteger x = [self returnColumnOrRowWithSwipeDirection:swipeDirection column:columnToSwipe row:rowToSwipe];
-    NSArray *movements = [self swipeInDirection:swipeDirection columnOrRow:x];
+    NSArray *movements = [self movementsForSwipe:swipeDirection columnOrRow:x];
     
     
     NSDictionary *animationsToPerform = @{
@@ -69,7 +69,7 @@
     return animationsToPerform;
 }
 
-- (NSArray *)swipeInDirection:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow {
+- (NSArray *)movementsForSwipe:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow {
     NSMutableArray *movementsArray = [NSMutableArray array];
     
     //Determine the co-ordinates of the section
@@ -100,6 +100,13 @@
                         BBQCookie *nextCookie = section[i];
                         BBQMoveCookie *movement = [self moveCookieOneTileOver:nextCookie swipeDirection:swipeDirection];
                         [array addObject:movement];
+                        
+                        if (i == index + 1) {
+                            movement.removeAfterMovement = YES;
+                        }
+                        else {
+                            movement.removeAfterMovement = NO;
+                        }
                     }
                     
                     [section removeObject:cookie];
