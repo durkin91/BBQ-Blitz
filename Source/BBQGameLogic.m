@@ -78,7 +78,7 @@
         NSMutableArray *array;
         NSArray *sections = [self.level breakColumnOrRowIntoSectionsForDirection:swipeDirection columnOrRow:columnOrRow];
         for (NSInteger sectionIndex = 0; sectionIndex < [sections count]; sectionIndex ++) {
-            NSArray *section = sections[sectionIndex];
+            NSMutableArray *section = sections[sectionIndex];
             for (NSInteger index = 0; index < [section count] - 1; index++) {
                 BBQCookie *cookie = section[index];
                 BBQCookie *nextCookie = section[index + 1];
@@ -102,6 +102,7 @@
                         [array addObject:movement];
                     }
                     
+                    [section removeObject:cookie];
                     break;
                 }
             }
