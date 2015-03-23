@@ -501,37 +501,54 @@ static const CGFloat TileHeight = 36.0;
     
 }
 
-- (void)animateMovements:(NSArray *)movements completion:(dispatch_block_t)completion {
+- (void)animateMovements:(NSArray *)finalCookies completion: (dispatch_block_t)completion {
     
     __block NSTimeInterval longestDuration = 0;
     
-    for (NSInteger i = 0; i < [movements count]; i++) {
-        NSMutableArray *batch = movements[i];
-        NSTimeInterval delay = 0.15*i;
-        NSTimeInterval duration = 1.0;
-        longestDuration = MAX(longestDuration, duration + delay);
+    [finalCookies enumerateObjectsUsingBlock:^(BBQCookie *cookie, NSUInteger idx, BOOL *stop) {
+        CGPoint newPosition = [GameplayScene pointForColumn:cookie.column row:cookie.row];
+        NSTimeInterval duration = ((cookie.sprite.position.y - newPosition.y) / TileHeight) * 0.5;
+        longestDuration = MAX(longestDuration, duration);
         
-        for (BBQMoveCookie *movement in batch) {
-            CGPoint newPosition = [GameplayScene pointForColumn:movement.destinationColumn row:movement.destinationRow];
-            CCActionMoveTo *moveAction = [CCActionMoveTo actionWithDuration:duration position:newPosition];
-            
-            CCActionSequence *sequence;
-            if (movement.removeAfterMovement) {
-                CCActionRemove *remove = [CCActionRemove action];
-                sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:delay], moveAction, remove, nil];
-            }
-            else {
-                sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:delay], moveAction, nil];
-            }
-            [movement.cookieA.sprite runAction:sequence];
-        }
-
-    }
-    
+        CCActionMoveTo *moveAction = [CCActionMoveTo actionWithDuration:duration position:newPosition];
+        [cookie.sprite runAction:moveAction];
+    }];
     
     CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil];
     [self runAction:sequence];
 }
+
+//- (void)animateMovements:(NSArray *)movements completion:(dispatch_block_t)completion {
+//    
+//    __block NSTimeInterval longestDuration = 0;
+//    
+//    for (NSInteger i = 0; i < [movements count]; i++) {
+//        NSMutableArray *batch = movements[i];
+//        NSTimeInterval delay = 0.15*i;
+//        NSTimeInterval duration = 1.0;
+//        longestDuration = MAX(longestDuration, duration + delay);
+//        
+//        for (BBQMoveCookie *movement in batch) {
+//            CGPoint newPosition = [GameplayScene pointForColumn:movement.destinationColumn row:movement.destinationRow];
+//            CCActionMoveTo *moveAction = [CCActionMoveTo actionWithDuration:duration position:newPosition];
+//            
+//            CCActionSequence *sequence;
+//            if (movement.removeAfterMovement) {
+//                CCActionRemove *remove = [CCActionRemove action];
+//                sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:delay], moveAction, remove, nil];
+//            }
+//            else {
+//                sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:delay], moveAction, nil];
+//            }
+//            [movement.cookieA.sprite runAction:sequence];
+//        }
+//
+//    }
+//    
+//    
+//    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil];
+//    [self runAction:sequence];
+//}
 
 
 

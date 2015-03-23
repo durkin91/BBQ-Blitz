@@ -135,6 +135,52 @@
 
 }
 
+- (NSArray *)allCookiesInColumnOrRow:(NSInteger)columnOrRow swipeDirection:(NSString *)swipeDirection {
+    NSMutableArray *array = [NSMutableArray array];
+    
+    if ([swipeDirection isEqualToString:UP]) {
+        NSInteger column = columnOrRow;
+        for (NSInteger row = NumRows - 1; row >= 0; row --) {
+            BBQCookie *cookie = _cookies[column][row];
+            if (cookie) {
+                [array addObject:cookie];
+            }
+        }
+    }
+    
+    else if ([swipeDirection isEqualToString:DOWN]) {
+        NSInteger column = columnOrRow;
+        for (NSInteger row = 0; row < NumRows; row ++) {
+            BBQCookie *cookie = _cookies[column][row];
+            if (cookie) {
+                [array addObject:cookie];
+            }
+        }
+    }
+    
+    else if ([swipeDirection isEqualToString:LEFT]) {
+        NSInteger row = columnOrRow;
+        for (NSInteger column = 0; column < NumColumns; column++) {
+            BBQCookie *cookie = _cookies[column][row];
+            if (cookie) {
+                [array addObject:cookie];
+            }
+        }
+    }
+    
+    else if ([swipeDirection isEqualToString:RIGHT]) {
+        NSInteger row = columnOrRow;
+        for (NSInteger column = NumColumns - 1; column >= 0; column --) {
+            BBQCookie *cookie = _cookies[column][row];
+            if (cookie) {
+                [array addObject:cookie];
+            }
+        }
+    }
+    
+    return array;
+}
+
 - (NSSet *)createCookiesInBlankTiles {
     NSMutableSet *set = [NSMutableSet set];
     
