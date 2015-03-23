@@ -247,7 +247,7 @@ static const CGFloat TileHeight = 36.0;
     self.userInteractionEnabled = NO;
     
     NSArray *movements = [self.gameLogic movementsForSwipe:direction columnOrRow:[self.gameLogic returnColumnOrRowWithSwipeDirection:direction column:self.swipeFromColumn row:self.swipeFromRow]];
-    [self animateMovements:movements completion:^{
+    [self animateMovements:movements swipeDirection:direction completion:^{
         self.userInteractionEnabled = YES;
         
 //        NSArray *columns = [self.gameLogic.level fillHoles];
@@ -501,13 +501,26 @@ static const CGFloat TileHeight = 36.0;
     
 }
 
-- (void)animateMovements:(NSArray *)finalCookies completion: (dispatch_block_t)completion {
+- (void)animateMovements:(NSArray *)finalCookies swipeDirection:(NSString *)swipeDirection completion: (dispatch_block_t)completion {
     
     __block NSTimeInterval longestDuration = 0;
     
     [finalCookies enumerateObjectsUsingBlock:^(BBQCookie *cookie, NSUInteger idx, BOOL *stop) {
         CGPoint newPosition = [GameplayScene pointForColumn:cookie.column row:cookie.row];
-        NSTimeInterval duration = ((cookie.sprite.position.y - newPosition.y) / TileHeight) * 0.5;
+        
+        NSTimeInterval duration = 0;
+        if ([swipeDirection isEqualToString:UP]) {
+            duration = ((newPosition.y - cookie.sprite.position.y) / TileHeight) * 0.5;
+        }
+        else if ([swipeDirection isEqualToString:DOWN]) {
+            duration = ((cookie.sprite.position.y - newPosition.y) / TileHeight) * 0.5;
+        }
+        else if ([swipeDirection isEqualToString:RIGHT]) {
+            duration = ((newPosition.x - cookie.sprite.position.x) / TileWidth) * 0.5;
+        }
+        else if ([swipeDirection isEqualToString:LEFT]) {
+            duration = ((cookie.sprite.position.x - newPosition.x) / TileWidth) * 0.5;
+        }
         longestDuration = MAX(longestDuration, duration);
         
         CCActionMoveTo *moveAction = [CCActionMoveTo actionWithDuration:duration position:newPosition];

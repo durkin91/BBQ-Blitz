@@ -289,7 +289,7 @@
     
     if ([swipeDirection isEqualToString:UP]) {
         NSInteger column = columnOrRow;
-        NSInteger row = NumRows;
+        NSInteger row = NumRows - 1;
         while (row >= 0) {
             NSMutableArray *section = [NSMutableArray array];
             for (row = row; row >= 0; row --) {
@@ -340,7 +340,7 @@
     
     if ([swipeDirection isEqualToString:RIGHT]) {
         NSInteger row = columnOrRow;
-        NSInteger column = NumColumns;
+        NSInteger column = NumColumns - 1;
         while (column >= 0) {
             NSMutableArray *section = [NSMutableArray array];
             for (column = column; column >= 0; column --) {
