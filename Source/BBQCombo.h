@@ -13,6 +13,7 @@
 @interface BBQCombo : NSObject
 
 @property (strong, nonatomic) BBQCookie *rootCookie;
+@property (assign, nonatomic) BOOL isRootCookie;
 
 
 

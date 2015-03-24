@@ -220,6 +220,7 @@
     return cookie;
 }
 
+
 - (NSArray *)fillHoles {
     NSMutableArray *columns = [NSMutableArray array];
     
@@ -390,6 +391,42 @@
     }
     
     return [allSections copy];
+}
+
+- (NSArray *)chainsInSection:(NSArray *)section {
+    NSMutableArray *chains = [NSMutableArray array];
+    
+    for (NSInteger i = 0; i < [section count]; i++) {
+        NSMutableArray *chain = [NSMutableArray array];
+        [chains addObject:chain];
+        BBQCookie *cookie = section[i];
+        [chain addObject:cookie];
+        
+        if (i == [section count] - 1) break;
+        
+        BBQCookie *nextCookie = section[i + 1];
+        NSInteger x = 2;
+        NSInteger index = i;
+        while (cookie.cookieType == nextCookie.cookieType && index + x <= [section count]) {
+            [chain addObject:nextCookie];
+            i++;
+            
+            if (index + x >= [section count]) break;
+            
+            nextCookie = section[index + x];
+            x++;
+        }
+    }
+    
+    NSMutableArray *cleanedUpChains = [NSMutableArray array];
+    for (NSInteger i = 0; i < [chains count]; i++) {
+        NSArray *chain = chains[i];
+        if ([chain count] > 1) {
+            [cleanedUpChains addObject:chain];
+        }
+    }
+    
+    return cleanedUpChains;
 }
 
 

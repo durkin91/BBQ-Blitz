@@ -528,7 +528,9 @@ static const CGFloat TileHeight = 36.0;
         CCActionSequence *sequence;
         if (cookie.combo) {
             CCActionCallBlock *removeSprite = [CCActionCallBlock actionWithBlock:^{
-                [cookie.combo.rootCookie.sprite removeFromParent];
+                if (cookie.combo.rootCookie) {
+                    [cookie.combo.rootCookie.sprite removeFromParent];
+                }
             }];
             sequence = [CCActionSequence actions:moveAction, removeSprite, nil];
         }

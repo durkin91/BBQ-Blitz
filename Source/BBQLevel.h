@@ -38,6 +38,7 @@ static const NSInteger NumRows = 9;
 - (NSArray *)breakColumnOrRowIntoSectionsForDirection:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow;
 - (NSSet *)chainsForColumnOrRow:(NSInteger)columnOrRow swipeDirection:(NSString *)swipeDirection;
 - (NSArray *)allCookiesInColumnOrRow:(NSInteger)columnOrRow swipeDirection:(NSString *)swipeDirection;
+- (NSArray *)chainsInSection:(NSArray *)section;
 
 
 @end

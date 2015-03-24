@@ -77,42 +77,110 @@
     //Take a snapshot of the column or row as it is, before the model is changed
     NSArray *finalCookies = [self.level allCookiesInColumnOrRow:columnOrRow swipeDirection:swipeDirection];
     
-    //Move everything in the model
-    BOOL finished = NO;
-    while (!finished) {
-        NSArray *sections = [self.level breakColumnOrRowIntoSectionsForDirection:swipeDirection columnOrRow:columnOrRow];
-        for (NSInteger sectionIndex = 0; sectionIndex < [sections count]; sectionIndex ++) {
-            NSMutableArray *section = sections[sectionIndex];
-            for (NSInteger index = 0; index < [section count] - 1; index++) {
-                BBQCookie *cookie = section[index];
-                BBQCookie *nextCookie = section[index + 1];
+    //Break into sections, and remove all chains in that column/row
+    NSArray *sections = [self.level breakColumnOrRowIntoSectionsForDirection:swipeDirection columnOrRow:columnOrRow];
+    for (NSInteger sectionIndex = 0; sectionIndex < [sections count]; sectionIndex++) {
+        NSMutableArray *section = sections[sectionIndex];
+        NSArray *chains = [self.level chainsInSection:section];
+        for (NSArray *chain in chains) {
+            
+            //Change the cookie's position to the root cookie, and set it to nil in the model
+            BBQCookie *rootCookie = chain[0];
+            for (NSInteger i = 0; i < [chain count]; i++) {
+                BBQCookie *cookie = chain[i];
+                [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
+                cookie.column = rootCookie.column;
+                cookie.row = rootCookie.row;
                 
-                if (index == [section count] - 2) {
-                    finished = YES;
+                //create and attach the combo
+                BBQCombo *combo = [[BBQCombo alloc] init];
+                cookie.combo = combo;
+                
+                if (i == 0) {
+                    combo.isRootCookie = YES;
                 }
+                
                 else {
-                    finished = NO;
-                }
-                
-                if (cookie.cookieType == nextCookie.cookieType) {
-                    
-                    for (NSInteger i = index + 1; i < [section count]; i++) {
-                        BBQCookie *nextCookie = section[i];
-                        [self moveCookieOneTileOver:nextCookie swipeDirection:swipeDirection];
-                        
-                        if (i == index + 1) {
-                            BBQCombo *combo = [[BBQCombo alloc] init];
-                            nextCookie.combo = combo;
-                            combo.rootCookie = section[i - 1];
-                        }
-                    }
-                    
-                    [section removeObject:cookie];
-                    break;
+                    combo.isRootCookie = NO;
+                    combo.rootCookie = rootCookie;
                 }
             }
         }
     }
+    
+    //Move all remaining cookies to their appropriate positions
+    for (NSInteger sectionIndex = 0; sectionIndex < [sections count]; sectionIndex++) {
+        NSMutableArray *section = sections[sectionIndex];
+        NSArray *chains = [self.level chainsInSection:section];
+        BBQCookie *rootCookie = section[0];
+        
+        //Remove all chain cookies from section
+        for (NSArray *chain in chains) {
+            [section removeObjectsInArray:chain];
+        }
+        
+        //move all remaining cookies in section to the appropriate position, relative to root cookie
+        for (NSInteger i = 0; i < [section count]; i++) {
+            BBQCookie *cookie = section[i];
+            [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
+            if ([swipeDirection isEqualToString:UP]) {
+                [self.level replaceCookieAtColumn:rootCookie.column row:rootCookie.row - i withCookie:cookie];
+                cookie.row = rootCookie.row - i;
+            }
+            else if ([swipeDirection isEqualToString:DOWN]) {
+                [self.level replaceCookieAtColumn:rootCookie.column row:rootCookie.row + i withCookie:cookie];
+                cookie.row = rootCookie.row + i;
+            }
+            else if ([swipeDirection isEqualToString:LEFT]) {
+                [self.level replaceCookieAtColumn:rootCookie.column + i row:rootCookie.row withCookie:cookie];
+                cookie.column = rootCookie.column + i;
+            }
+            else if ([swipeDirection isEqualToString:RIGHT]) {
+                [self.level replaceCookieAtColumn:rootCookie.column - i row:rootCookie.row withCookie:cookie];
+                cookie.column = rootCookie.column - i;
+            }
+        }
+
+    }
+
+    
+    
+//    //Move everything in the model
+//    BOOL finished = NO;
+//    while (!finished) {
+//        NSArray *sections = [self.level breakColumnOrRowIntoSectionsForDirection:swipeDirection columnOrRow:columnOrRow];
+//        for (NSInteger sectionIndex = 0; sectionIndex < [sections count]; sectionIndex ++) {
+//            NSMutableArray *section = sections[sectionIndex];
+//            for (NSInteger index = 0; index < [section count] - 1; index++) {
+//                BBQCookie *cookie = section[index];
+//                BBQCookie *nextCookie = section[index + 1];
+//                
+//                if (index == [section count] - 2) {
+//                    finished = YES;
+//                }
+//                else {
+//                    finished = NO;
+//                }
+//                
+//                if (cookie.cookieType == nextCookie.cookieType) {
+//                    
+//                    for (NSInteger i = index + 1; i < [section count]; i++) {
+//                        BBQCookie *nextCookie = section[i];
+//                        [self moveCookieOneTileOver:nextCookie swipeDirection:swipeDirection];
+//                        
+//                        if (i == index + 1) {
+//                            BBQCombo *combo = [[BBQCombo alloc] init];
+//                            nextCookie.combo = combo;
+//                            combo.rootCookie = section[i - 1];                            
+//                        }
+//                    }
+//                    
+//                    [section removeObject:cookie];
+//                    break;
+//                }
+//            }
+//        }
+//    }
     
     return finalCookies;
 }
