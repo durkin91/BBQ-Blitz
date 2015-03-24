@@ -12,6 +12,7 @@
 #import "BBQComboAnimation.h"
 #import "BBQMoveCookie.h"
 #import "BBQPowerup.h"
+#import "BBQCombo.h"
 
 @implementation BBQGameLogic
 
@@ -70,55 +71,6 @@
 }
 
 
-//- (NSArray *)fillHoles {
-//    NSMutableArray *columns = [NSMutableArray array];
-//    
-//    for (NSInteger column = 0; column < NumColumns; column ++) {
-//        NSMutableArray *array;
-//        
-//        for (NSInteger row = 0; row < NumRows; row++) {
-//            
-//            BBQTile *tile = _tiles[column][row];
-//            if (tile.tileType != 0 && _cookies[column][row] == nil) {
-//                for (NSInteger lookup = row + 1; lookup < NumRows; lookup ++) {
-//                    BBQCookie *cookie = _cookies[column][lookup];
-//                    
-//                    if (cookie != nil) {
-//                        _cookies[column][lookup] = nil;
-//                        _cookies[column][row] = cookie;
-//                        cookie.row = row;
-//                        
-//                        if (!array) {
-//                            array = [NSMutableArray array];
-//                            [columns addObject:array];
-//                        }
-//                        [array addObject:cookie];
-//                        
-//                        break;
-//                    }
-//                    
-//                }
-//            }
-//        }
-//    }
-//    return columns;
-//}
-
-
-//- (NSArray *)movementsForSwipe:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow {
-//    
-//    //Move the extra cookies in the chain to the root cookie position
-//    NSSet *chains = [self.level chainsForColumnOrRow:columnOrRow swipeDirection:swipeDirection];
-//    for (NSArray *chain in chains) {
-//        BBQCookie *rootCookie = chain[0];
-//        for (NSInteger i = 1; i < [chain count]; i++) {
-//            BBQCookie *extraCookie = chain[i];
-//            extraCookie.column = rootCookie.column;
-//            extraCookie.row = rootCookie.row;
-//            
-//        }
-//    }
-//}
 
 - (NSArray *)movementsForSwipe:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow {
     
@@ -147,6 +99,12 @@
                     for (NSInteger i = index + 1; i < [section count]; i++) {
                         BBQCookie *nextCookie = section[i];
                         [self moveCookieOneTileOver:nextCookie swipeDirection:swipeDirection];
+                        
+                        if (i == index + 1) {
+                            BBQCombo *combo = [[BBQCombo alloc] init];
+                            nextCookie.combo = combo;
+                            combo.rootCookie = section[i - 1];
+                        }
                     }
                     
                     [section removeObject:cookie];

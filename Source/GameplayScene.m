@@ -248,29 +248,28 @@ static const CGFloat TileHeight = 36.0;
     
     NSArray *movements = [self.gameLogic movementsForSwipe:direction columnOrRow:[self.gameLogic returnColumnOrRowWithSwipeDirection:direction column:self.swipeFromColumn row:self.swipeFromRow]];
     [self animateMovements:movements swipeDirection:direction completion:^{
-        self.userInteractionEnabled = YES;
         
-//        NSArray *columns = [self.gameLogic.level fillHoles];
-//        [self animateFallingCookies:columns completion:^{
-//            
-//            NSArray *columns = [self.gameLogic.level topUpCookies];
-//            [self animateNewCookies:columns completion:^{
-//                
-//                self.userInteractionEnabled = YES;
-//                
-//                //check whether the player has finished the level
-//                if ([self.gameLogic isLevelComplete]) {
-//                    [_menuNode displayMenuFor:LEVEL_COMPLETE];
-//                    
-//                }
-//                
-//                //check whether player has run out of moves
-//                else if (![self.gameLogic areThereMovesLeft]) {
-//                    [_menuNode displayMenuFor:NO_MORE_MOVES];
-//                }
-//                
-//            }];
-//        }];
+        NSArray *columns = [self.gameLogic.level fillHoles];
+        [self animateFallingCookies:columns completion:^{
+            
+            NSArray *columns = [self.gameLogic.level topUpCookies];
+            [self animateNewCookies:columns completion:^{
+                
+                self.userInteractionEnabled = YES;
+                
+                //check whether the player has finished the level
+                if ([self.gameLogic isLevelComplete]) {
+                    [_menuNode displayMenuFor:LEVEL_COMPLETE];
+                    
+                }
+                
+                //check whether player has run out of moves
+                else if (![self.gameLogic areThereMovesLeft]) {
+                    [_menuNode displayMenuFor:NO_MORE_MOVES];
+                }
+                
+            }];
+        }];
     }];
 }
 
@@ -510,63 +509,39 @@ static const CGFloat TileHeight = 36.0;
         
         NSTimeInterval duration = 0;
         if ([swipeDirection isEqualToString:UP]) {
-            duration = ((newPosition.y - cookie.sprite.position.y) / TileHeight) * 0.5;
+            duration = ((newPosition.y - cookie.sprite.position.y) / TileHeight) * 0.3;
         }
         else if ([swipeDirection isEqualToString:DOWN]) {
-            duration = ((cookie.sprite.position.y - newPosition.y) / TileHeight) * 0.5;
+            duration = ((cookie.sprite.position.y - newPosition.y) / TileHeight) * 0.3;
         }
         else if ([swipeDirection isEqualToString:RIGHT]) {
-            duration = ((newPosition.x - cookie.sprite.position.x) / TileWidth) * 0.5;
+            duration = ((newPosition.x - cookie.sprite.position.x) / TileWidth) * 0.3;
         }
         else if ([swipeDirection isEqualToString:LEFT]) {
-            duration = ((cookie.sprite.position.x - newPosition.x) / TileWidth) * 0.5;
+            duration = ((cookie.sprite.position.x - newPosition.x) / TileWidth) * 0.3;
         }
         longestDuration = MAX(longestDuration, duration);
         
         CCActionMoveTo *moveAction = [CCActionMoveTo actionWithDuration:duration position:newPosition];
-        [cookie.sprite runAction:moveAction];
+        
+        //Remove the extra sprite on a combo if necessary
+        CCActionSequence *sequence;
+        if (cookie.combo) {
+            CCActionCallBlock *removeSprite = [CCActionCallBlock actionWithBlock:^{
+                [cookie.combo.rootCookie.sprite removeFromParent];
+            }];
+            sequence = [CCActionSequence actions:moveAction, removeSprite, nil];
+        }
+        else {
+            sequence = [CCActionSequence actions:moveAction, nil];
+        }
+        
+        [cookie.sprite runAction:sequence];
     }];
     
     CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil];
     [self runAction:sequence];
 }
-
-//- (void)animateMovements:(NSArray *)movements completion:(dispatch_block_t)completion {
-//    
-//    __block NSTimeInterval longestDuration = 0;
-//    
-//    for (NSInteger i = 0; i < [movements count]; i++) {
-//        NSMutableArray *batch = movements[i];
-//        NSTimeInterval delay = 0.15*i;
-//        NSTimeInterval duration = 1.0;
-//        longestDuration = MAX(longestDuration, duration + delay);
-//        
-//        for (BBQMoveCookie *movement in batch) {
-//            CGPoint newPosition = [GameplayScene pointForColumn:movement.destinationColumn row:movement.destinationRow];
-//            CCActionMoveTo *moveAction = [CCActionMoveTo actionWithDuration:duration position:newPosition];
-//            
-//            CCActionSequence *sequence;
-//            if (movement.removeAfterMovement) {
-//                CCActionRemove *remove = [CCActionRemove action];
-//                sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:delay], moveAction, remove, nil];
-//            }
-//            else {
-//                sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:delay], moveAction, nil];
-//            }
-//            [movement.cookieA.sprite runAction:sequence];
-//        }
-//
-//    }
-//    
-//    
-//    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil];
-//    [self runAction:sequence];
-//}
-
-
-
-
-
 
 #pragma mark - Popover methods
 

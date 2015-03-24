@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "BBQCookieNode.h"
 #import "BBQTile.h"
+#import "BBQCombo.h"
 
 static const NSUInteger NumCookieTypes = 6;
 static const NSUInteger NumStartingCookies = 5;
@@ -22,6 +23,7 @@ static const NSUInteger NumCookiesToUpgrade = 40;
 @property (strong, nonatomic) BBQCookieNode *sprite;
 @property (assign, nonatomic) BOOL isInStaticTile;
 @property (assign, nonatomic) NSInteger countdown;
+@property (strong, nonatomic) BBQCombo *combo;
 
 
 
