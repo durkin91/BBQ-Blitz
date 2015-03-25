@@ -97,13 +97,12 @@
                 cookie.combo = combo;
                 
                 if (i == 0) {
-                    combo.isRootCookie = YES;
                 }
                 
                 else {
-                    combo.isRootCookie = NO;
                     combo.rootCookie = rootCookie;
                 }
+
             }
         }
     }

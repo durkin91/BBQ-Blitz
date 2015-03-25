@@ -508,17 +508,18 @@ static const CGFloat TileHeight = 36.0;
         CGPoint newPosition = [GameplayScene pointForColumn:cookie.column row:cookie.row];
         
         NSTimeInterval duration = 0;
+        CGFloat tileDuration = 0.3;
         if ([swipeDirection isEqualToString:UP]) {
-            duration = ((newPosition.y - cookie.sprite.position.y) / TileHeight) * 0.3;
+            duration = ((newPosition.y - cookie.sprite.position.y) / TileHeight) * tileDuration;
         }
         else if ([swipeDirection isEqualToString:DOWN]) {
-            duration = ((cookie.sprite.position.y - newPosition.y) / TileHeight) * 0.3;
+            duration = ((cookie.sprite.position.y - newPosition.y) / TileHeight) * tileDuration;
         }
         else if ([swipeDirection isEqualToString:RIGHT]) {
-            duration = ((newPosition.x - cookie.sprite.position.x) / TileWidth) * 0.3;
+            duration = ((newPosition.x - cookie.sprite.position.x) / TileWidth) * tileDuration;
         }
         else if ([swipeDirection isEqualToString:LEFT]) {
-            duration = ((cookie.sprite.position.x - newPosition.x) / TileWidth) * 0.3;
+            duration = ((cookie.sprite.position.x - newPosition.x) / TileWidth) * tileDuration;
         }
         longestDuration = MAX(longestDuration, duration);
         
@@ -531,6 +532,7 @@ static const CGFloat TileHeight = 36.0;
                 if (cookie.combo.rootCookie) {
                     [cookie.combo.rootCookie.sprite removeFromParent];
                 }
+                
             }];
             sequence = [CCActionSequence actions:moveAction, removeSprite, nil];
         }
