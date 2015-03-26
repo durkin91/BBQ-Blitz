@@ -14,9 +14,10 @@
 
 @interface BBQCombo : NSObject
 
-@property (strong, nonatomic) BBQCookie *rootCookie;
-@property (assign, nonatomic) BOOL isLastCookie;
+
+@property (nonatomic) BOOL isLastCookieInChain;
 @property (strong, nonatomic) BBQCookieOrder *cookieOrder;
+@property (nonatomic) NSInteger numberOfTilesToDelayBy;
 
 
 

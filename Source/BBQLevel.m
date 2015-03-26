@@ -428,16 +428,17 @@
         }
     }
     
-    NSMutableArray *cleanedUpChains = [NSMutableArray array];
-    for (NSInteger i = 0; i < [chains count]; i++) {
-        NSArray *chain = chains[i];
-        if ([chain count] > 1) {
-            [cleanedUpChains addObject:chain];
-        }
-    }
+//    NSMutableArray *cleanedUpChains = [NSMutableArray array];
+//    for (NSInteger i = 0; i < [chains count]; i++) {
+//        NSArray *chain = chains[i];
+//        if ([chain count] > 1) {
+//            [cleanedUpChains addObject:chain];
+//        }
+//    }
     
-    return cleanedUpChains;
+    return chains;
 }
+
 
 
 #pragma mark - Level loading methods
