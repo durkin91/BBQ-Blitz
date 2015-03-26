@@ -558,43 +558,82 @@ static const CGFloat TileHeight = 36.0;
         CCActionMoveTo *moveAction = [CCActionMoveTo actionWithDuration:duration position:newPosition];
         
         //Remove the extra sprite on a combo if necessary
-        CCActionSequence *sequence;
-        if (cookie.combo) {
-            CCActionCallBlock *removeSprite = [CCActionCallBlock actionWithBlock:^{
-                if (cookie.combo.cookieOrder) {
-                    [self animateCookieOrderCollection:cookie.combo.cookieOrder cookieToAnimate:cookie isFinalCookie:NO];
-                }
-                else {
-                    [cookie.combo.rootCookie.sprite removeFromParent];
-                }
-                
-                
+        CCActionCallBlock *removeRootCookie;
+        CCActionCallBlock *removeLastCookie;
+        
+        //Take care of removing root cookie
+        if (cookie.combo && cookie.combo.rootCookie && cookie.combo.rootCookie.combo.cookieOrder) {
+            removeRootCookie = [CCActionCallBlock actionWithBlock:^{
+                CCActionSequence *removalSequence = [self animateCookieOrderCollection:cookie];
+                [cookie.combo.rootCookie.sprite runAction:removalSequence];
             }];
-            CCActionCallBlock *removeLastCookie = [CCActionCallBlock actionWithBlock:^{
-                if (cookie.combo.cookieOrder && cookie.combo.isLastCookie) {
-                    [self animateCookieOrderCollection:cookie.combo.cookieOrder cookieToAnimate:cookie isFinalCookie:YES];
-                }
-                else if (cookie.combo.isLastCookie) {
-                    [cookie.sprite removeFromParent];
-                }
-            }];
-            
-            //Remove final cookie in the chain
-            sequence = [CCActionSequence actions:moveAction, removeSprite, removeLastCookie, nil];
-        }
-        else {
-            sequence = [CCActionSequence actions:moveAction, nil];
         }
         
-        [cookie.sprite runAction:sequence];
+        else if (cookie.combo && !cookie.combo.cookieOrder && cookie.combo.rootCookie) {
+            removeRootCookie = [CCActionCallBlock actionWithBlock:^{
+                CCActionRemove *removeCookie = [CCActionRemove action];
+                [cookie.combo.rootCookie.sprite runAction:removeCookie];
+            }];
+        }
+        
+        //Take care of removing last cookie
+        CGFloat delayDuration = 0.15;
+        if (cookie.combo && cookie.combo.isLastCookie && cookie.combo.cookieOrder) {
+            removeLastCookie = [CCActionCallBlock actionWithBlock:^{
+                CCActionSequence *removeLastCookie = [self animateCookieOrderCollection:cookie];
+                CCActionDelay *delayForLastCookie = [CCActionDelay actionWithDuration:delayDuration];
+                CCActionSequence *finalSequence = [CCActionSequence actions: delayForLastCookie, removeLastCookie, nil];
+                [cookie.sprite runAction:finalSequence];
+            }];
+        }
+        
+        else if (cookie.combo && cookie.combo.isLastCookie && !cookie.combo.cookieOrder) {
+            removeLastCookie = [CCActionCallBlock actionWithBlock:^{
+                CCActionRemove *remove = [CCActionRemove action];
+                [cookie.sprite runAction:remove];
+            }];
+        }
+        
+        CCActionSequence *finalSequence = [CCActionSequence actions:moveAction, removeRootCookie, removeLastCookie, nil];
+        
+//        
+//        CCActionSequence *sequence;
+//        if (cookie.combo) {
+//            CCActionCallBlock *removeSprite = [CCActionCallBlock actionWithBlock:^{
+//                if (cookie.combo.cookieOrder) {
+//                    [self animateCookieOrderCollection:cookie.combo.cookieOrder cookieToAnimate:cookie isFinalCookie:NO];
+//                }
+//                else {
+//                    [cookie.combo.rootCookie.sprite removeFromParent];
+//                }
+//                
+//                
+//            }];
+//            CCActionCallBlock *removeLastCookie = [CCActionCallBlock actionWithBlock:^{
+//                if (cookie.combo.cookieOrder && cookie.combo.isLastCookie) {
+//                    [self animateCookieOrderCollection:cookie.combo.cookieOrder cookieToAnimate:cookie isFinalCookie:YES];
+//                }
+//                else if (cookie.combo.isLastCookie) {
+//                    [cookie.sprite removeFromParent];
+//                }
+//            }];
+//            
+//            //Remove final cookie in the chain
+//            sequence = [CCActionSequence actions:moveAction, removeSprite, removeLastCookie, nil];
+//        }
+//        else {
+//            sequence = [CCActionSequence actions:moveAction, nil];
+//        }
+        
+        [cookie.sprite runAction:finalSequence];
     }];
     
     CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil];
     [self runAction:sequence];
 }
 
-- (void)animateCookieOrderCollection:(BBQCookieOrder *)cookieOrder cookieToAnimate:(BBQCookie *)cookieToAnimate isFinalCookie:(BOOL)isFinalCookie {
-    CCSprite *orderSprite = cookieOrder.orderNode.cookieSprite.children[0];
+- (CCActionSequence *)animateCookieOrderCollection:(BBQCookie *)cookie {
+    CCSprite *orderSprite = cookie.combo.cookieOrder.orderNode.cookieSprite.children[0];
     CGPoint endPosition = [orderSprite convertToWorldSpace:CGPointZero];
     
     CCActionMoveTo *move = [CCActionMoveTo actionWithDuration:1.0 position:endPosition];
@@ -602,22 +641,13 @@ static const CGFloat TileHeight = 36.0;
     CCActionScaleTo *scaleDown = [CCActionScaleTo actionWithDuration:0.1 scale:1.0];
     CCActionRemove *removeSprite = [CCActionRemove action];
     CCActionCallBlock *updateOrderQuantity = [CCActionCallBlock actionWithBlock:^{
-        NSInteger quantityLeft = [cookieOrder.orderNode.quantityLabel.string integerValue];
+        NSInteger quantityLeft = [cookie.combo.cookieOrder.orderNode.quantityLabel.string integerValue];
         quantityLeft --;
-        cookieOrder.orderNode.quantityLabel.string = [NSString stringWithFormat:@"%i", quantityLeft];
+        cookie.combo.cookieOrder.orderNode.quantityLabel.string = [NSString stringWithFormat:@"%i", quantityLeft];
     }];
     
-    CCActionSequence *orderActionSequence;
-    
-    if (!isFinalCookie) {
-        orderActionSequence = [CCActionSequence actions:move, scaleUp, scaleDown, removeSprite, updateOrderQuantity, nil];
-        [cookieToAnimate.combo.rootCookie.sprite runAction:orderActionSequence];
-    }
-    else {
-        CCActionDelay *delay = [CCActionDelay actionWithDuration:0.15];
-        orderActionSequence = [CCActionSequence actions:delay, move, scaleUp, scaleDown, removeSprite, updateOrderQuantity, nil];
-        [cookieToAnimate.sprite runAction:orderActionSequence];
-    }
+    CCActionSequence *orderActionSequence = [CCActionSequence actions:move, scaleUp, scaleDown, removeSprite, updateOrderQuantity, nil];
+    return orderActionSequence;
 }
 
 #pragma mark - Popover methods
