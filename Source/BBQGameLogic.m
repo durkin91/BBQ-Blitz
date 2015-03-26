@@ -103,9 +103,9 @@
                     }
                     
                     //Set the number of tiles the animation needs to be delayed by, before the cookie dissapears. So the sequence is move > delay > cookie dissappears
-                    cookie.combo.numberOfTilesToDelayBy = [chain count] - x - 1;
-                    
-                    
+                    NSInteger chainCount = [chain count];
+                    NSInteger delay = chainCount - x - 1;
+                    cookie.combo.numberOfTilesToDelayBy = delay;
                     
                     //move over the last cookie in the chain
                     if (x == [chain count] - 1) {

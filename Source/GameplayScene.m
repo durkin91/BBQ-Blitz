@@ -558,72 +558,64 @@ static const CGFloat TileHeight = 36.0;
         CCActionMoveTo *moveAction = [CCActionMoveTo actionWithDuration:duration position:newPosition];
         
         //Remove the extra sprite on a combo if necessary
-        CCActionCallBlock *removeRootCookie;
-        CCActionCallBlock *removeLastCookie;
-        
-        //Take care of removing root cookie
-        if (cookie.combo && cookie.combo.rootCookie && cookie.combo.rootCookie.combo.cookieOrder) {
-            removeRootCookie = [CCActionCallBlock actionWithBlock:^{
-                CCActionSequence *removalSequence = [self animateCookieOrderCollection:cookie];
-                [cookie.combo.rootCookie.sprite runAction:removalSequence];
-            }];
+        CCActionDelay *delayRemoval;
+        CCActionDelay *delayForLastCookie;
+        CCAction *removeCookie;
+        if (cookie.combo) {
+            
+            //Generic delay
+            delayRemoval = [CCActionDelay actionWithDuration:cookie.combo.numberOfTilesToDelayBy * tileDuration];
+            
+            //Delay for last cookie
+            if (cookie.combo.isLastCookieInChain) {
+                delayForLastCookie = [CCActionDelay actionWithDuration:0.15];
+            }
+            
+            //Cookie removal
+            if (cookie.combo.cookieOrder) {
+                removeCookie = [self animateCookieOrderCollection:cookie];
+            }
+            
+            else {
+                removeCookie = [CCActionRemove action];
+            }
+            
         }
         
-        else if (cookie.combo && !cookie.combo.cookieOrder && cookie.combo.rootCookie) {
-            removeRootCookie = [CCActionCallBlock actionWithBlock:^{
-                CCActionRemove *removeCookie = [CCActionRemove action];
-                [cookie.combo.rootCookie.sprite runAction:removeCookie];
-            }];
-        }
-        
-        //Take care of removing last cookie
-        CGFloat delayDuration = 0.15;
-        if (cookie.combo && cookie.combo.isLastCookie && cookie.combo.cookieOrder) {
-            removeLastCookie = [CCActionCallBlock actionWithBlock:^{
-                CCActionSequence *removeLastCookie = [self animateCookieOrderCollection:cookie];
-                CCActionDelay *delayForLastCookie = [CCActionDelay actionWithDuration:delayDuration];
-                CCActionSequence *finalSequence = [CCActionSequence actions: delayForLastCookie, removeLastCookie, nil];
-                [cookie.sprite runAction:finalSequence];
-            }];
-        }
-        
-        else if (cookie.combo && cookie.combo.isLastCookie && !cookie.combo.cookieOrder) {
-            removeLastCookie = [CCActionCallBlock actionWithBlock:^{
-                CCActionRemove *remove = [CCActionRemove action];
-                [cookie.sprite runAction:remove];
-            }];
-        }
-        
-        CCActionSequence *finalSequence = [CCActionSequence actions:moveAction, removeRootCookie, removeLastCookie, nil];
-        
+//        //Take care of removing root cookie
+//        if (cookie.combo && cookie.combo.rootCookie && cookie.combo.rootCookie.combo.cookieOrder) {
+//            removeRootCookie = [CCActionCallBlock actionWithBlock:^{
+//                CCActionSequence *removalSequence = [self animateCookieOrderCollection:cookie];
+//                [cookie.combo.rootCookie.sprite runAction:removalSequence];
+//            }];
+//        }
 //        
-//        CCActionSequence *sequence;
-//        if (cookie.combo) {
-//            CCActionCallBlock *removeSprite = [CCActionCallBlock actionWithBlock:^{
-//                if (cookie.combo.cookieOrder) {
-//                    [self animateCookieOrderCollection:cookie.combo.cookieOrder cookieToAnimate:cookie isFinalCookie:NO];
-//                }
-//                else {
-//                    [cookie.combo.rootCookie.sprite removeFromParent];
-//                }
-//                
-//                
+//        else if (cookie.combo && !cookie.combo.cookieOrder && cookie.combo.rootCookie) {
+//            removeRootCookie = [CCActionCallBlock actionWithBlock:^{
+//                CCActionRemove *removeCookie = [CCActionRemove action];
+//                [cookie.combo.rootCookie.sprite runAction:removeCookie];
 //            }];
-//            CCActionCallBlock *removeLastCookie = [CCActionCallBlock actionWithBlock:^{
-//                if (cookie.combo.cookieOrder && cookie.combo.isLastCookie) {
-//                    [self animateCookieOrderCollection:cookie.combo.cookieOrder cookieToAnimate:cookie isFinalCookie:YES];
-//                }
-//                else if (cookie.combo.isLastCookie) {
-//                    [cookie.sprite removeFromParent];
-//                }
+//        }
+//        
+//        //Take care of removing last cookie
+//        CGFloat delayDuration = 0.15;
+//        if (cookie.combo && cookie.combo.isLastCookie && cookie.combo.cookieOrder) {
+//            removeLastCookie = [CCActionCallBlock actionWithBlock:^{
+//                CCActionSequence *removeLastCookie = [self animateCookieOrderCollection:cookie];
+//                CCActionDelay *delayForLastCookie = [CCActionDelay actionWithDuration:delayDuration];
+//                CCActionSequence *finalSequence = [CCActionSequence actions: delayForLastCookie, removeLastCookie, nil];
+//                [cookie.sprite runAction:finalSequence];
 //            }];
-//            
-//            //Remove final cookie in the chain
-//            sequence = [CCActionSequence actions:moveAction, removeSprite, removeLastCookie, nil];
 //        }
-//        else {
-//            sequence = [CCActionSequence actions:moveAction, nil];
+//        
+//        else if (cookie.combo && cookie.combo.isLastCookie && !cookie.combo.cookieOrder) {
+//            removeLastCookie = [CCActionCallBlock actionWithBlock:^{
+//                CCActionRemove *remove = [CCActionRemove action];
+//                [cookie.sprite runAction:remove];
+//            }];
 //        }
+        
+        CCActionSequence *finalSequence = [CCActionSequence actions:moveAction, delayRemoval, delayForLastCookie, removeCookie, nil];
         
         [cookie.sprite runAction:finalSequence];
     }];
