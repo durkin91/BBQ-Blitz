@@ -1,6 +1,7 @@
 
 #import "BBQMenu.h"
 #import "BBQCookieNode.h"
+#import "BBQCombo.h"
 
 @class BBQLevel;
 @class BBQComboAnimation;

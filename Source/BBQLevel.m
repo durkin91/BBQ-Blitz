@@ -9,6 +9,7 @@
 #import "BBQLevel.h"
 #import "BBQChain.h"
 #import "BBQGameLogic.h"
+#import "BBQCookieOrder.h"
 
 @interface BBQLevel ()
 
@@ -133,6 +134,15 @@
     
     return [set copy];
 
+}
+
+- (BBQCookieOrder *)cookieOrderForType:(NSInteger)cookieType {
+    for (BBQCookieOrder *order in self.cookieOrders) {
+        if (order.cookie.cookieType == cookieType) {
+            return order;
+        }
+    }
+    return nil;
 }
 
 - (NSArray *)allCookiesInColumnOrRow:(NSInteger)columnOrRow swipeDirection:(NSString *)swipeDirection {
@@ -515,7 +525,22 @@
         if (dictionary[@"securityGuardCountdown"]) {
             self.securityGuardCountdown = [dictionary[@"securityGuardCountdown"] unsignedIntegerValue];
         }
+        
+        //Setup Cookie Order objects
+        NSArray *orderTypes = dictionary[@"orderCookieType"];
+        NSArray *orderQuantities = dictionary[@"orderCookieQuantity"];
+        NSMutableArray *orders = [NSMutableArray array];
+        self.cookieOrders = [@[] mutableCopy];
+        for (int i = 0; i < [orderTypes count]; i ++) {
+            NSInteger orderType = [orderTypes[i] unsignedIntegerValue];
+            NSInteger orderQuantity = [orderQuantities[i] unsignedIntegerValue];
+            BBQCookieOrder *cookieOrder = [[BBQCookieOrder alloc] initWithCookieType:orderType startingAmount:orderQuantity];
+            [orders addObject:cookieOrder];
+        }
+        self.cookieOrders = orders;
+
     }
+    
     return self;
 }
 

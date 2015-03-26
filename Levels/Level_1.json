@@ -12,4 +12,6 @@
     "targetScore" : 1000,
     "moves" : 80,
     "securityGuardCountdown" : 10,
+    "orderCookieType" : [1, 2, 3, 4],
+    "orderCookieQuantity" : [5, 4, 2, 1],
 }

@@ -7,6 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "BBQCookieOrder.h"
+
 
 @class BBQCookie;
 
@@ -14,6 +16,7 @@
 
 @property (strong, nonatomic) BBQCookie *rootCookie;
 @property (assign, nonatomic) BOOL isLastCookie;
+@property (strong, nonatomic) BBQCookieOrder *cookieOrder;
 
 
 

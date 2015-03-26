@@ -13,6 +13,7 @@
 #import "BBQMoveCookie.h"
 #import "BBQPowerup.h"
 #import "BBQCombo.h"
+#import "BBQCookieOrder.h"
 
 @implementation BBQGameLogic
 
@@ -86,6 +87,7 @@
             
             //Change the cookie's position to the root cookie, and set it to nil in the model
             BBQCookie *rootCookie = chain[0];
+            BBQCookieOrder *order = [self.level cookieOrderForType:rootCookie.cookieType];
             for (NSInteger i = 0; i < [chain count]; i++) {
                 BBQCookie *cookie = chain[i];
                 [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
@@ -96,11 +98,19 @@
                 BBQCombo *combo = [[BBQCombo alloc] init];
                 cookie.combo = combo;
                 
-                if (i == 0) {
+                if (i > 0) {
+                    BBQCookie *root = chain[i-1];
+                    combo.rootCookie = root;
                 }
                 
-                else {
-                    combo.rootCookie = rootCookie;
+                if (i == [chain count] - 1) {
+                    combo.isLastCookie = YES;
+                }
+                
+                //Attach the order if relevant
+                if (order.quantityLeft > 0) {
+                    order.quantityLeft --;
+                    cookie.combo.cookieOrder = order;
                 }
 
             }
@@ -141,45 +151,13 @@
         }
 
     }
-
+    
+    //Update moves
+    self.movesLeft --;
+    
+    //Update orders
     
     
-//    //Move everything in the model
-//    BOOL finished = NO;
-//    while (!finished) {
-//        NSArray *sections = [self.level breakColumnOrRowIntoSectionsForDirection:swipeDirection columnOrRow:columnOrRow];
-//        for (NSInteger sectionIndex = 0; sectionIndex < [sections count]; sectionIndex ++) {
-//            NSMutableArray *section = sections[sectionIndex];
-//            for (NSInteger index = 0; index < [section count] - 1; index++) {
-//                BBQCookie *cookie = section[index];
-//                BBQCookie *nextCookie = section[index + 1];
-//                
-//                if (index == [section count] - 2) {
-//                    finished = YES;
-//                }
-//                else {
-//                    finished = NO;
-//                }
-//                
-//                if (cookie.cookieType == nextCookie.cookieType) {
-//                    
-//                    for (NSInteger i = index + 1; i < [section count]; i++) {
-//                        BBQCookie *nextCookie = section[i];
-//                        [self moveCookieOneTileOver:nextCookie swipeDirection:swipeDirection];
-//                        
-//                        if (i == index + 1) {
-//                            BBQCombo *combo = [[BBQCombo alloc] init];
-//                            nextCookie.combo = combo;
-//                            combo.rootCookie = section[i - 1];                            
-//                        }
-//                    }
-//                    
-//                    [section removeObject:cookie];
-//                    break;
-//                }
-//            }
-//        }
-//    }
     
     return finalCookies;
 }
