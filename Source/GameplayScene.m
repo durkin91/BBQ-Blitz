@@ -570,6 +570,9 @@ static const CGFloat TileHeight = 36.0;
             if (cookie.combo.isLastCookieInChain) {
                 delayForLastCookie = [CCActionDelay actionWithDuration:0.15];
             }
+            else {
+                delayForLastCookie = [CCActionDelay actionWithDuration:0];
+            }
             
             //Cookie removal
             if (cookie.combo.cookieOrder) {
