@@ -22,6 +22,8 @@ static const CGFloat TileHeight = 36.0;
 @property (strong, nonatomic) CCNode *tilesLayer;
 @property (strong, nonatomic) CCNode *cookiesLayer;
 @property (strong, nonatomic) CCNode *overlayTilesLayer;
+@property (strong, nonatomic) CCClippingNode *cropLayer;
+@property (strong, nonatomic) CCNode *maskLayer;
 @property (strong, nonatomic) BBQGameLogic *gameLogic;
 @property (assign, nonatomic) NSInteger swipeFromColumn;
 @property (assign, nonatomic) NSInteger swipeFromRow;
@@ -62,6 +64,11 @@ static const CGFloat TileHeight = 36.0;
     
     [self addSpritesForCookies:cookies];
     [self addTiles];
+    
+    self.cropLayer.stencil = self.maskLayer;
+    self.cropLayer.alphaThreshold = 0.0;
+    
+    
     [_menuNode displayMenuFor:START_LEVEL];
 }
 
@@ -109,19 +116,20 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)createSpriteForTile:(BBQTile *)tile column:(NSInteger)column row:(NSInteger)row {
     
-    NSString *directory = [NSString stringWithFormat:@"Tiles/%@", [tile spriteName]];
-    CCNode *tileSprite = [CCBReader load:directory];
+    //NSString *directory = [NSString stringWithFormat:@"Tiles/%@", [tile spriteName]];
+    //CCNode *tileSprite = [CCBReader load:directory];
+    CCSprite *tileSprite = [CCSprite spriteWithImageNamed:@"sprites/MaskTile.png"];
     tileSprite.position = [GameplayScene pointForColumn:column row:row];
     tileSprite.zOrder = 10;
-    [self.tilesLayer addChild:tileSprite];
+    [self.maskLayer addChild:tileSprite];
     tile.sprite = tileSprite;
     
-    if (tile.tileType == 3) {
-        BBQLaserTileNode *laserTileOverlay = (BBQLaserTileNode *)[CCBReader load:@"LaserTile"];
-        laserTileOverlay.position = [GameplayScene pointForColumn:column row:row];
-        [self.overlayTilesLayer addChild:laserTileOverlay];
-        tile.overlayTile = laserTileOverlay;
-    }
+//    if (tile.tileType == 3) {
+//        BBQLaserTileNode *laserTileOverlay = (BBQLaserTileNode *)[CCBReader load:@"LaserTile"];
+//        laserTileOverlay.position = [GameplayScene pointForColumn:column row:row];
+//        [self.overlayTilesLayer addChild:laserTileOverlay];
+//        tile.overlayTile = laserTileOverlay;
+//    }
 
 }
 
