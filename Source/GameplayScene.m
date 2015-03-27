@@ -268,6 +268,7 @@ static const CGFloat TileHeight = 36.0;
     self.userInteractionEnabled = NO;
     
     NSArray *movements = [self.gameLogic movementsForSwipe:direction columnOrRow:[self.gameLogic returnColumnOrRowWithSwipeDirection:direction column:self.swipeFromColumn row:self.swipeFromRow]];
+    [self changeCookieZIndex:movements];
     [self animateMovements:movements swipeDirection:direction completion:^{
         
         NSArray *columns = [self.gameLogic.level fillHoles];
@@ -294,6 +295,14 @@ static const CGFloat TileHeight = 36.0;
             }];
         }];
     }];
+}
+
+- (void)changeCookieZIndex:(NSArray *)cookies {
+    NSInteger z = 10;
+    for (BBQCookie *cookie in cookies) {
+        cookie.sprite.zOrder = z;
+        z = z + 10;
+    }
 }
 
 #pragma mark - Animate Swipe
