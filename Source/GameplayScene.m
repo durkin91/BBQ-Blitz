@@ -171,7 +171,7 @@ static const CGFloat TileHeight = 36.0;
         BBQCookieOrderNode *orderView = orderviews[i];
         NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [order.cookie spriteName]];
         CCSprite *sprite = [CCSprite spriteWithImageNamed:directory];
-        sprite.anchorPoint = CGPointMake(0.0, 0.5);
+        sprite.anchorPoint = CGPointMake(0.5, 0.5);
         [orderView.cookieSprite addChild:sprite];
         orderView.quantityLabel.string = [NSString stringWithFormat:@"%ld", (long)order.quantity];
         
@@ -549,7 +549,7 @@ static const CGFloat TileHeight = 36.0;
         CGPoint newPosition = [GameplayScene pointForColumn:cookie.column row:cookie.row];
         
         NSTimeInterval duration = 0;
-        CGFloat tileDuration = 1.0;
+        CGFloat tileDuration = 0.2;
         if ([swipeDirection isEqualToString:UP]) {
             duration = ((newPosition.y - cookie.sprite.position.y) / TileHeight) * tileDuration;
         }
@@ -638,10 +638,8 @@ static const CGFloat TileHeight = 36.0;
 
 - (CCActionSequence *)animateCookieOrderCollection:(BBQCookie *)cookie {
     CCSprite *orderSprite = cookie.combo.cookieOrder.orderNode.cookieSprite.children[0];
-    [cookie.sprite removeFromParent];
-    [self addChild:cookie.sprite];
-    CGPoint endPosition = [orderSprite convertToWorldSpace:orderSprite.position];
-    
+    CGPoint orderSpriteWorldPosition = [orderSprite.parent convertToWorldSpace:orderSprite.positionInPoints];
+    CGPoint endPosition = [_cookiesLayer convertToNodeSpace:orderSpriteWorldPosition];
     
     CCActionMoveTo *move = [CCActionMoveTo actionWithDuration:1.0 position:endPosition];
     CCActionScaleTo *scaleUp = [CCActionScaleTo actionWithDuration:0.1 scale:1.2];
