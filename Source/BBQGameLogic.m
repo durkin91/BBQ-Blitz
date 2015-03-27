@@ -57,19 +57,7 @@
     //Now create the movements
     NSMutableArray *movements = [NSMutableArray array];
     NSArray *sections = [self.level breakColumnOrRowIntoSectionsForDirection:swipeDirection columnOrRow:columnOrRow];
-    
-    //Setup the first and last cookies
-    NSArray *firstSection = sections[0];
-    BBQCookie *firstCookieOverall = firstSection[0];
-    
-    NSArray *lastSection = [sections lastObject];
-    BBQCookie *lastCookieOverall = [lastSection lastObject];
-    
-    NSInteger numberOfSections = [sections count];
-    
-    for (NSInteger sectionIndex = 0; sectionIndex < [sections count]; sectionIndex++) {
-        NSArray *section = sections[sectionIndex];
-        
+    for (NSArray *section in sections) {
         for (NSInteger i = 0; i < [section count]; i++) {
             BBQCookie *cookie = section[i];
             BBQMovement *movement;
@@ -82,28 +70,20 @@
             }
             //The first cookie needs to move one space then disappear
             else if (i == [section count] - 1) {
-                //Determine whether you're referencing the very first sprite on the column/row (if you're in the last section), or merely the first sprite in the next section (if you aren't in the last section)
-                BBQCookie *sourceCookie;
-                if (numberOfSections > 1 && sectionIndex < [sections count] - 1) {
-                    NSArray *nextSection = sections[sectionIndex + 1];
-                    sourceCookie = nextSection[0];
-                }
-                else {
-                    sourceCookie = firstCookieOverall;
-                }
+                BBQCookie *firstCookie = section[0];
                 
                 //Make an exiting movement
                 if ([swipeDirection isEqualToString:UP]) {
-                    movement = [[BBQMovement alloc] initWithCookie:cookie destinationColumn:sourceCookie.column destinationRow:sourceCookie.row + 1];
+                    movement = [[BBQMovement alloc] initWithCookie:cookie destinationColumn:firstCookie.column destinationRow:firstCookie.row + 1];
                 }
                 if ([swipeDirection isEqualToString:DOWN]) {
-                    movement = [[BBQMovement alloc] initWithCookie:cookie destinationColumn:sourceCookie.column destinationRow:sourceCookie.row - 1];
+                    movement = [[BBQMovement alloc] initWithCookie:cookie destinationColumn:firstCookie.column destinationRow:firstCookie.row - 1];
                 }
                 if ([swipeDirection isEqualToString:LEFT]) {
-                    movement = [[BBQMovement alloc] initWithCookie:cookie destinationColumn:sourceCookie.column - 1 destinationRow:sourceCookie.row];
+                    movement = [[BBQMovement alloc] initWithCookie:cookie destinationColumn:firstCookie.column - 1 destinationRow:firstCookie.row];
                 }
                 if ([swipeDirection isEqualToString:RIGHT]) {
-                    movement = [[BBQMovement alloc] initWithCookie:cookie destinationColumn:sourceCookie.column + 1 destinationRow:sourceCookie.row];
+                    movement = [[BBQMovement alloc] initWithCookie:cookie destinationColumn:firstCookie.column + 1 destinationRow:firstCookie.row];
                 }
                 
                 movement.sprite = cookie.sprite;
