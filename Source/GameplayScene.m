@@ -638,7 +638,10 @@ static const CGFloat TileHeight = 36.0;
 
 - (CCActionSequence *)animateCookieOrderCollection:(BBQCookie *)cookie {
     CCSprite *orderSprite = cookie.combo.cookieOrder.orderNode.cookieSprite.children[0];
-    CGPoint endPosition = [orderSprite convertToWorldSpace:CGPointZero];
+    [cookie.sprite removeFromParent];
+    [self addChild:cookie.sprite];
+    CGPoint endPosition = [orderSprite convertToWorldSpace:orderSprite.position];
+    
     
     CCActionMoveTo *move = [CCActionMoveTo actionWithDuration:1.0 position:endPosition];
     CCActionScaleTo *scaleUp = [CCActionScaleTo actionWithDuration:0.1 scale:1.2];
