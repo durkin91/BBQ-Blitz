@@ -2,8 +2,6 @@
 #import "BBQCookie.h"
 #import "BBQLevel.h"
 #import "BBQGameLogic.h"
-#import "BBQComboAnimation.h"
-#import "BBQMoveCookie.h"
 #import "BBQCookieOrderNode.h"
 #import "BBQRanOutOfMovesNode.h"
 #import "BBQLevelCompleteNode.h"
@@ -11,6 +9,7 @@
 #import "WorldsScene.h"
 #import "BBQLaserTileNode.h"
 #import "BBQCookieOrder.h"
+#import "BBQMovement.h"
 
 
 
@@ -307,179 +306,6 @@ static const CGFloat TileHeight = 36.0;
 
 #pragma mark - Animate Swipe
 
-
-- (void)animateSwipe:(NSDictionary *)animations completion:(dispatch_block_t)completion {
-    
-    const NSTimeInterval duration = 0.4;
-    
-    ////**** COMBOS ACTION BLOCK ****
-    
-    CCActionCallBlock *performCombosAndMoveCookies = [CCActionCallBlock actionWithBlock:^{
-        
-        ////COMBOS
-        for (BBQComboAnimation *combo in animations[COMBOS]) {
-            
-            //Put cookie A on top and move cookie A to cookie B, then remove cookie A
-            combo.cookieA.sprite.zOrder = 100;
-            combo.cookieB.sprite.zOrder = 90;
-            
-            CCActionMoveTo *moveA = [CCActionMoveTo actionWithDuration:duration position:[GameplayScene pointForColumn:combo.destinationColumn row:combo.destinationRow]];
-            CCActionRemove *removeA = [CCActionRemove action];
-            CCActionCallBlock *removeB = [CCActionCallBlock actionWithBlock:^{
-                if (combo.isRootCombo) {
-                    CCActionRemove *remove = [CCActionRemove action];
-                    [combo.cookieB.sprite runAction:remove];
-                }
-
-            }];
-            
-            CCActionCallBlock *updateCountCircle = [CCActionCallBlock actionWithBlock:^{
-                
-                //scale up and down
-                CCActionScaleTo *scaleUp = [CCActionScaleTo actionWithDuration:0.1 scale:1.2];
-                CCActionScaleTo *scaleDown = [CCActionScaleTo actionWithDuration:0.1 scale:1.0];
-                CCActionSequence *scaleSequence = [CCActionSequence actions:scaleUp, scaleDown, nil];
-                [combo.cookieB.sprite runAction:scaleSequence];
-                
-                //Display score label
-                if (combo.score > 0) {
-                    NSString *scoreString = [NSString stringWithFormat:@"%ld", (long)combo.score];
-                    CCLabelTTF *scoreLabel = [CCLabelTTF labelWithString:scoreString fontName:@"GillSans-BoldItalic" fontSize:12.0];
-                    scoreLabel.position = [GameplayScene pointForColumn:combo.destinationColumn row:combo.destinationRow];
-                    scoreLabel.outlineColor = [CCColor blackColor];
-                    scoreLabel.outlineWidth = 1.0;
-                    scoreLabel.zOrder = 300;
-                    [_cookiesLayer addChild:scoreLabel];
-                    [BBQAnimations animateScoreLabel:scoreLabel];
-                }
-                
-                //If it is a static tile, break the tile
-                if (combo.didBreakOutOfStaticTile == YES) {
-                    BBQTile *tileB = [self.gameLogic.level tileAtColumn:combo.cookieB.column row:combo.cookieB.row];
-                    
-                    if (tileB.overlayTile) {
-                        if (tileB.staticTileCountdown > 0) {
-                            tileB.overlayTile.countLabel.string = [NSString stringWithFormat:@"%ld", (long)tileB.staticTileCountdown];
-                        }
-                        
-                        else if (tileB.staticTileCountdown <= 0) {
-                            [tileB.overlayTile removeFromParent];
-                            tileB.overlayTile = nil;
-                        }
-                    }
-                    
-                    else if (tileB.tileType == 1) {
-                        [tileB.sprite removeFromParent];
-                        CCNode *newSprite = [CCBReader load:@"Tiles/RegularTile"];
-                        newSprite.position = [GameplayScene pointForColumn:combo.cookieB.column row:combo.cookieB.row];
-                        [_tilesLayer addChild:newSprite];
-                        tileB.sprite = newSprite;
-                    }
-                }
-                
-                //Take care of powerups
-                if (combo.powerup) {
-                    for (BBQCookie *cookie in combo.powerup.disappearingCookies) {
-                        [cookie.sprite removeFromParent];
-                    }
-                }
-                
-                //Take care of steel blocker tiles
-                for (BBQTile *tile in combo.steelBlockerTiles) {
-                    CCParticleSystem *explosion = (CCParticleSystem *)[CCBReader load:@"SteelBlockersEffect"];
-                    explosion.autoRemoveOnFinish = TRUE;
-                    explosion.position = tile.sprite.position;
-                    [_cookiesLayer addChild:explosion];
-                    [tile.sprite removeFromParent];
-                    [self createSpriteForTile:tile column:tile.column row:tile.row];
-                    
-                }
-
-            }];
-            
-            CCActionSequence *sequenceA = [CCActionSequence actions:moveA, removeA, removeB, updateCountCircle, nil];
-            [combo.cookieA.sprite runAction:sequenceA];
-            
-        }
-        
-        ////MOVE COOKIES
-        for (BBQMoveCookie *movement in animations[MOVEMENTS]) {
-            CGPoint position = [GameplayScene pointForColumn:movement.destinationColumn row:movement.destinationRow];
-            CCActionMoveTo *moveAnimation = [CCActionMoveTo actionWithDuration:duration position:position];
-            [movement.cookieA.sprite runAction:moveAnimation];
-        }
-        
-    }];
-    
-    //**** DELAY ****
-    CCActionDelay *delayOne = [CCActionDelay actionWithDuration:duration + 0.3];
-    
-    //**** MOVEMENT BATCH TWO ****
-    CCActionCallBlock *movementsBatchTwo = [CCActionCallBlock actionWithBlock:^{
-        NSArray *movements = animations[MOVEMENTS_BATCH_2];
-        for (BBQMoveCookie *movement in movements) {
-            CGPoint position = [GameplayScene pointForColumn:movement.destinationColumn row:movement.destinationRow];
-            CCActionMoveTo *moveAnimation = [CCActionMoveTo actionWithDuration:duration position:position];
-            [movement.cookieA.sprite runAction:moveAnimation];
-        }
-    }];
-    
-    //**** DELAY ****
-    CCActionDelay *delayTwo = [CCActionDelay actionWithDuration:duration + 0.3];
-    
-    //**** DROP EXISTING COOKIES ****
-    CCActionCallBlock *dropExistingCookies = [CCActionCallBlock actionWithBlock:^{
-        NSArray *dropMovements = animations[DROP_MOVEMENTS];
-        for (BBQMoveCookie *movement in dropMovements) {
-            CGPoint position = [GameplayScene pointForColumn:movement.destinationColumn row:movement.destinationRow];
-            CCActionMoveTo *moveAnimation = [CCActionMoveTo actionWithDuration:duration position:position];
-            [movement.cookieA.sprite runAction:moveAnimation];
-        }
-    }];
-    
-    
-    //**** UPDATE SCORE & MOVES ****
-    CCActionCallBlock *updateScoreBlock = [CCActionCallBlock actionWithBlock:^{
-        NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-        [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
-        _scoreLabel.string = [formatter stringFromNumber:@(self.gameLogic.currentScore)];
-        _movesLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.movesLeft];
-        NSLog(@"Moves left label: %@", _movesLabel.string);
-    }];
-    
-    //**** CREATE SPRITES FOR NEW GOOSE EGG COOKIES AND STEEL BLOCKER TILES && SECURITY GUARD COUNTDOWN UPDATE ****
-    CCActionCallBlock *newSprites = [CCActionCallBlock actionWithBlock:^{
-        NSArray *newCookies = animations[GOLDEN_GOOSE_COOKIES];
-        for (BBQCookie *cookie in newCookies) {
-            [self spriteForCookie:cookie];
-        }
-        
-        NSArray *newSteelBlockerTiles = animations[NEW_STEEL_BLOCKER_TILES];
-        for (BBQTile *tile in newSteelBlockerTiles) {
-            [tile.sprite removeFromParent];
-            [self createSpriteForTile:tile column:tile.column row:tile.row];
-        }
-        
-        for (BBQCookie *guard in self.gameLogic.level.securityGuardCookies) {
-            guard.sprite.countLabel.string = [NSString stringWithFormat:@"%ld", (long)guard.countdown];
-        }
-
-        
-    }];
-    
-    //**** UPDATE COUNTDOWN ON SECURITY TILES ****//
-//    CCActionCallBlock *updateSecurityGuards = [CCActionCallBlock actionWithBlock:^{
-//        for (BBQCookie *guard in self.gameLogic.level.securityGuardCookies) {
-//            guard.sprite.countLabel.string = [NSString stringWithFormat:@"%ld", (long)guard.countdown];
-//        }
-//    }];
-    
-
-    ////**** FINAL SEQUENCE ****
-    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, delayOne, movementsBatchTwo, delayTwo, dropExistingCookies, updateScoreBlock, newSprites, [CCActionCallBlock actionWithBlock:completion], nil];
-    [_cookiesLayer runAction:finalSequence];
-}
-
 - (void)updateScoreAndMoves {
     NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
     [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
@@ -541,98 +367,108 @@ static const CGFloat TileHeight = 36.0;
     
 }
 
-- (void)animateMovements:(NSArray *)finalCookies swipeDirection:(NSString *)swipeDirection completion: (dispatch_block_t)completion {
+//- (void)animateMovements:(NSArray *)finalCookies swipeDirection:(NSString *)swipeDirection completion: (dispatch_block_t)completion {
+//    
+//    __block NSTimeInterval longestDuration = 0;
+//    
+//    [finalCookies enumerateObjectsUsingBlock:^(BBQCookie *cookie, NSUInteger idx, BOOL *stop) {
+//        CGPoint newPosition = [GameplayScene pointForColumn:cookie.column row:cookie.row];
+//        
+//        NSTimeInterval duration = 0;
+//        CGFloat tileDuration = 0.2;
+//        if ([swipeDirection isEqualToString:UP]) {
+//            duration = ((newPosition.y - cookie.sprite.position.y) / TileHeight) * tileDuration;
+//        }
+//        else if ([swipeDirection isEqualToString:DOWN]) {
+//            duration = ((cookie.sprite.position.y - newPosition.y) / TileHeight) * tileDuration;
+//        }
+//        else if ([swipeDirection isEqualToString:RIGHT]) {
+//            duration = ((newPosition.x - cookie.sprite.position.x) / TileWidth) * tileDuration;
+//        }
+//        else if ([swipeDirection isEqualToString:LEFT]) {
+//            duration = ((cookie.sprite.position.x - newPosition.x) / TileWidth) * tileDuration;
+//        }
+//        longestDuration = MAX(longestDuration, duration);
+//        
+//        CCActionMoveTo *moveAction = [CCActionMoveTo actionWithDuration:duration position:newPosition];
+//        
+//        //Remove the extra sprite on a combo if necessary
+//        CCActionDelay *delayRemoval;
+//        CCActionDelay *delayForLastCookie;
+//        CCAction *removeCookie;
+//        if (cookie.combo) {
+//            
+//            //Generic delay
+//            delayRemoval = [CCActionDelay actionWithDuration:cookie.combo.numberOfTilesToDelayBy * tileDuration];
+//            
+//            //Delay for last cookie
+//            if (cookie.combo.isLastCookieInChain) {
+//                delayForLastCookie = [CCActionDelay actionWithDuration:0.15];
+//            }
+//            else {
+//                delayForLastCookie = [CCActionDelay actionWithDuration:0];
+//            }
+//            
+//            //Cookie removal
+//            if (cookie.combo.cookieOrder) {
+//                removeCookie = [self animateCookieOrderCollection:cookie];
+//            }
+//            
+//            else {
+//                removeCookie = [CCActionRemove action];
+//            }
+//            
+//        }
+//                
+//        CCActionSequence *finalSequence = [CCActionSequence actions:moveAction, delayRemoval, delayForLastCookie, removeCookie, nil];
+//        
+//        [cookie.sprite runAction:finalSequence];
+//    }];
+//    
+//    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil];
+//    [self runAction:sequence];
+//}
+
+- (void)animateMovements:(NSArray *)movements swipeDirection:(NSString *)swipeDirection completion: (dispatch_block_t)completion {
     
-    __block NSTimeInterval longestDuration = 0;
+    __block NSTimeInterval tileDuration = 1.0;
     
-    [finalCookies enumerateObjectsUsingBlock:^(BBQCookie *cookie, NSUInteger idx, BOOL *stop) {
-        CGPoint newPosition = [GameplayScene pointForColumn:cookie.column row:cookie.row];
+    [movements enumerateObjectsUsingBlock:^(BBQMovement *movement, NSUInteger idx, BOOL *stop) {
+        CGPoint newPosition = [GameplayScene pointForColumn:movement.destinationColumn row:movement.destinationRow];
         
-        NSTimeInterval duration = 0;
-        CGFloat tileDuration = 0.2;
-        if ([swipeDirection isEqualToString:UP]) {
-            duration = ((newPosition.y - cookie.sprite.position.y) / TileHeight) * tileDuration;
-        }
-        else if ([swipeDirection isEqualToString:DOWN]) {
-            duration = ((cookie.sprite.position.y - newPosition.y) / TileHeight) * tileDuration;
-        }
-        else if ([swipeDirection isEqualToString:RIGHT]) {
-            duration = ((newPosition.x - cookie.sprite.position.x) / TileWidth) * tileDuration;
-        }
-        else if ([swipeDirection isEqualToString:LEFT]) {
-            duration = ((cookie.sprite.position.x - newPosition.x) / TileWidth) * tileDuration;
-        }
-        longestDuration = MAX(longestDuration, duration);
-        
-        CCActionMoveTo *moveAction = [CCActionMoveTo actionWithDuration:duration position:newPosition];
-        
-        //Remove the extra sprite on a combo if necessary
-        CCActionDelay *delayRemoval;
-        CCActionDelay *delayForLastCookie;
-        CCAction *removeCookie;
-        if (cookie.combo) {
+        if (movement.isEnteringCookie) {
             
-            //Generic delay
-            delayRemoval = [CCActionDelay actionWithDuration:cookie.combo.numberOfTilesToDelayBy * tileDuration];
-            
-            //Delay for last cookie
-            if (cookie.combo.isLastCookieInChain) {
-                delayForLastCookie = [CCActionDelay actionWithDuration:0.15];
+            BBQCookieNode *sprite;
+            if ([swipeDirection isEqualToString:UP]) {
+                sprite = [self createCookieNodeForCookie:movement.cookie column:movement.destinationColumn row:movement.destinationRow - 1];
             }
-            else {
-                delayForLastCookie = [CCActionDelay actionWithDuration:0];
+            else if ([swipeDirection isEqualToString:DOWN]) {
+                sprite = [self createCookieNodeForCookie:movement.cookie column:movement.destinationColumn row:movement.destinationRow + 1];
             }
-            
-            //Cookie removal
-            if (cookie.combo.cookieOrder) {
-                removeCookie = [self animateCookieOrderCollection:cookie];
+            else if ([swipeDirection isEqualToString:LEFT]) {
+                sprite = [self createCookieNodeForCookie:movement.cookie column:movement.destinationColumn + 1 row:movement.destinationRow];
             }
-            
-            else {
-                removeCookie = [CCActionRemove action];
+            else if ([swipeDirection isEqualToString:RIGHT]) {
+                sprite = [self createCookieNodeForCookie:movement.cookie column:movement.destinationColumn - 1 row:movement.destinationRow];
             }
-            
+            movement.sprite = sprite;
+            movement.cookie.sprite = sprite;
         }
         
-//        //Take care of removing root cookie
-//        if (cookie.combo && cookie.combo.rootCookie && cookie.combo.rootCookie.combo.cookieOrder) {
-//            removeRootCookie = [CCActionCallBlock actionWithBlock:^{
-//                CCActionSequence *removalSequence = [self animateCookieOrderCollection:cookie];
-//                [cookie.combo.rootCookie.sprite runAction:removalSequence];
-//            }];
-//        }
-//        
-//        else if (cookie.combo && !cookie.combo.cookieOrder && cookie.combo.rootCookie) {
-//            removeRootCookie = [CCActionCallBlock actionWithBlock:^{
-//                CCActionRemove *removeCookie = [CCActionRemove action];
-//                [cookie.combo.rootCookie.sprite runAction:removeCookie];
-//            }];
-//        }
-//        
-//        //Take care of removing last cookie
-//        CGFloat delayDuration = 0.15;
-//        if (cookie.combo && cookie.combo.isLastCookie && cookie.combo.cookieOrder) {
-//            removeLastCookie = [CCActionCallBlock actionWithBlock:^{
-//                CCActionSequence *removeLastCookie = [self animateCookieOrderCollection:cookie];
-//                CCActionDelay *delayForLastCookie = [CCActionDelay actionWithDuration:delayDuration];
-//                CCActionSequence *finalSequence = [CCActionSequence actions: delayForLastCookie, removeLastCookie, nil];
-//                [cookie.sprite runAction:finalSequence];
-//            }];
-//        }
-//        
-//        else if (cookie.combo && cookie.combo.isLastCookie && !cookie.combo.cookieOrder) {
-//            removeLastCookie = [CCActionCallBlock actionWithBlock:^{
-//                CCActionRemove *remove = [CCActionRemove action];
-//                [cookie.sprite runAction:remove];
-//            }];
-//        }
+        CCActionMoveTo *moveSprite = [CCActionMoveTo actionWithDuration:tileDuration position:newPosition];
+        CCActionSequence *sequence;
+        if (movement.isExitingCookie) {
+            sequence = [CCActionSequence actions:moveSprite, [CCActionRemove action], nil];
+        }
+        else {
+            sequence = [CCActionSequence actions:moveSprite, nil];
+        }
         
-        CCActionSequence *finalSequence = [CCActionSequence actions:moveAction, delayRemoval, delayForLastCookie, removeCookie, nil];
+        [movement.sprite runAction:sequence];
         
-        [cookie.sprite runAction:finalSequence];
     }];
     
-    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil];
+    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:tileDuration], [CCActionCallBlock actionWithBlock:completion], nil];
     [self runAction:sequence];
 }
 
