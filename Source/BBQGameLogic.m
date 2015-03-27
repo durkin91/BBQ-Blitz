@@ -832,7 +832,14 @@
 
 - (BOOL)isLevelComplete {
     //Put logic in here
-    BOOL isComplete = NO;
+    BOOL isComplete = YES;
+    
+    for (BBQCookieOrder *order in self.level.cookieOrders) {
+        if (order.quantityLeft > 0) {
+            isComplete = NO;
+            break;
+        }
+    }
 
     
     return isComplete;
