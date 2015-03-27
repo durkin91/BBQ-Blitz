@@ -9,6 +9,7 @@
 #import "BBQAnimations.h"
 #import "GameplayScene.h"
 
+
 @implementation BBQAnimations
 
 + (void)animateButton:(CCButton *)button {
@@ -147,107 +148,27 @@
 
 #pragma mark - Gameplay Scene Animations
 
-//+ (void)animateSwipe:(NSDictionary *)animations scoreLabel:(CCLabelTTF *)scoreLabel movesLabel:(CCLabelTTF *)movesLabel cookiesLayer:(CCNode *)cookiesLayer tilesLayer:(CCNode *)tilesLayer currentScore:(NSInteger)currentScore movesLeft:(NSInteger)movesLeft gameLogic:(BBQGameLogic *)gameLogic completion:(dispatch_block_t)completion {
-//    
-//    const NSTimeInterval duration = 0.4;
-//    
-//    ////**** COMBOS ACTION BLOCK ****
-//    
-//    CCActionCallBlock *performCombosAndMoveCookies = [CCActionCallBlock actionWithBlock:^{
-//        
-//        ////COMBOS
-//        for (BBQComboAnimation *combo in animations[COMBOS]) {
-//            
-//            //Put cookie A on top and move cookie A to cookie B, then remove cookie A
-//            combo.cookieA.sprite.zOrder = 100;
-//            combo.cookieB.sprite.zOrder = 90;
-//            
-//            CCActionMoveTo *moveA = [CCActionMoveTo actionWithDuration:duration position:[GameplayScene pointForColumn:combo.destinationColumn row:combo.destinationRow]];
-//            CCActionRemove *removeA = [CCActionRemove action];
-//            
-//            CCActionCallBlock *updateCountCircle = [CCActionCallBlock actionWithBlock:^{
-//
-//                if (combo.cookieB.isFinalCookie) {
-//                    combo.cookieB.sprite.countCircle.visible = NO;
-//                    combo.cookieB.sprite.tickSprite.visible = YES;
-//                }
-//                
-//                else {
-//                    //combo.cookieB.sprite.countCircle.visible = YES;
-//                    combo.cookieB.sprite.countLabel.string = [NSString stringWithFormat:@"%ld", (long)combo.cookieB.count];
-//                }
-//                
-//                //scale up and down
-//                CCActionScaleTo *scaleUp = [CCActionScaleTo actionWithDuration:0.1 scale:1.2];
-//                CCActionScaleTo *scaleDown = [CCActionScaleTo actionWithDuration:0.1 scale:1.0];
-//                CCActionSequence *scaleSequence = [CCActionSequence actions:scaleUp, scaleDown, nil];
-//                [combo.cookieB.sprite runAction:scaleSequence];
-//                
-//                //Display score label
-//                if (combo.score > 0) {
-//                    NSString *scoreString = [NSString stringWithFormat:@"%ld", (long)combo.score];
-//                    CCLabelTTF *scoreLabel = [CCLabelTTF labelWithString:scoreString fontName:@"GillSans-BoldItalic" fontSize:12.0];
-//                    scoreLabel.position = [GameplayScene pointForColumn:combo.destinationColumn row:combo.destinationRow];
-//                    scoreLabel.outlineColor = [CCColor blackColor];
-//                    scoreLabel.outlineWidth = 1.0;
-//                    scoreLabel.zOrder = 300;
-//                    [cookiesLayer addChild:scoreLabel];
-//                    [scoreLabel runAction:[self animateScoreLabel:scoreLabel]];
-//                }
-//                
-//                //If it is a static tile, break the tile
-//                if (combo.didBreakOutOfStaticTile == YES) {
-//                    BBQTile *tileB = [gameLogic.level tileAtColumn:combo.cookieB.column row:combo.cookieB.row];
-//                    
-//                    if (tileB.overlayTile) {
-//                        if (tileB.staticTileCountdown > 0) {
-//                            tileB.overlayTile.countLabel.string = [NSString stringWithFormat:@"%ld", (long)tileB.staticTileCountdown];
-//                        }
-//                        
-//                        else if (tileB.staticTileCountdown <= 0) {
-//                            [tileB.overlayTile removeFromParent];
-//                            tileB.overlayTile = nil;
-//                        }
-//                    }
-//                    
-//                    else if (tileB.tileType == 1) {
-//                        [tileB.sprite removeFromParent];
-//                        CCNode *newSprite = [CCBReader load:@"Tiles/RegularTile"];
-//                        newSprite.position = [GameplayScene pointForColumn:combo.cookieB.column row:combo.cookieB.row];
-//                        [tilesLayer addChild:newSprite];
-//                        tileB.sprite = newSprite;
-//                    }
-//                }
-//                
-//            }];
-//            
-//            CCActionSequence *sequenceA = [CCActionSequence actions:moveA, removeA, updateCountCircle, nil];
-//            [combo.cookieA.sprite runAction:sequenceA];
-//            
-//        }
-//        
-//        ////MOVE COOKIES
-//        for (BBQMoveCookie *movement in animations[MOVEMENTS]) {
-//            CGPoint position = [GameplayScene pointForColumn:movement.destinationColumn row:movement.destinationRow];
-//            CCActionMoveTo *moveAnimation = [CCActionMoveTo actionWithDuration:duration position:position];
-//            [movement.cookieA.sprite runAction:moveAnimation];
-//        }
-//        
-//    }];
-//    
-//    
-//    //**** UPDATE SCORE & MOVES ****
-//    CCActionCallBlock *updateScoreBlock = [CCActionCallBlock actionWithBlock:^{
-//        NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-//        [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
-//        scoreLabel.string = [formatter stringFromNumber:@(currentScore)];
-//        movesLabel.string = [NSString stringWithFormat:@"%ld", (long)movesLeft];
-//        NSLog(@"Moves left label: %@", movesLabel.string);
-//    }];
-//    
-//    ////**** FINAL SEQUENCE ****
-//    CCActionSequence *finalSequence = [CCActionSequence actions:performCombosAndMoveCookies, updateScoreBlock, [CCActionCallBlock actionWithBlock:completion], nil];
-//    [cookiesLayer runAction:finalSequence];
-//}
++ (void)animateFallingCookies:(NSArray *)columns tileHeight:(CGFloat)tileHeight gameplayScene:(CCNode *)gameplayScene completion:(dispatch_block_t)completion {
+    
+    __block NSTimeInterval longestDuration = 0;
+    
+    for (NSArray *array in columns) {
+        [array enumerateObjectsUsingBlock:^(BBQCookie *cookie, NSUInteger idx, BOOL *stop) {
+            CGPoint newPosition = [GameplayScene pointForColumn:cookie.column row: cookie.row];
+            NSTimeInterval delay = 0.5 + 0.15*idx;
+            
+            NSTimeInterval duration = ((cookie.sprite.position.y - newPosition.y) / tileHeight) * 0.1;
+            longestDuration = MAX(longestDuration, duration + delay);
+            
+            CCActionMoveTo *moveAction = [CCActionMoveTo actionWithDuration:duration position:newPosition];
+            CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:delay], moveAction, nil];
+            [cookie.sprite runAction:sequence];
+        }];
+    }
+    
+    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil];
+    [gameplayScene runAction:sequence];
+    
+}
 
 @end

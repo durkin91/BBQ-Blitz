@@ -12,6 +12,8 @@
 #import "BBQComboAnimation.h"
 #import "BBQMoveCookie.h"
 
+@class BBQCookieOrder;
+
 static const NSInteger NumColumns = 9;
 static const NSInteger NumRows = 9;
 
@@ -23,6 +25,7 @@ static const NSInteger NumRows = 9;
 @property (strong, nonatomic) NSMutableArray *goldenGooseTiles;
 @property (strong, nonatomic) NSMutableArray *steelBlockerFactoryTiles;
 @property (strong, nonatomic) NSMutableArray *securityGuardCookies;
+@property (strong, nonatomic) NSArray *cookieOrders;
 
 
 - (NSSet *)shuffle;
@@ -33,5 +36,13 @@ static const NSInteger NumRows = 9;
 - (void)replaceCookieAtColumn:(int)column row:(int)row withCookie:(BBQCookie *)cookie;
 - (NSSet *)createCookiesInBlankTiles;
 - (BBQCookie *)createCookieAtColumn:(NSInteger)column row:(NSInteger)row withType:(NSUInteger)cookieType;
+- (NSArray *)fillHoles;
+- (NSArray *)topUpCookies;
+- (NSArray *)breakColumnOrRowIntoSectionsForDirection:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow;
+- (NSSet *)chainsForColumnOrRow:(NSInteger)columnOrRow swipeDirection:(NSString *)swipeDirection;
+- (NSArray *)allCookiesInColumnOrRow:(NSInteger)columnOrRow swipeDirection:(NSString *)swipeDirection;
+- (NSArray *)chainsInSection:(NSArray *)section;
+- (BBQCookieOrder *)cookieOrderForType:(NSInteger)cookieType;
+
 
 @end

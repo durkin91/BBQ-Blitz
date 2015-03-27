@@ -7,7 +7,15 @@
 //
 
 #import "BBQLevel.h"
+#import "BBQChain.h"
+#import "BBQGameLogic.h"
+#import "BBQCookieOrder.h"
 
+@interface BBQLevel ()
+
+@property (strong, nonatomic) NSSet *possibleChains;
+
+@end
 
 @implementation BBQLevel {
     BBQCookie *_cookies[NumColumns][NumRows];
@@ -30,7 +38,157 @@
 
 
 - (NSSet *)shuffle {
-    return [self createCookiesInBlankTiles];
+    NSSet *set;
+    do {
+        set = [self createCookiesInBlankTiles];
+        [self detectPossibleChains];
+        NSLog(@"possible chains: %@", self.possibleChains);
+        NSLog(@"Number of chains: %lu", (unsigned long)[self.possibleChains count]);
+    }
+    while ([self.possibleChains count] == 0);
+    
+    return set;
+}
+
+- (void)detectPossibleChains {
+    NSMutableSet *allChains;
+    
+    //Vertical Chains
+    for (NSInteger column = 0; column < NumColumns; column ++) {
+        for (NSInteger row = NumRows - 1; row >= 0; row --) {
+            NSUInteger cookieType = _cookies[column][row].cookieType;
+            
+            if (cookieType > 0) {
+                
+                //Check for chains going down
+                BBQChain *vertChain;
+                for (NSInteger i = row - 1; i >= 0 && _cookies[column][i].cookieType == cookieType; i--) {
+                    
+                    if (!allChains) {
+                        allChains = [NSMutableSet set];
+                    }
+                    
+                    if (!vertChain) {
+                        vertChain = [[BBQChain alloc] initWithColumn:column row:-1];
+                        vertChain.cookiesInChain = [NSMutableArray array];
+                        [allChains addObject:vertChain];
+                        [vertChain.cookiesInChain addObject:_cookies[column][row]];
+                    }
+                    
+                    [vertChain.cookiesInChain addObject:_cookies[column][i]];
+                    
+                    //subtract a row from the loop, because otherwise vertical chains of 3 or more are recorded twice
+                    row --;
+                }
+
+            }
+        }
+    }
+    
+    //Horizontal Chains
+    for (NSInteger row = 0; row < NumRows; row ++) {
+        for (NSInteger column = 0; column < NumColumns; column++) {
+            NSUInteger cookieType = _cookies[column][row].cookieType;
+            
+            if (cookieType > 0) {
+                //Check for chains to the left
+                BBQChain *horzChain;
+                for (NSInteger i = column - 1; i >= 0 && _cookies[i][row].cookieType == cookieType; i--) {
+                    
+                    if (!allChains) {
+                        allChains = [NSMutableSet set];
+                    }
+                    
+                    if (!horzChain) {
+                        horzChain = [[BBQChain alloc] initWithColumn:-1 row:row];
+                        horzChain.cookiesInChain = [NSMutableArray array];
+                        [allChains addObject:horzChain];
+                        [horzChain.cookiesInChain addObject:_cookies[column][row]];
+                    }
+                    
+                    [horzChain.cookiesInChain addObject:_cookies[i][row]];
+                    
+                    column++;
+                }
+            }
+        }
+    }
+        
+    self.possibleChains = [allChains copy];
+}
+
+- (NSSet *)chainsForColumnOrRow:(NSInteger)columnOrRow swipeDirection:(NSString *)swipeDirection {
+    NSMutableSet *set = [NSMutableSet set];
+    for (BBQChain *chain in self.possibleChains) {
+        if ([swipeDirection isEqualToString:UP] || [swipeDirection isEqualToString:DOWN]) {
+            if (chain.activeColumn == columnOrRow) {
+                [set addObject:chain];
+            }
+        }
+        else if ([swipeDirection isEqualToString:LEFT] || [swipeDirection isEqualToString:RIGHT]) {
+            if (chain.activeRow == columnOrRow) {
+                [set addObject:chain];
+            }
+        }
+    }
+    
+    return [set copy];
+
+}
+
+- (BBQCookieOrder *)cookieOrderForType:(NSInteger)cookieType {
+    for (BBQCookieOrder *order in self.cookieOrders) {
+        if (order.cookie.cookieType == cookieType) {
+            return order;
+        }
+    }
+    return nil;
+}
+
+- (NSArray *)allCookiesInColumnOrRow:(NSInteger)columnOrRow swipeDirection:(NSString *)swipeDirection {
+    NSMutableArray *array = [NSMutableArray array];
+    
+    if ([swipeDirection isEqualToString:UP]) {
+        NSInteger column = columnOrRow;
+        for (NSInteger row = NumRows - 1; row >= 0; row --) {
+            BBQCookie *cookie = _cookies[column][row];
+            if (cookie) {
+                [array addObject:cookie];
+            }
+        }
+    }
+    
+    else if ([swipeDirection isEqualToString:DOWN]) {
+        NSInteger column = columnOrRow;
+        for (NSInteger row = 0; row < NumRows; row ++) {
+            BBQCookie *cookie = _cookies[column][row];
+            if (cookie) {
+                [array addObject:cookie];
+            }
+        }
+    }
+    
+    else if ([swipeDirection isEqualToString:LEFT]) {
+        NSInteger row = columnOrRow;
+        for (NSInteger column = 0; column < NumColumns; column++) {
+            BBQCookie *cookie = _cookies[column][row];
+            if (cookie) {
+                [array addObject:cookie];
+            }
+        }
+    }
+    
+    else if ([swipeDirection isEqualToString:RIGHT]) {
+        NSInteger row = columnOrRow;
+        for (NSInteger column = NumColumns - 1; column >= 0; column --) {
+            BBQCookie *cookie = _cookies[column][row];
+            if (cookie) {
+                [array addObject:cookie];
+            }
+        }
+    }
+    
+    return array;
 }
 
 - (NSSet *)createCookiesInBlankTiles {
@@ -43,21 +201,7 @@
             if (_cookies[column][row] == nil && tile.requiresACookie == YES) {
                 
                 NSUInteger cookieType;
-                switch (tile.tileType) {
-                    case 7:
-                        cookieType = 10;
-                        tile.tileType = 1;
-                        break;
-                        
-                    case 8:
-                        cookieType = 11;
-                        tile.tileType = 1;
-                        break;
-                        
-                    default:
-                        cookieType = arc4random_uniform(NumStartingCookies) + 1;
-                        break;
-                }
+                cookieType = arc4random_uniform(NumStartingCookies) + 1;
                 
                 BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
                 
@@ -65,16 +209,6 @@
                     cookie.isInStaticTile = YES;
                 }
                 else cookie.isInStaticTile = NO;
-                
-                //Set countdown on security guard
-                if (cookie.cookieType == 10) {
-                    if (!self.securityGuardCookies) {
-                        self.securityGuardCookies = [@[] mutableCopy];
-                    }
-                    
-                    cookie.countdown = self.securityGuardCountdown;
-                    [self.securityGuardCookies addObject:cookie];
-                }
                 
                 [set addObject:cookie];
             }
@@ -95,6 +229,217 @@
     _cookies[column][row] = cookie;
     return cookie;
 }
+
+
+- (NSArray *)fillHoles {
+    NSMutableArray *columns = [NSMutableArray array];
+    
+    for (NSInteger column = 0; column < NumColumns; column ++) {
+        NSMutableArray *array;
+        
+        for (NSInteger row = 0; row < NumRows; row++) {
+            
+            BBQTile *tile = _tiles[column][row];
+            if (tile.tileType != 0 && _cookies[column][row] == nil) {
+                for (NSInteger lookup = row + 1; lookup < NumRows; lookup ++) {
+                    BBQCookie *cookie = _cookies[column][lookup];
+                    
+                    if (cookie != nil) {
+                        _cookies[column][lookup] = nil;
+                        _cookies[column][row] = cookie;
+                        cookie.row = row;
+                        
+                        if (!array) {
+                            array = [NSMutableArray array];
+                            [columns addObject:array];
+                        }
+                        [array addObject:cookie];
+                        
+                        break;
+                    }
+                    
+                }
+            }
+        }
+    }
+    return columns;
+}
+
+- (NSArray *)topUpCookies {
+    NSMutableArray *columns = [NSMutableArray array];
+    NSUInteger cookieType = 0;
+    
+    for (NSInteger column = 0; column < NumColumns; column++) {
+        NSMutableArray *array;
+        for (NSInteger row = NumRows - 1; row >= 0 && _cookies[column][row] == nil; row--) {
+            BBQTile *tile = _tiles[column][row];
+            if (tile.tileType != 0) {
+                NSUInteger newCookieType;
+                do {
+                    newCookieType = arc4random_uniform(NumStartingCookies) + 1;
+                }
+                while (newCookieType == cookieType);
+                cookieType = newCookieType;
+                
+                BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
+                
+                if (!array) {
+                    array = [NSMutableArray array];
+                    [columns addObject:array];
+                }
+                [array addObject:cookie];
+            }
+        }
+    }
+    return columns;
+}
+
+
+- (NSArray *)breakColumnOrRowIntoSectionsForDirection:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow {
+    NSMutableArray *allSections = [NSMutableArray array];
+    
+    if ([swipeDirection isEqualToString:UP]) {
+        NSInteger column = columnOrRow;
+        NSInteger row = NumRows - 1;
+        while (row >= 0) {
+            NSMutableArray *section = [NSMutableArray array];
+            for (row = row; row >= 0; row --) {
+                BBQCookie *cookie = _cookies[column][row];
+                
+                //If there is a gap, end the section
+                if (cookie == nil) {
+                    row --;
+                    break;
+                }
+                
+                //If there isn't a gap, add it to the section
+                else {
+                    [section addObject:cookie];
+                    if ([section count] == 1) {
+                        [allSections addObject:section];
+                    }
+                }
+            }
+        }
+
+    }
+    
+    if ([swipeDirection isEqualToString:DOWN]) {
+        NSInteger column = columnOrRow;
+        NSInteger row = 0;
+        while (row < NumRows) {
+            NSMutableArray *section = [NSMutableArray array];
+            for (row = row; row < NumRows; row ++) {
+                BBQCookie *cookie = _cookies[column][row];
+                
+                //If there is a gap, end the section
+                if (cookie == nil) {
+                    row ++;
+                    break;
+                }
+                
+                //If there isn't a gap, add it to the section
+                else {
+                    [section addObject:cookie];
+                    if ([section count] == 1) {
+                        [allSections addObject:section];
+                    }
+                }
+            }
+        }
+    }
+    
+    if ([swipeDirection isEqualToString:RIGHT]) {
+        NSInteger row = columnOrRow;
+        NSInteger column = NumColumns - 1;
+        while (column >= 0) {
+            NSMutableArray *section = [NSMutableArray array];
+            for (column = column; column >= 0; column --) {
+                BBQCookie *cookie = _cookies[column][row];
+                
+                //If there is a gap, end the section
+                if (cookie == nil) {
+                    column --;
+                    break;
+                }
+                
+                //If there isn't a gap, add it to the section
+                else {
+                    [section addObject:cookie];
+                    if ([section count] == 1) {
+                        [allSections addObject:section];
+                    }
+                }
+            }
+        }
+        
+    }
+    
+    if ([swipeDirection isEqualToString:LEFT]) {
+        NSInteger row = columnOrRow;
+        NSInteger column = 0;
+        while (column < NumColumns) {
+            NSMutableArray *section = [NSMutableArray array];
+            for (column = column; column < NumColumns; column ++) {
+                BBQCookie *cookie = _cookies[column][row];
+                
+                //If there is a gap, end the section
+                if (cookie == nil) {
+                    column ++;
+                    break;
+                }
+                
+                //If there isn't a gap, add it to the section
+                else {
+                    [section addObject:cookie];
+                    if ([section count] == 1) {
+                        [allSections addObject:section];
+                    }
+                }
+            }
+        }
+    }
+    
+    return [allSections copy];
+}
+
+- (NSArray *)chainsInSection:(NSArray *)section {
+    NSMutableArray *chains = [NSMutableArray array];
+    
+    for (NSInteger i = 0; i < [section count]; i++) {
+        NSMutableArray *chain = [NSMutableArray array];
+        [chains addObject:chain];
+        BBQCookie *cookie = section[i];
+        [chain addObject:cookie];
+        
+        if (i == [section count] - 1) break;
+        
+        BBQCookie *nextCookie = section[i + 1];
+        NSInteger x = 2;
+        NSInteger index = i;
+        while (cookie.cookieType == nextCookie.cookieType && index + x <= [section count]) {
+            [chain addObject:nextCookie];
+            i++;
+            
+            if (index + x >= [section count]) break;
+            
+            nextCookie = section[index + x];
+            x++;
+        }
+    }
+    
+//    NSMutableArray *cleanedUpChains = [NSMutableArray array];
+//    for (NSInteger i = 0; i < [chains count]; i++) {
+//        NSArray *chain = chains[i];
+//        if ([chain count] > 1) {
+//            [cleanedUpChains addObject:chain];
+//        }
+//    }
+    
+    return chains;
+}
+
+
 
 #pragma mark - Level loading methods
 
@@ -153,15 +498,6 @@
                     _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:3 column:column row:tileRow];
                 }
                 
-                else if ([value integerValue] == 4) {
-                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:4 column:column row:tileRow];
-                    if (!self.goldenGooseTiles) {
-                        self.goldenGooseTiles = [@[] mutableCopy];
-                    }
-                    
-                    [self.goldenGooseTiles addObject:[self tileAtColumn:column row:tileRow]];
-                }
-                
                 else if ([value integerValue] == 5) {
                     _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:5 column:column row:tileRow];
                 }
@@ -190,7 +526,22 @@
         if (dictionary[@"securityGuardCountdown"]) {
             self.securityGuardCountdown = [dictionary[@"securityGuardCountdown"] unsignedIntegerValue];
         }
+        
+        //Setup Cookie Order objects
+        NSArray *orderTypes = dictionary[@"orderCookieType"];
+        NSArray *orderQuantities = dictionary[@"orderCookieQuantity"];
+        NSMutableArray *orders = [NSMutableArray array];
+        self.cookieOrders = [@[] mutableCopy];
+        for (int i = 0; i < [orderTypes count]; i ++) {
+            NSInteger orderType = [orderTypes[i] unsignedIntegerValue];
+            NSInteger orderQuantity = [orderQuantities[i] unsignedIntegerValue];
+            BBQCookieOrder *cookieOrder = [[BBQCookieOrder alloc] initWithCookieType:orderType startingAmount:orderQuantity];
+            [orders addObject:cookieOrder];
+        }
+        self.cookieOrders = orders;
+
     }
+    
     return self;
 }
 

@@ -12,6 +12,8 @@
 #import "BBQComboAnimation.h"
 #import "BBQMoveCookie.h"
 #import "BBQPowerup.h"
+#import "BBQCombo.h"
+#import "BBQCookieOrder.h"
 
 @implementation BBQGameLogic
 
@@ -21,88 +23,274 @@
     NSString *directory = [NSString stringWithFormat:@"Level_%ld", (long)level];
     self.level = [[BBQLevel alloc] initWithFile:directory];
     self.movesLeft = self.level.maximumMoves;
-    NSSet *cookies = [self.level createCookiesInBlankTiles];
-    [self sortCookieSetIntoTypes:cookies];
-    NSLog(@"in setup: %@", self.cookieTypeCount);
+    NSSet *cookies = [self.level shuffle];
     return cookies;
 }
 
-- (void)sortCookieSetIntoTypes:(NSSet *)cookieSet {
-    
-    NSMutableArray *sortedCookies = [@[] mutableCopy];
-    for (int i = 0; i < NumStartingCookies; i++) {
-        [sortedCookies addObject:@(0)];
-    }
-    
-    for (BBQCookie *cookie in cookieSet) {
-        if (cookie.cookieType <= NumCookieTypes) {
-            NSNumber *count = sortedCookies[cookie.cookieType - 1];
-            NSInteger newCount = [count integerValue] + 1;
-            sortedCookies[cookie.cookieType - 1] = [NSNumber numberWithInteger:newCount];
-        }
-    }
-    
-    self.cookieTypeCount = sortedCookies;
-}
-
-- (void)sortGoldenGooseCookies:(NSArray *)goldenGooseCookies {
-    for (BBQCookie *cookie in goldenGooseCookies) {
-        NSNumber *count = self.cookieTypeCount[cookie.cookieType - 1];
-        NSInteger newCount = [count integerValue] + 1;
-        self.cookieTypeCount[cookie.cookieType - 1] = [NSNumber numberWithInteger:newCount];
-    }
-}
 
 #pragma mark - Swipe Logic
 
 - (NSDictionary *)swipe:(NSString *)swipeDirection column:(NSInteger)columnToSwipe row:(NSInteger)rowToSwipe {
     
+    NSInteger x = [self returnColumnOrRowWithSwipeDirection:swipeDirection column:columnToSwipe row:rowToSwipe];
+    NSArray *movements = [self movementsForSwipe:swipeDirection columnOrRow:x];
+    
+    
     NSDictionary *animationsToPerform = @{
                                           COMBOS : [@[] mutableCopy],
                                           MOVEMENTS : [@[] mutableCopy],
+                                          MOVEMENTS_BATCH_2 : [@[] mutableCopy],
+                                          DROP_MOVEMENTS : [@[] mutableCopy],
                                           POWERUPS : [@[] mutableCopy],
-                                          GOLDEN_GOOSE_COOKIES : [@[] mutableCopy],
                                           NEW_STEEL_BLOCKER_TILES : [@[] mutableCopy],
                                           };
     
-    [self startSwipeInDirection:swipeDirection animations:animationsToPerform column:columnToSwipe row:rowToSwipe];
-    self.movesLeft = self.movesLeft - 1;
-    [self findComboChains:animationsToPerform[COMBOS] swipeDirection:swipeDirection];
-    [self scoreTheCombos:animationsToPerform[COMBOS]];
-    NSLog(@"Moves left: %@", [NSString stringWithFormat:@"%ld", (long)self.movesLeft]);
-    
-    //take care of new golden goose cookies or new steel blocker tiles
-    if (self.level.goldenGooseTiles || self.level.steelBlockerFactoryTiles) {
-        NSArray *blankTiles = [self findBlankTiles];
-        
-        if (self.level.goldenGooseTiles) {
-            NSMutableArray *goldenGooseCookies = animationsToPerform[GOLDEN_GOOSE_COOKIES];
-            [goldenGooseCookies addObjectsFromArray:[self layGoldenGooseEggs:blankTiles]];
-            [self sortGoldenGooseCookies:goldenGooseCookies];
-        }
-        
-        if (self.level.steelBlockerFactoryTiles) {
-            NSMutableArray *newSteelBlockerTiles = animationsToPerform[NEW_STEEL_BLOCKER_TILES];
-            [newSteelBlockerTiles addObjectsFromArray:[self createNewSteelBlockerTilesWithBlankTiles:blankTiles]];
-        }
-    }
-    
-    //turn steel blocker tiles from combos into regular tiles
-    NSArray *combos = animationsToPerform[COMBOS];
-    [self turnSteelBlockerIntoRegularTilesForCombos:combos];
-    
-    //Get rid of final cookies
-    [self removeCompletedCookies:combos];
-    
-    [self updateSecurityGuardCountdowns];
+    //[self startSwipeInDirection:swipeDirection animations:animationsToPerform column:columnToSwipe row:rowToSwipe];
+//    self.movesLeft = self.movesLeft - 1;
+//    [self findComboChains:animationsToPerform[COMBOS] swipeDirection:swipeDirection];
+//    [self scoreTheCombos:animationsToPerform[COMBOS]];
+//    
+//    //Move over the rest of the cookies
+//    NSMutableArray *movementsTwo = animationsToPerform[MOVEMENTS_BATCH_2];
+//    [movementsTwo addObjectsFromArray:[self batchTwoMovementsInDirection:swipeDirection column:columnToSwipe row:rowToSwipe]];
+//    
+//    //take care of new new steel blocker tiles
+//    if (self.level.steelBlockerFactoryTiles) {
+//        NSArray *blankTiles = [self findBlankTiles];
+//        
+//        if (self.level.steelBlockerFactoryTiles) {
+//            NSMutableArray *newSteelBlockerTiles = animationsToPerform[NEW_STEEL_BLOCKER_TILES];
+//            [newSteelBlockerTiles addObjectsFromArray:[self createNewSteelBlockerTilesWithBlankTiles:blankTiles]];
+//        }
+//    }
+//    
+//    //turn steel blocker tiles from combos into regular tiles
+//    NSArray *combos = animationsToPerform[COMBOS];
+//    [self turnSteelBlockerIntoRegularTilesForCombos:combos];
     
     return animationsToPerform;
 }
 
+
+
+- (NSArray *)movementsForSwipe:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow {
+    
+    //Take a snapshot of the column or row as it is, before the model is changed
+    NSArray *finalCookies = [self.level allCookiesInColumnOrRow:columnOrRow swipeDirection:swipeDirection];
+    
+    //Move all cookies to appropriate positions
+    NSArray *sections = [self.level breakColumnOrRowIntoSectionsForDirection:swipeDirection columnOrRow:columnOrRow];
+    for (NSInteger sectionIndex = 0; sectionIndex < [sections count]; sectionIndex++) {
+        NSMutableArray *section = sections[sectionIndex];
+        NSArray *chains = [self.level chainsInSection:section];
+        for (NSInteger i = 0; i < [chains count]; i++) {
+            NSArray *chain = chains[i];
+            BBQCookie *rootCookie = chain[0];
+            BBQCookieOrder *order = [self.level cookieOrderForType:rootCookie.cookieType];
+            if ([chain count] >= 2) {
+                for (NSInteger x = [chain count] - 1; x >= 0; x --) {
+                    BBQCookie *cookie = chain[x];
+                    [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
+                    
+                    //Attach a combo
+                    BBQCombo *combo = [[BBQCombo alloc] init];
+                    cookie.combo = combo;
+                    
+                    //Check to see if it is on cookie order, but not if it is the last cookie. Have to check that one afterwards, because it is the last sprite to dissappear
+                    if (order.quantityLeft > 0 && x < [chain count] - 1) {
+                        order.quantityLeft --;
+                        cookie.combo.cookieOrder = order;
+                    }
+                    
+                    //Set the number of tiles the animation needs to be delayed by, before the cookie dissapears. So the sequence is move > delay > cookie dissappears
+                    NSInteger chainCount = [chain count];
+                    NSInteger delay = chainCount - x - 1;
+                    cookie.combo.numberOfTilesToDelayBy = delay;
+                    
+                    //move over the last cookie in the chain
+                    if (x == [chain count] - 1) {
+                        cookie.column = rootCookie.column;
+                        cookie.row = rootCookie.row;
+                        combo.isLastCookieInChain = YES;
+                    }
+
+                    
+                    //move all cookies after this one, over one space
+                    for (NSInteger y = i + 1; y < [chains count]; y++) {
+                        NSArray *chainToMove = chains[y];
+                        for (BBQCookie *cookie in chainToMove) {
+                            [self moveCookieOneTileOver:cookie swipeDirection:swipeDirection];
+                        }
+
+                    }
+                }
+                
+                //Update cookie order for last cookie in chain, which will disappear last
+                if (order.quantityLeft > 0) {
+                    order.quantityLeft --;
+                    NSInteger z = [chain count] - 1;
+                    BBQCookie *lastCookie = chain[z];
+                    lastCookie.combo.cookieOrder = order;
+                }
+            }
+        }
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+//    //Break into sections, and remove all chains in that column/row
+//    NSArray *sections = [self.level breakColumnOrRowIntoSectionsForDirection:swipeDirection columnOrRow:columnOrRow];
+//    for (NSInteger sectionIndex = 0; sectionIndex < [sections count]; sectionIndex++) {
+//        NSMutableArray *section = sections[sectionIndex];
+//        NSArray *chains = [self.level chainsInSection:section];
+//        for (NSArray *chain in chains) {
+//            
+//            //Change the cookie's position to the root cookie, and set it to nil in the model
+//            BBQCookie *rootCookie = chain[0];
+//            BBQCookieOrder *order = [self.level cookieOrderForType:rootCookie.cookieType];
+//            for (NSInteger i = 0; i < [chain count]; i++) {
+//                BBQCookie *cookie = chain[i];
+//                [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
+//                cookie.column = rootCookie.column;
+//                cookie.row = rootCookie.row;
+//                
+//                //create and attach the combo
+//                BBQCombo *combo = [[BBQCombo alloc] init];
+//                cookie.combo = combo;
+//                
+//                if (i > 0) {
+//                    BBQCookie *root = chain[i-1];
+//                    combo.rootCookie = root;
+//                }
+//                
+//                if (i == [chain count] - 1) {
+//                    combo.isLastCookie = YES;
+//                }
+//                
+//                //Attach the order if relevant
+//                if (order.quantityLeft > 0) {
+//                    order.quantityLeft --;
+//                    cookie.combo.cookieOrder = order;
+//                }
+//
+//            }
+//        }
+//    }
+//    
+//    //Move all remaining cookies to their appropriate positions
+//    for (NSInteger sectionIndex = 0; sectionIndex < [sections count]; sectionIndex++) {
+//        NSMutableArray *section = sections[sectionIndex];
+//        NSArray *chains = [self.level chainsInSection:section];
+//        BBQCookie *rootCookie = section[0];
+//        
+//        //Remove all chain cookies from section
+//        for (NSArray *chain in chains) {
+//            [section removeObjectsInArray:chain];
+//        }
+//        
+//        //move all remaining cookies in section to the appropriate position, relative to root cookie
+//        for (NSInteger i = 0; i < [section count]; i++) {
+//            BBQCookie *cookie = section[i];
+//            [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
+//            if ([swipeDirection isEqualToString:UP]) {
+//                [self.level replaceCookieAtColumn:rootCookie.column row:rootCookie.row - i withCookie:cookie];
+//                cookie.row = rootCookie.row - i;
+//            }
+//            else if ([swipeDirection isEqualToString:DOWN]) {
+//                [self.level replaceCookieAtColumn:rootCookie.column row:rootCookie.row + i withCookie:cookie];
+//                cookie.row = rootCookie.row + i;
+//            }
+//            else if ([swipeDirection isEqualToString:LEFT]) {
+//                [self.level replaceCookieAtColumn:rootCookie.column + i row:rootCookie.row withCookie:cookie];
+//                cookie.column = rootCookie.column + i;
+//            }
+//            else if ([swipeDirection isEqualToString:RIGHT]) {
+//                [self.level replaceCookieAtColumn:rootCookie.column - i row:rootCookie.row withCookie:cookie];
+//                cookie.column = rootCookie.column - i;
+//            }
+//        }
+//
+//    }
+    
+    //Update moves
+    self.movesLeft --;
+    
+    //Update orders
+    
+    
+    
+    return finalCookies;
+}
+
+- (void)moveCookieOneTileOver:(BBQCookie *)nextCookie swipeDirection:(NSString *)swipeDirection {
+    [self.level replaceCookieAtColumn:nextCookie.column row:nextCookie.row withCookie:nil];
+    
+    if ([swipeDirection isEqualToString:UP]) {
+        [self.level replaceCookieAtColumn:nextCookie.column row:nextCookie.row + 1 withCookie:nextCookie];
+        nextCookie.row = nextCookie.row + 1;
+    }
+    
+    else if ([swipeDirection isEqualToString:DOWN]) {
+        [self.level replaceCookieAtColumn:nextCookie.column row:nextCookie.row - 1 withCookie:nextCookie];
+        nextCookie.row = nextCookie.row - 1;
+    }
+    
+    else if ([swipeDirection isEqualToString:LEFT]) {
+        [self.level replaceCookieAtColumn:nextCookie.column - 1 row:nextCookie.row withCookie:nextCookie];
+        nextCookie.column = nextCookie.column - 1;
+    }
+    
+    else if ([swipeDirection isEqualToString:RIGHT]) {
+        [self.level replaceCookieAtColumn:nextCookie.column + 1 row:nextCookie.row withCookie:nextCookie];
+        nextCookie.column = nextCookie.column + 1;
+    }
+    
+}
+
+- (NSArray *)createCookieMovementsForDirection:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow {
+    NSMutableArray *finalCookies = [NSMutableArray array];
+    
+    if ([swipeDirection isEqualToString:UP]) {
+        NSInteger column = columnOrRow;
+        for (NSInteger row = NumRows - 1; row >= 0; row--) {
+            [self createCookieMovements:finalCookies column:column row:row];
+        }
+    }
+    
+    else if ([swipeDirection isEqualToString:DOWN]) {
+        NSInteger column = columnOrRow;
+        for (NSInteger row = 0; row < NumRows; row++) {
+            [self createCookieMovements:finalCookies column:column row:row];
+        }
+    }
+    
+    else if ([swipeDirection isEqualToString:LEFT]) {
+        NSInteger row = columnOrRow;
+        for (NSInteger column = 0; column < NumColumns; column ++) {
+            [self createCookieMovements:finalCookies column:column row:row];
+        }
+    }
+    
+    else if ([swipeDirection isEqualToString:RIGHT]) {
+        NSInteger row = columnOrRow;
+        for (NSInteger column = NumColumns - 1; column >= 0; column--) {
+            [self createCookieMovements:finalCookies column:column row:row];
+        }
+    }
+    
+    return [finalCookies copy];
+}
+
+
 - (void)startSwipeInDirection:(NSString *)swipeDirection animations:(NSDictionary *)animationsToPerform column:(NSInteger)columnToSwipe row:(NSInteger)rowToSwipe {
     
     //UP swipe
-    if ([swipeDirection isEqualToString:@"Up"]) {
+    if ([swipeDirection isEqualToString:UP]) {
         NSInteger column = columnToSwipe;
         for (int row = NumRows - 1; row > 0; row--) {
             BBQTile *tileB = [self.level tileAtColumn:column  row:row];
@@ -110,7 +298,7 @@
                 //Find cookie B and if it is nil, move what would be cookie A to B's tile
                 BBQCookie *cookieB = [self.level cookieAtColumn:column row:row];
                 if (cookieB == nil) {
-                    [self moveASingleCookieInDirection:@"Up" toColumn:column row:row + 1];
+                    [self moveASingleCookieInDirection:UP toColumn:column row:row + 1];
                     cookieB = [self.level cookieAtColumn:column row:row];
                 }
                 
@@ -120,19 +308,19 @@
                     [self tryCombineCookieA:cookieA withCookieB:cookieB animations:animationsToPerform direction:swipeDirection];
                     
                     //if there was a combo or cookie A is the last cookie above a nil tile, move the cookie below tile A into tile A
-                    [self moveASingleCookieInDirection:@"Up" toColumn:column row:row];
+                    [self moveASingleCookieInDirection:UP toColumn:column row:row];
                 }
             }
         }
         
         //Now create the cookie movements for the sprites to match where the cookies are located in the model
         for (int row = NumRows - 1; row > 0; row--) {
-            [self createCookieMovements:animationsToPerform column:column row:row];
+            [self createCookieMovements:animationsToPerform[MOVEMENTS] column:column row:row];
         }
     }
     
     //DOWN swipe
-    if ([swipeDirection isEqualToString:@"Down"]) {
+    if ([swipeDirection isEqualToString:DOWN]) {
         NSInteger column = columnToSwipe;
         for (int row = 0; row < NumRows - 1; row++) {
             BBQTile *tileB = [self.level tileAtColumn:column  row:row];
@@ -140,7 +328,7 @@
                 //Find cookie B and if it is nil move what would be cookie A to B's tile
                 BBQCookie *cookieB = [self.level cookieAtColumn:column row:row];
                 if (cookieB == nil) {
-                    [self moveASingleCookieInDirection:@"Down" toColumn:column row:row - 1];
+                    [self moveASingleCookieInDirection:DOWN toColumn:column row:row - 1];
                     cookieB = [self.level cookieAtColumn:column row:row];
                 }
                 
@@ -150,19 +338,19 @@
                     [self tryCombineCookieA:cookieA withCookieB:cookieB animations:animationsToPerform direction:swipeDirection];
                     
                     //if there was a combo or cookie A is the last cookie above a nil tile, move the cookie below tile A into tile A
-                    [self moveASingleCookieInDirection:@"Down" toColumn:column row:row];
+                    [self moveASingleCookieInDirection:DOWN toColumn:column row:row];
                 }
             }
         }
         
         //Now create the cookie movements for the sprites to match where the cookies are located in the model
         for (int row = 0; row < NumRows - 1; row++) {
-            [self createCookieMovements:animationsToPerform column:column row:row];
+            [self createCookieMovements:animationsToPerform[MOVEMENTS] column:column row:row];
         }
     }
     
     //LEFT swipe
-    if ([swipeDirection isEqualToString:@"Left"]) {
+    if ([swipeDirection isEqualToString:LEFT]) {
         NSInteger row = rowToSwipe;
         for (int column = 0; column < NumColumns - 1; column++) {
             BBQTile *tileB = [self.level tileAtColumn:column  row:row];
@@ -170,7 +358,7 @@
                 //Find cookie B and if it is nil move what would be cookie A to B's tile
                 BBQCookie *cookieB = [self.level cookieAtColumn:column row:row];
                 if (cookieB == nil) {
-                    [self moveASingleCookieInDirection:@"Left" toColumn:column - 1 row:row];
+                    [self moveASingleCookieInDirection:LEFT toColumn:column - 1 row:row];
                     cookieB = [self.level cookieAtColumn:column row:row];
                 }
                 
@@ -180,20 +368,20 @@
                     [self tryCombineCookieA:cookieA withCookieB:cookieB animations:animationsToPerform direction:swipeDirection];
                     
                     //if there was a combo or cookie A is the last cookie above a nil tile, move the cookie below tile A into tile A
-                    [self moveASingleCookieInDirection:@"Left" toColumn:column row:row];
+                    [self moveASingleCookieInDirection:LEFT toColumn:column row:row];
                 }
             }
         }
         
         //Now create the cookie movements for the sprites to match where the cookies are located in the model
         for (int column = 0; column < NumColumns - 1; column ++) {
-            [self createCookieMovements:animationsToPerform column:column row:row];
+            [self createCookieMovements:animationsToPerform[MOVEMENTS] column:column row:row];
         }
         
     }
     
     //RIGHT swipe
-    if ([swipeDirection isEqualToString:@"Right"]) {
+    if ([swipeDirection isEqualToString:RIGHT]) {
         NSInteger row = rowToSwipe;
         for (int column = NumColumns - 1; column > 0; column--) {
             BBQTile *tileB = [self.level tileAtColumn:column  row:row];
@@ -201,7 +389,7 @@
                 //Find cookie B and if it is nil (as is case if its a shark tile underneath a blank tile), move what would be cookie A to B's tile
                 BBQCookie *cookieB = [self.level cookieAtColumn:column row:row];
                 if (cookieB == nil) {
-                    [self moveASingleCookieInDirection:@"Right" toColumn:column + 1 row:row];
+                    [self moveASingleCookieInDirection:RIGHT toColumn:column + 1 row:row];
                     cookieB = [self.level cookieAtColumn:column row:row];
                 }
                 
@@ -211,25 +399,107 @@
                     [self tryCombineCookieA:cookieA withCookieB:cookieB animations:animationsToPerform direction:swipeDirection];
                     
                     //if there was a combo or cookie A is the last cookie above a nil tile, move the cookie below tile A into tile A
-                    [self moveASingleCookieInDirection:@"Right" toColumn:column row:row];
+                    [self moveASingleCookieInDirection:RIGHT toColumn:column row:row];
                 }
             }
         }
         
         //Now create the cookie movements for the sprites to match where the cookies are located in the model
         for (int column = NumColumns - 1; column > 0; column--) {
-            [self createCookieMovements:animationsToPerform column:column row:row];
+            [self createCookieMovements:animationsToPerform[MOVEMENTS] column:column row:row];
         }
     }
 }
 
-- (void)createCookieMovements:(NSDictionary *)animationsToPerform column:(NSInteger)column row:(NSInteger)row {
+- (void)createCookieMovements:(NSMutableArray *)array column:(NSInteger)column row:(NSInteger)row {
     BBQCookie *cookie = [self.level cookieAtColumn:column row:row];
     if (cookie != nil) {
         BBQMoveCookie *movement = [[BBQMoveCookie alloc] initWithCookieA:cookie destinationColumn:cookie.column destinationRow:cookie.row];
-        [animationsToPerform[MOVEMENTS] addObject:movement];
+        [array addObject:movement];
     }
 }
+
+- (NSMutableArray *)batchTwoMovementsInDirection:(NSString *)swipeDirection column:(NSInteger)columnToSwipe row:(NSInteger)rowToSwipe {
+    NSMutableArray *batchTwoMovements = [@[] mutableCopy];
+    
+    //UP swipe
+    if ([swipeDirection isEqualToString:UP]) {
+        NSInteger column = columnToSwipe;
+        for (int row = NumRows - 1; row > 0; row--) {
+            BBQTile *tile = [self.level tileAtColumn:column row:row];
+            if (tile.requiresACookie) {
+                BBQCookie *cookie = [self.level cookieAtColumn:column row:row];
+                if (cookie == nil) {
+                    [self moveASingleCookieInDirection:swipeDirection toColumn:column row:row + 1];
+                }
+            }
+            
+            [self createCookieMovements:batchTwoMovements column:column row:row];
+        }
+    }
+    
+    //DOWN swipe
+    if ([swipeDirection isEqualToString:DOWN]) {
+        NSInteger column = columnToSwipe;
+        for (int row = 0; row < NumRows - 1; row++) {
+            BBQTile *tile = [self.level tileAtColumn:column row:row];
+            if (tile.requiresACookie) {
+                BBQCookie *cookie = [self.level cookieAtColumn:column row:row];
+                if (cookie == nil) {
+                    [self moveASingleCookieInDirection:swipeDirection toColumn:column row:row - 1];
+                }
+            }
+            
+            [self createCookieMovements:batchTwoMovements column:column row:row];
+        }
+    }
+    
+    //LEFT swipe
+    if ([swipeDirection isEqualToString:LEFT]) {
+        NSInteger row = rowToSwipe;
+        for (int column = 0; column < NumColumns - 1; column++) {
+            BBQTile *tile = [self.level tileAtColumn:column row:row];
+            if (tile.requiresACookie) {
+                BBQCookie *cookie = [self.level cookieAtColumn:column row:row];
+                if (cookie == nil) {
+                    [self moveASingleCookieInDirection:swipeDirection toColumn:column - 1 row:row];
+                }
+            }
+            [self createCookieMovements:batchTwoMovements column:column row:row];
+        }
+    }
+    
+    //RIGHT swipe
+    if ([swipeDirection isEqualToString:RIGHT]) {
+        NSInteger row = rowToSwipe;
+        for (int column = NumColumns - 1; column > 0; column--) {
+            BBQTile *tile = [self.level tileAtColumn:column row:row];
+            if (tile.requiresACookie) {
+                BBQCookie *cookie = [self.level cookieAtColumn:column row:row];
+                if (cookie == nil) {
+                    [self moveASingleCookieInDirection:swipeDirection toColumn:column + 1 row:row];
+                }
+            }
+            
+            [self createCookieMovements:batchTwoMovements column:column row:row];
+        }
+        
+    }
+    
+    return batchTwoMovements;
+
+}
+
+- (void)checkForMovementsColumn:(NSInteger)column row:(NSInteger)row swipeDirection:(NSString *)swipeDirection {
+    BBQTile *tile = [self.level tileAtColumn:column row:row];
+    if (tile.requiresACookie) {
+        BBQCookie *cookie = [self.level cookieAtColumn:column row:row];
+        if (cookie == nil) {
+            [self moveASingleCookieInDirection:swipeDirection toColumn:column row:row];
+        }
+    }
+}
+
 
 - (void)tryCombineCookieA:(BBQCookie *)cookieA withCookieB:(BBQCookie *)cookieB animations:(NSDictionary *)animations direction:(NSString *)direction {
     
@@ -285,37 +555,26 @@
             for (int i = lowestCookieIndex; i >= 1; i--) {
                 BBQCookie *localCookieA = cookiesInChain[i];
                 BBQCookie *localCookieB = cookiesInChain[i - 1];
-                [self combineCookieA:localCookieA withcookieB:localCookieB destinationColumn:cookieB.column destinationRow:cookieB.row animations:animations];
+                BOOL isRootCombo = NO;
+                if (i == 1) isRootCombo = YES;
+                [self combineCookieA:localCookieA withcookieB:localCookieB destinationColumn:cookieB.column destinationRow:cookieB.row animations:animations isRootCombo:isRootCombo];
             }
         }
+        
+        //Remove the root cookie
+        BBQCookie *rootCookie = [cookiesInChain objectAtIndex:0];
+        [self.level replaceCookieAtColumn:rootCookie.column row:rootCookie.row withCookie:nil];
     }
     
 }
 
 
-- (void)combineCookieA:(BBQCookie *)cookieA withcookieB:(BBQCookie *)cookieB destinationColumn:(NSInteger)destinationColumn destinationRow:(NSInteger)destinationRow animations:(NSDictionary *)animations {
+- (void)combineCookieA:(BBQCookie *)cookieA withcookieB:(BBQCookie *)cookieB destinationColumn:(NSInteger)destinationColumn destinationRow:(NSInteger)destinationRow animations:(NSDictionary *)animations isRootCombo:(BOOL)isRootCombo {
     //Upgrade count and check whether the new count will turn it into an upgrade
     BBQComboAnimation *combo;
-    if (cookieB.isRopeOrSecurityGuard || cookieA.isRopeOrSecurityGuard) {
-        combo = [[BBQComboAnimation alloc] initWithCookieA:cookieA cookieB:cookieB destinationColumn:destinationColumn destinationRow:destinationRow];
-        BBQTile *tileB = [self.level tileAtColumn:cookieB.column row:cookieB.row];
-        tileB.tileType = 9;
-        [self.level replaceCookieAtColumn:cookieB.column row:cookieB.row withCookie:nil];
-        [self.level replaceCookieAtColumn:cookieA.column row:cookieA.row withCookie:nil];
-        
-        //Remove the security guard from the array
-        if (cookieB.cookieType == 10) {
-            [self.level.securityGuardCookies removeObject:cookieB];
-        }
-        else {
-            [self.level.securityGuardCookies removeObject:cookieA];
-        }
-    }
     
-    else {
-        combo = [[BBQComboAnimation alloc] initWithCookieA:cookieA cookieB:cookieB destinationColumn:destinationColumn destinationRow:destinationRow];
-        combo.cookieB.isFinalCookie = [self isFinalCookie:combo];
-    }
+    combo = [[BBQComboAnimation alloc] initWithCookieA:cookieA cookieB:cookieB destinationColumn:destinationColumn destinationRow:destinationRow];
+    combo.isRootCombo = isRootCombo;
     
     NSMutableArray *combos = animations[COMBOS];
     [combos addObject:combo];
@@ -389,32 +648,6 @@
     }
 }
 
-- (NSArray *)layGoldenGooseEggs:(NSArray *)blankTiles {
-    
-    NSMutableArray *newCookies = [@[] mutableCopy];
-    
-    for (BBQTile *goldenGooseTile in self.level.goldenGooseTiles) {
-        goldenGooseTile.goldenGooseTileCountdown --;
-        
-        if (goldenGooseTile.goldenGooseTileCountdown <= 0) {
-            
-            //pick a blank tile at random
-            NSUInteger randomTileIndex = arc4random_uniform([blankTiles count]);
-            BBQTile *chosenTile = [blankTiles objectAtIndex:randomTileIndex];
-            
-            //create the cookie
-            NSUInteger cookieType = arc4random_uniform(NumStartingCookies) + 1;
-            BBQCookie *newCookie = [self.level createCookieAtColumn:chosenTile.column row:chosenTile.row withType:cookieType];
-            [newCookies addObject:newCookie];
-            
-            //reset the countdown
-            goldenGooseTile.goldenGooseTileCountdown = goldenGooseMax;
-        }
-    }
-    
-    return newCookies;
-}
-
 - (NSArray *)createNewSteelBlockerTilesWithBlankTiles:(NSArray *)blankTiles {
     NSMutableArray *newTiles = [@[] mutableCopy];
     
@@ -449,7 +682,7 @@
 - (void)moveASingleCookieInDirection:(NSString *)direction toColumn:(NSInteger)columnB row:(NSInteger)rowB {
     
     //UP Swipe
-    if ([direction isEqualToString:@"Up"]) {
+    if ([direction isEqualToString:UP]) {
         
         //find the A cookie
         BBQCookie *cookieA = [self.level cookieAtColumn:columnB row:rowB - 1];
@@ -470,7 +703,7 @@
     }
     
     //DOWN Swipe
-    if ([direction isEqualToString:@"Down"]) {
+    if ([direction isEqualToString:DOWN]) {
         
         //find the A cookie
         BBQCookie *cookieA = [self.level cookieAtColumn:columnB row:rowB + 1];
@@ -491,7 +724,7 @@
     }
     
     //LEFT Swipe
-    if ([direction isEqualToString:@"Left"]) {
+    if ([direction isEqualToString:LEFT]) {
         
         //find the A cookie
         BBQCookie *cookieA = [self.level cookieAtColumn:columnB + 1 row:rowB];
@@ -512,7 +745,7 @@
     }
     
     //RIGHT Swipe
-    if ([direction isEqualToString:@"Right"]) {
+    if ([direction isEqualToString:RIGHT]) {
         
         //find the A cookie
         BBQCookie *cookieA = [self.level cookieAtColumn:columnB - 1 row:rowB];
@@ -539,7 +772,7 @@
     BBQCookie *cookieA;
     BBQTile *tileA;
     
-    if ([direction isEqualToString:@"Up"]) {
+    if ([direction isEqualToString:UP]) {
         if (row > 0) {
             cookieA = [self.level cookieAtColumn:column row:row - 1];
             tileA = [self.level tileAtColumn:column row:row - 1];
@@ -552,7 +785,7 @@
         }
     }
     
-    else if ([direction isEqualToString:@"Down"]) {
+    else if ([direction isEqualToString:DOWN]) {
         if (row < NumRows - 1) {
             cookieA = [self.level cookieAtColumn:column row:row + 1];
             tileA = [self.level tileAtColumn:column row:row + 1];
@@ -565,7 +798,7 @@
         }
     }
     
-    else if ([direction isEqualToString:@"Left"]) {
+    else if ([direction isEqualToString:LEFT]) {
         if (column < NumColumns - 1) {
             cookieA = [self.level cookieAtColumn:column + 1 row:row];
             tileA = [self.level tileAtColumn:column + 1 row:row];
@@ -578,7 +811,7 @@
         }
     }
     
-    else if ([direction isEqualToString:@"Right"]) {
+    else if ([direction isEqualToString:RIGHT]) {
         if (column > 0) {
             cookieA = [self.level cookieAtColumn:column - 1 row:row];
             tileA = [self.level tileAtColumn:column - 1 row:row];
@@ -598,14 +831,16 @@
 
 
 - (BOOL)isLevelComplete {
+    //Put logic in here
     BOOL isComplete = YES;
     
-    for (NSNumber *number in self.cookieTypeCount) {
-        if ([number integerValue] > 1) {
+    for (BBQCookieOrder *order in self.level.cookieOrders) {
+        if (order.quantityLeft > 0) {
             isComplete = NO;
             break;
         }
     }
+
     
     return isComplete;
 }
@@ -618,41 +853,6 @@
     return movesLeft;
 }
 
-- (void)updateSecurityGuardCountdowns {
-    for (BBQCookie *securityGuard in self.level.securityGuardCookies) {
-        securityGuard.countdown--;
-    }
-}
-
-- (BOOL)isSecurityGuardAtZero {
-    for (BBQCookie *securityGuard in self.level.securityGuardCookies) {
-        if (securityGuard.countdown <=0) {
-            return YES;
-            
-        }
-    }
-    return NO;
-}
-
-- (void)removeCompletedCookies:(NSArray *)combos {
-    for (BBQComboAnimation *combo in combos) {
-        if (combo.cookieB.isFinalCookie) {
-            [self.level replaceCookieAtColumn:combo.cookieB.column row:combo.cookieB.row withCookie:nil];
-        }
-    }
-}
-
-- (BOOL)isFinalCookie:(BBQComboAnimation *)combo {
-    
-    //adjust the count
-    NSNumber *count = self.cookieTypeCount[combo.cookieA.cookieType - 1];
-    NSInteger newCount = [count integerValue] - 1;
-    self.cookieTypeCount[combo.cookieA.cookieType - 1] = [NSNumber numberWithInteger:newCount];
-    
-    //check if its the final cookie of its type
-    if (newCount == 1) return YES;
-    else return NO;
-}
 
 #pragma mark - Combos
 
@@ -698,6 +898,19 @@
         }
     }
     self.currentScore = self.currentScore + scoreForThisRound;
+}
+
+#pragma mark - General Helper methods
+
+- (NSInteger)returnColumnOrRowWithSwipeDirection:(NSString *)swipeDirection column:(NSInteger)column row:(NSInteger)row {
+    NSInteger x;
+    if ([swipeDirection isEqualToString:UP] || [swipeDirection isEqualToString:DOWN]) {
+        x = column;
+    }
+    else {
+        x = row;
+    }
+    return x;
 }
 
 

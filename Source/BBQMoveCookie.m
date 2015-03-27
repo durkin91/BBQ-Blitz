@@ -16,6 +16,8 @@
         self.cookieA = cookieA;
         self.destinationColumn = column;
         self.destinationRow = row;
+        cookieA.column = column;
+        cookieA.row = row;
     }
     return self;
 }

@@ -10,6 +10,8 @@
 #import "BBQCookieNode.h"
 #import "BBQTile.h"
 
+@class BBQCombo;
+
 static const NSUInteger NumCookieTypes = 6;
 static const NSUInteger NumStartingCookies = 5;
 static const NSUInteger NumCookiesToUpgrade = 40;
@@ -20,10 +22,9 @@ static const NSUInteger NumCookiesToUpgrade = 40;
 @property (assign, nonatomic) NSInteger row;
 @property (assign, nonatomic) NSUInteger cookieType;
 @property (strong, nonatomic) BBQCookieNode *sprite;
-@property (assign, nonatomic) BOOL isFinalCookie;
 @property (assign, nonatomic) BOOL isInStaticTile;
-@property (assign, nonatomic) BOOL isRopeOrSecurityGuard;
 @property (assign, nonatomic) NSInteger countdown;
+@property (strong, nonatomic) BBQCombo *combo;
 
 
 
