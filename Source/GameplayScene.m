@@ -185,6 +185,7 @@ static const CGFloat TileHeight = 36.0;
         orderView.quantityLabel.string = [NSString stringWithFormat:@"%ld", (long)order.quantity];
         
         order.orderNode = orderView;
+        orderView.zOrder = 5 - i;
         
     }
 }
@@ -550,9 +551,14 @@ static const CGFloat TileHeight = 36.0;
 }
 
 - (CCActionSequence *)animateCookieOrderCollection:(BBQCookie *)cookie cookieOrder:(BBQCookieOrder *)cookieOrder {
-    CCSprite *orderSprite = cookieOrder.orderNode.cookieSprite.children[0];
-    CGPoint orderSpriteWorldPosition = [orderSprite.parent convertToWorldSpace:orderSprite.positionInPoints];
-    CGPoint endPosition = [_cookiesLayer convertToNodeSpace:orderSpriteWorldPosition];
+    CCSprite *orderSprite = cookieOrder.orderNode.cookieSprite;
+    CGPoint cookieSpriteWorldPos = [cookie.sprite.parent convertToWorldSpace:cookie.sprite.positionInPoints];
+    CGPoint relativeToOrderSpritePos = [orderSprite convertToNodeSpace:cookieSpriteWorldPos];
+    [cookie.sprite removeFromParent];
+    [orderSprite addChild:cookie.sprite];
+    cookie.sprite.position = relativeToOrderSpritePos;
+    
+    CGPoint endPosition = orderSprite.position;
     
     CCActionMoveTo *move = [CCActionMoveTo actionWithDuration:1.0 position:endPosition];
     CCActionScaleTo *scaleUp = [CCActionScaleTo actionWithDuration:0.1 scale:1.2];
