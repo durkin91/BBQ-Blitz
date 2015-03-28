@@ -150,14 +150,13 @@
 
 - (NSSet *)removeMatches {
     NSSet *horizontalChains = [self.level detectHorizontalMatches];
-    [self removeCookies:horizontalChains];
     NSSet *verticalChains = [self.level detectVerticalMatches];
-    [self removeCookies:verticalChains];
+    NSSet *allChains = [horizontalChains setByAddingObjectsFromSet:verticalChains];
+    [self removeCookies:allChains];
+    [self calculateScoresForChains:allChains];
+    [self cookieOrdersForChains:allChains];
     
-    [self calculateScoresForChains:horizontalChains];
-    [self calculateScoresForChains:verticalChains];
-    
-    return [horizontalChains setByAddingObjectsFromSet:verticalChains];
+    return allChains;
 }
 
 - (void)removeCookies:(NSSet *)chains {
@@ -173,6 +172,24 @@
         chain.score = 30 * ([chain.cookiesInChain count] - 2) * self.multiChainMultiplier;
         self.currentScore = self.currentScore + chain.score;
         self.multiChainMultiplier ++;
+    }
+}
+
+- (void)cookieOrdersForChains:(NSSet *)chains {
+    for (BBQChain *chain in chains) {
+        
+        //find the right order
+        for (BBQCookieOrder *cookieOrder in self.level.cookieOrders) {
+            if (cookieOrder.cookie.cookieType == chain.cookieType) {
+                chain.cookieOrder = cookieOrder;
+                
+                //Figure out how many of the cookies are used for the order
+                for (NSInteger i = 0; i < [chain.cookiesInChain count] && cookieOrder.quantityLeft > 0; i++) {
+                    chain.numberOfCookiesForOrder ++;
+                    cookieOrder.quantityLeft --;
+                }
+            }
+        }
     }
 }
 
@@ -265,20 +282,6 @@
 - (void)resetMultiChainMultiplier {
     self.multiChainMultiplier = 1;
 }
-
-
-#pragma mark - Combos
-
-
-//- (void)scoreTheCombos:(NSArray *)combos {
-//    NSInteger scoreForThisRound = 0;
-//    for (BBQComboAnimation *combo in combos) {
-//        if (combo.score > 0) {
-//            scoreForThisRound = scoreForThisRound + combo.score;
-//        }
-//    }
-//    self.currentScore = self.currentScore + scoreForThisRound;
-//}
 
 #pragma mark - General Helper methods
 

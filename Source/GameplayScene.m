@@ -482,8 +482,19 @@ static const CGFloat TileHeight = 36.0;
 - (void)animateMatchedCookies:(NSSet *)chains completion:(dispatch_block_t)completion {
     for (BBQChain *chain in chains) {
         [self animateScoreForChain:chain];
-        for (BBQCookie *cookie in chain.cookiesInChain) {
-            if (cookie.sprite != nil) {
+        [self changeCookieZIndex:chain.cookiesInChain];
+        
+        for (NSInteger i = 0; i < [chain.cookiesInChain count]; i++) {
+            BBQCookie *cookie = chain.cookiesInChain[i];
+            
+            if (i < chain.numberOfCookiesForOrder && cookie.sprite != nil) {
+                CCActionSequence *sequence = [self animateCookieOrderCollection:cookie cookieOrder:chain.cookieOrder];
+                [cookie.sprite runAction:sequence];
+                cookie.sprite = nil;
+            }
+            
+            
+            else if (cookie.sprite != nil) {
                 CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:0.3 scale:0.1];
                 [cookie.sprite runAction:[CCActionSequence actions:scaleAction, [CCActionRemove action], nil]];
                 
@@ -497,7 +508,7 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)animateMovements:(NSArray *)movements swipeDirection:(NSString *)swipeDirection completion: (dispatch_block_t)completion {
     
-    __block NSTimeInterval tileDuration = 0.5;
+    __block NSTimeInterval tileDuration = 0.3;
     
     [movements enumerateObjectsUsingBlock:^(BBQMovement *movement, NSUInteger idx, BOOL *stop) {
         CGPoint newPosition = [GameplayScene pointForColumn:movement.destinationColumn row:movement.destinationRow];
@@ -538,8 +549,8 @@ static const CGFloat TileHeight = 36.0;
     [self runAction:sequence];
 }
 
-- (CCActionSequence *)animateCookieOrderCollection:(BBQCookie *)cookie {
-    CCSprite *orderSprite = cookie.combo.cookieOrder.orderNode.cookieSprite.children[0];
+- (CCActionSequence *)animateCookieOrderCollection:(BBQCookie *)cookie cookieOrder:(BBQCookieOrder *)cookieOrder {
+    CCSprite *orderSprite = cookieOrder.orderNode.cookieSprite.children[0];
     CGPoint orderSpriteWorldPosition = [orderSprite.parent convertToWorldSpace:orderSprite.positionInPoints];
     CGPoint endPosition = [_cookiesLayer convertToNodeSpace:orderSpriteWorldPosition];
     
@@ -548,9 +559,13 @@ static const CGFloat TileHeight = 36.0;
     CCActionScaleTo *scaleDown = [CCActionScaleTo actionWithDuration:0.1 scale:1.0];
     CCActionRemove *removeSprite = [CCActionRemove action];
     CCActionCallBlock *updateOrderQuantity = [CCActionCallBlock actionWithBlock:^{
-        NSInteger quantityLeft = [cookie.combo.cookieOrder.orderNode.quantityLabel.string integerValue];
+        NSInteger quantityLeft = [cookieOrder.orderNode.quantityLabel.string integerValue];
         quantityLeft --;
-        cookie.combo.cookieOrder.orderNode.quantityLabel.string = [NSString stringWithFormat:@"%i", quantityLeft];
+        cookieOrder.orderNode.quantityLabel.string = [NSString stringWithFormat:@"%i", quantityLeft];
+        if (quantityLeft == 0) {
+            cookieOrder.orderNode.quantityLabel.visible = NO;
+            cookieOrder.orderNode.tickSprite.visible = YES;
+        }
     }];
     
     CCActionSequence *orderActionSequence = [CCActionSequence actions:move, scaleUp, scaleDown, removeSprite, updateOrderQuantity, nil];

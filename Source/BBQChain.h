@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "BBQCookieOrder.h"
 
 @class BBQCookie;
 
@@ -17,9 +18,12 @@ typedef NS_ENUM(NSUInteger, ChainType) {
 
 @interface BBQChain : NSObject
 
-@property (strong, nonatomic, readonly) NSMutableArray *cookiesInChain;
+@property (strong, nonatomic, readonly) NSArray *cookiesInChain;
 @property (assign, nonatomic) ChainType chainType;
 @property (assign, nonatomic) NSUInteger score;
+@property (strong, nonatomic) BBQCookieOrder *cookieOrder;
+@property (assign, nonatomic) NSInteger numberOfCookiesForOrder;
+@property (assign, nonatomic) NSInteger cookieType;
 
 
 - (void)addCookie:(BBQCookie *)cookie;

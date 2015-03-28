@@ -57,6 +57,7 @@
                     _cookies[column + 2][row].cookieType == matchType) {
                     BBQChain *chain = [[BBQChain alloc] init];
                     chain.chainType = ChainTypeHorizontal;
+                    chain.cookieType = _cookies[column][row].cookieType;
                     do {
                         [chain addCookie:_cookies[column][row]];
                         column += 1;
@@ -88,6 +89,7 @@
                     
                     BBQChain *chain = [[BBQChain alloc] init];
                     chain.chainType = ChainTypeVertical;
+                    chain.cookieType = _cookies[column][row].cookieType;
                     do {
                         [chain addCookie:_cookies[column][row]];
                         row += 1;
