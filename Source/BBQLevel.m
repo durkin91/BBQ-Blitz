@@ -201,7 +201,17 @@
             if (_cookies[column][row] == nil && tile.requiresACookie == YES) {
                 
                 NSUInteger cookieType;
-                cookieType = arc4random_uniform(NumStartingCookies) + 1;
+                do {
+                    cookieType = arc4random_uniform(NumStartingCookies) + 1;
+                }
+                
+                while ((column >= 2 &&
+                        _cookies[column - 1][row].cookieType == cookieType &&
+                        _cookies[column - 2][row].cookieType == cookieType)
+                       ||
+                       (row >= 2 &&
+                        _cookies[column][row - 1].cookieType == cookieType &&
+                        _cookies[column][row - 2].cookieType == cookieType));
                 
                 BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
                 
