@@ -279,34 +279,49 @@ static const CGFloat TileHeight = 36.0;
     [self changeCookieZIndex:movements];
     [self animateMovements:movements swipeDirection:direction completion:^{
         
-        NSSet *chains = [self.gameLogic removeMatches];
-        [self animateMatchedCookies:chains completion:^{
+        [self handleMatches];
+        
+    }];
+}
+
+- (void)handleMatches {
+    NSSet *chains = [self.gameLogic removeMatches];
+    [self animateMatchedCookies:chains completion:^{
+        
+        NSArray *columns = [self.gameLogic.level fillHoles];
+        [self animateFallingCookies:columns completion:^{
             
-            NSArray *columns = [self.gameLogic.level fillHoles];
-            [self animateFallingCookies:columns completion:^{
+            NSArray *columns = [self.gameLogic.level topUpCookies];
+            [self animateNewCookies:columns completion:^{
                 
-                NSArray *columns = [self.gameLogic.level topUpCookies];
-                [self animateNewCookies:columns completion:^{
-                    
-                    [self updateScoreAndMoves];
-                    
-                    self.userInteractionEnabled = YES;
-                    
-                    //check whether the player has finished the level
-                    if ([self.gameLogic isLevelComplete]) {
-                        [_menuNode displayMenuFor:LEVEL_COMPLETE];
-                        
-                    }
-                    
-                    //check whether player has run out of moves
-                    else if (![self.gameLogic areThereMovesLeft]) {
-                        [_menuNode displayMenuFor:NO_MORE_MOVES];
-                    }
-                    
-                }];
+                [self updateScoreAndMoves];
+                
+                if ([chains count] == 0) {
+                    [self beginNextTurn];
+                }
+                
+                else {
+                    [self handleMatches];
+                }
+                
             }];
         }];
     }];
+}
+
+- (void)beginNextTurn {
+    self.userInteractionEnabled = YES;
+    
+    //check whether the player has finished the level
+    if ([self.gameLogic isLevelComplete]) {
+        [_menuNode displayMenuFor:LEVEL_COMPLETE];
+        
+    }
+    
+    //check whether player has run out of moves
+    else if (![self.gameLogic areThereMovesLeft]) {
+        [_menuNode displayMenuFor:NO_MORE_MOVES];
+    }
 }
 
 - (void)changeCookieZIndex:(NSArray *)cookies {
