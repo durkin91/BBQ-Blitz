@@ -39,111 +39,71 @@
 
 - (NSSet *)shuffle {
     NSSet *set;
-    do {
-        set = [self createCookiesInBlankTiles];
-        [self detectPossibleChains];
-        NSLog(@"possible chains: %@", self.possibleChains);
-        NSLog(@"Number of chains: %lu", (unsigned long)[self.possibleChains count]);
-    }
-    while ([self.possibleChains count] == 0);
-    
+    set = [self createCookiesInBlankTiles];
     return set;
 }
 
-- (void)detectPossibleChains {
-    NSMutableSet *allChains;
-    
-    //Vertical Chains
-    for (NSInteger column = 0; column < NumColumns; column ++) {
-        for (NSInteger row = NumRows - 1; row >= 0; row --) {
-            NSUInteger cookieType = _cookies[column][row].cookieType;
-            
-            if (cookieType > 0) {
-                
-                //Check for chains going down
-                BBQChain *vertChain;
-                for (NSInteger i = row - 1; i >= 0 && _cookies[column][i].cookieType == cookieType; i--) {
-                    
-                    if (!allChains) {
-                        allChains = [NSMutableSet set];
-                    }
-                    
-                    if (!vertChain) {
-                        vertChain = [[BBQChain alloc] initWithColumn:column row:-1];
-                        vertChain.cookiesInChain = [NSMutableArray array];
-                        [allChains addObject:vertChain];
-                        [vertChain.cookiesInChain addObject:_cookies[column][row]];
-                    }
-                    
-                    [vertChain.cookiesInChain addObject:_cookies[column][i]];
-                    
-                    //subtract a row from the loop, because otherwise vertical chains of 3 or more are recorded twice
-                    row --;
-                }
 
-            }
-        }
-    }
-    
-    //Horizontal Chains
-    for (NSInteger row = 0; row < NumRows; row ++) {
-        for (NSInteger column = 0; column < NumColumns; column++) {
-            NSUInteger cookieType = _cookies[column][row].cookieType;
-            
-            if (cookieType > 0) {
-                //Check for chains to the left
-                BBQChain *horzChain;
-                for (NSInteger i = column - 1; i >= 0 && _cookies[i][row].cookieType == cookieType; i--) {
-                    
-                    if (!allChains) {
-                        allChains = [NSMutableSet set];
-                    }
-                    
-                    if (!horzChain) {
-                        horzChain = [[BBQChain alloc] initWithColumn:-1 row:row];
-                        horzChain.cookiesInChain = [NSMutableArray array];
-                        [allChains addObject:horzChain];
-                        [horzChain.cookiesInChain addObject:_cookies[column][row]];
-                    }
-                    
-                    [horzChain.cookiesInChain addObject:_cookies[i][row]];
-                    
-                    column++;
-                }
-            }
-        }
-    }
-        
-    self.possibleChains = [allChains copy];
-}
 
-- (NSSet *)chainsForColumnOrRow:(NSInteger)columnOrRow swipeDirection:(NSString *)swipeDirection {
+- (NSSet *)detectHorizontalMatches {
     NSMutableSet *set = [NSMutableSet set];
-    for (BBQChain *chain in self.possibleChains) {
-        if ([swipeDirection isEqualToString:UP] || [swipeDirection isEqualToString:DOWN]) {
-            if (chain.activeColumn == columnOrRow) {
-                [set addObject:chain];
-            }
-        }
-        else if ([swipeDirection isEqualToString:LEFT] || [swipeDirection isEqualToString:RIGHT]) {
-            if (chain.activeRow == columnOrRow) {
-                [set addObject:chain];
-            }
-        }
-    }
     
-    return [set copy];
-
-}
-
-- (BBQCookieOrder *)cookieOrderForType:(NSInteger)cookieType {
-    for (BBQCookieOrder *order in self.cookieOrders) {
-        if (order.cookie.cookieType == cookieType) {
-            return order;
+    for (NSInteger row = 0; row < NumRows; row ++) {
+        for (NSInteger column = 0; column < NumColumns - 2; ) {
+            if (_cookies[column][row] != nil) {
+                NSUInteger matchType = _cookies[column][row].cookieType;
+                
+                if (_cookies[column + 1][row].cookieType == matchType &&
+                    _cookies[column + 2][row].cookieType == matchType) {
+                    BBQChain *chain = [[BBQChain alloc] init];
+                    chain.chainType = ChainTypeHorizontal;
+                    do {
+                        [chain addCookie:_cookies[column][row]];
+                        column += 1;
+                    }
+                    while (column < NumColumns && _cookies[column][row].cookieType == matchType);
+                    
+                    [set addObject:chain];
+                    continue;
+                    
+                }
+            }
+            
+            column += 1;
         }
     }
-    return nil;
+    return set;
 }
+
+- (NSSet *)detectVerticalMatches {
+    NSMutableSet *set = [NSMutableSet set];
+    
+    for (NSInteger column = 0; column < NumColumns; column++) {
+        for (NSInteger row = 0; row < NumRows - 2; ) {
+            if (_cookies[column][row] != nil) {
+                NSUInteger matchType = _cookies[column][row].cookieType;
+                
+                if (_cookies[column][row + 1].cookieType == matchType
+                    && _cookies[column][row + 2].cookieType == matchType) {
+                    
+                    BBQChain *chain = [[BBQChain alloc] init];
+                    chain.chainType = ChainTypeVertical;
+                    do {
+                        [chain addCookie:_cookies[column][row]];
+                        row += 1;
+                    }
+                    while (row < NumRows && _cookies[column][row].cookieType == matchType);
+                    
+                    [set addObject:chain];
+                    continue;
+                }
+            }
+            row += 1;
+        }
+    }
+    return set;
+}
+
 
 - (NSArray *)allCookiesInColumnOrRow:(NSInteger)columnOrRow swipeDirection:(NSString *)swipeDirection {
     NSMutableArray *array = [NSMutableArray array];

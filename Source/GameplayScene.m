@@ -10,6 +10,7 @@
 #import "BBQLaserTileNode.h"
 #import "BBQCookieOrder.h"
 #import "BBQMovement.h"
+#import "BBQChain.h"
 
 
 
@@ -278,27 +279,31 @@ static const CGFloat TileHeight = 36.0;
     [self changeCookieZIndex:movements];
     [self animateMovements:movements swipeDirection:direction completion:^{
         
-        NSArray *columns = [self.gameLogic.level fillHoles];
-        [self animateFallingCookies:columns completion:^{
+        NSSet *chains = [self.gameLogic removeMatches];
+        [self animateMatchedCookies:chains completion:^{
             
-            NSArray *columns = [self.gameLogic.level topUpCookies];
-            [self animateNewCookies:columns completion:^{
+            NSArray *columns = [self.gameLogic.level fillHoles];
+            [self animateFallingCookies:columns completion:^{
                 
-                [self updateScoreAndMoves];
-                
-                self.userInteractionEnabled = YES;
-                
-                //check whether the player has finished the level
-                if ([self.gameLogic isLevelComplete]) {
-                    [_menuNode displayMenuFor:LEVEL_COMPLETE];
+                NSArray *columns = [self.gameLogic.level topUpCookies];
+                [self animateNewCookies:columns completion:^{
                     
-                }
-                
-                //check whether player has run out of moves
-                else if (![self.gameLogic areThereMovesLeft]) {
-                    [_menuNode displayMenuFor:NO_MORE_MOVES];
-                }
-                
+                    [self updateScoreAndMoves];
+                    
+                    self.userInteractionEnabled = YES;
+                    
+                    //check whether the player has finished the level
+                    if ([self.gameLogic isLevelComplete]) {
+                        [_menuNode displayMenuFor:LEVEL_COMPLETE];
+                        
+                    }
+                    
+                    //check whether player has run out of moves
+                    else if (![self.gameLogic areThereMovesLeft]) {
+                        [_menuNode displayMenuFor:NO_MORE_MOVES];
+                    }
+                    
+                }];
             }];
         }];
     }];
@@ -436,6 +441,21 @@ static const CGFloat TileHeight = 36.0;
 //    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil];
 //    [self runAction:sequence];
 //}
+
+- (void)animateMatchedCookies:(NSSet *)chains completion:(dispatch_block_t)completion {
+    for (BBQChain *chain in chains) {
+        for (BBQCookie *cookie in chain.cookiesInChain) {
+            if (cookie.sprite != nil) {
+                CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:0.3 scale:0.1];
+                [cookie.sprite runAction:[CCActionSequence actions:scaleAction, [CCActionRemove action], nil]];
+                
+                cookie.sprite = nil;
+            }
+        }
+    }
+    
+    [self runAction:[CCActionSequence actions:[CCActionDelay actionWithDuration:0.3], [CCActionCallBlock actionWithBlock:completion], nil]];
+}
 
 - (void)animateMovements:(NSArray *)movements swipeDirection:(NSString *)swipeDirection completion: (dispatch_block_t)completion {
     

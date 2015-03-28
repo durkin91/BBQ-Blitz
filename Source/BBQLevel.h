@@ -42,6 +42,9 @@ static const NSInteger NumRows = 9;
 - (NSArray *)allCookiesInColumnOrRow:(NSInteger)columnOrRow swipeDirection:(NSString *)swipeDirection;
 - (NSArray *)chainsInSection:(NSArray *)section;
 - (BBQCookieOrder *)cookieOrderForType:(NSInteger)cookieType;
+- (NSSet *)removeMatches;
+- (NSSet *)detectHorizontalMatches;
+- (NSSet *)detectVerticalMatches;
 
 
 @end

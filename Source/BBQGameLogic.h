@@ -35,6 +35,7 @@
 - (BOOL)areThereMovesLeft;
 - (NSArray *)movementsForSwipe:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow;
 - (NSInteger)returnColumnOrRowWithSwipeDirection:(NSString *)swipeDirection column:(NSInteger)column row:(NSInteger)row;
+- (NSSet *)removeMatches;
 
 
 @end

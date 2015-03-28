@@ -8,12 +8,18 @@
 
 #import <Foundation/Foundation.h>
 
+@class BBQCookie;
+
+typedef NS_ENUM(NSUInteger, ChainType) {
+    ChainTypeHorizontal,
+    ChainTypeVertical,
+};
+
 @interface BBQChain : NSObject
 
-@property (strong, nonatomic) NSMutableArray *cookiesInChain;
-@property (assign, nonatomic) NSInteger activeRow;
-@property (assign, nonatomic) NSInteger activeColumn;
+@property (strong, nonatomic, readonly) NSMutableArray *cookiesInChain;
+@property (assign, nonatomic) ChainType chainType;
 
-- (instancetype)initWithColumn:(NSInteger)column row:(NSInteger)row;
+- (void)addCookie:(BBQCookie *)cookie;
 
 @end

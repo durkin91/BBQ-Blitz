@@ -13,6 +13,7 @@
 #import "BBQPowerup.h"
 #import "BBQCombo.h"
 #import "BBQCookieOrder.h"
+#import "BBQChain.h"
 
 @implementation BBQGameLogic
 
@@ -119,69 +120,6 @@
         }
     }
     
-    
-    
-    //
-//    
-//    //Move all cookies to appropriate positions
-//    NSArray *sections = [self.level breakColumnOrRowIntoSectionsForDirection:swipeDirection columnOrRow:columnOrRow];
-//    for (NSInteger sectionIndex = 0; sectionIndex < [sections count]; sectionIndex++) {
-//        NSMutableArray *section = sections[sectionIndex];
-//        NSArray *chains = [self.level chainsInSection:section];
-//        for (NSInteger i = 0; i < [chains count]; i++) {
-//            NSArray *chain = chains[i];
-//            BBQCookie *rootCookie = chain[0];
-//            BBQCookieOrder *order = [self.level cookieOrderForType:rootCookie.cookieType];
-//            if ([chain count] >= 2) {
-//                for (NSInteger x = [chain count] - 1; x >= 0; x --) {
-//                    BBQCookie *cookie = chain[x];
-//                    [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
-//                    
-//                    //Attach a combo
-//                    BBQCombo *combo = [[BBQCombo alloc] init];
-//                    cookie.combo = combo;
-//                    
-//                    //Check to see if it is on cookie order, but not if it is the last cookie. Have to check that one afterwards, because it is the last sprite to dissappear
-//                    if (order.quantityLeft > 0 && x < [chain count] - 1) {
-//                        order.quantityLeft --;
-//                        cookie.combo.cookieOrder = order;
-//                    }
-//                    
-//                    //Set the number of tiles the animation needs to be delayed by, before the cookie dissapears. So the sequence is move > delay > cookie dissappears
-//                    NSInteger chainCount = [chain count];
-//                    NSInteger delay = chainCount - x - 1;
-//                    cookie.combo.numberOfTilesToDelayBy = delay;
-//                    
-//                    //move over the last cookie in the chain
-//                    if (x == [chain count] - 1) {
-//                        cookie.column = rootCookie.column;
-//                        cookie.row = rootCookie.row;
-//                        combo.isLastCookieInChain = YES;
-//                    }
-//
-//                    
-//                    //move all cookies after this one, over one space
-//                    for (NSInteger y = i + 1; y < [chains count]; y++) {
-//                        NSArray *chainToMove = chains[y];
-//                        for (BBQCookie *cookie in chainToMove) {
-//                            [self moveCookieOneTileOver:cookie swipeDirection:swipeDirection];
-//                        }
-//
-//                    }
-//                }
-//                
-//                //Update cookie order for last cookie in chain, which will disappear last
-//                if (order.quantityLeft > 0) {
-//                    order.quantityLeft --;
-//                    NSInteger z = [chain count] - 1;
-//                    BBQCookie *lastCookie = chain[z];
-//                    lastCookie.combo.cookieOrder = order;
-//                }
-//            }
-//        }
-//    }
-    
-    
     //Update moves
     self.movesLeft --;
     
@@ -211,6 +149,23 @@
         nextCookie.column = nextCookie.column + 1;
     }
     
+}
+
+- (NSSet *)removeMatches {
+    NSSet *horizontalChains = [self.level detectHorizontalMatches];
+    [self removeCookies:horizontalChains];
+    NSSet *verticalChains = [self.level detectVerticalMatches];
+    [self removeCookies:verticalChains];
+    
+    return [horizontalChains setByAddingObjectsFromSet:verticalChains];
+}
+
+- (void)removeCookies:(NSSet *)chains {
+    for (BBQChain *chain in chains) {
+        for (BBQCookie *cookie in chain.cookiesInChain) {
+            [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
+        }
+    }
 }
 
 #pragma mark - Obstacle methods
