@@ -157,6 +157,9 @@
     NSSet *verticalChains = [self.level detectVerticalMatches];
     [self removeCookies:verticalChains];
     
+    [self calculateScoresForChains:horizontalChains];
+    [self calculateScoresForChains:verticalChains];
+    
     return [horizontalChains setByAddingObjectsFromSet:verticalChains];
 }
 
@@ -165,6 +168,13 @@
         for (BBQCookie *cookie in chain.cookiesInChain) {
             [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
         }
+    }
+}
+
+- (void)calculateScoresForChains:(NSSet *)chains {
+    for (BBQChain *chain in chains) {
+        chain.score = 30 * ([chain.cookiesInChain count] - 2);
+        self.currentScore = self.currentScore + chain.score;
     }
 }
 

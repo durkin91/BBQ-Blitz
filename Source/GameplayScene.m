@@ -288,13 +288,13 @@ static const CGFloat TileHeight = 36.0;
     NSSet *chains = [self.gameLogic removeMatches];
     [self animateMatchedCookies:chains completion:^{
         
+        [self updateScoreAndMoves];
+        
         NSArray *columns = [self.gameLogic.level fillHoles];
         [self animateFallingCookies:columns completion:^{
             
             NSArray *columns = [self.gameLogic.level topUpCookies];
             [self animateNewCookies:columns completion:^{
-                
-                [self updateScoreAndMoves];
                 
                 if ([chains count] == 0) {
                     [self beginNextTurn];
@@ -341,6 +341,26 @@ static const CGFloat TileHeight = 36.0;
     _movesLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.movesLeft];
     NSLog(@"Moves left label: %@", _movesLabel.string);
 
+}
+
+- (void)animateScoreForChain:(BBQChain *)chain {
+    //Figure out what the midpoint of the chain is
+    BBQCookie *firstCookie = [chain.cookiesInChain firstObject];
+    BBQCookie *lastCookie = [chain.cookiesInChain lastObject];
+    CGPoint centerPosition = CGPointMake(
+                                         (firstCookie.sprite.position.x + lastCookie.sprite.position.x) / 2,
+                                         (firstCookie.sprite.position.y + lastCookie.sprite.position.y) / 2 - 8);
+    
+    //Add a label for the score that slowly fades up
+    NSString *score = [NSString stringWithFormat:@"%lu", (long)chain.score];
+    CCLabelTTF *scoreLabel = [CCLabelTTF labelWithString:score fontName:@"GillSans-BoldItalic" fontSize:16];
+    scoreLabel.position = centerPosition;
+    scoreLabel.zOrder = 300;
+    scoreLabel.outlineColor = [CCColor blackColor];
+    scoreLabel.outlineWidth = 1.0;
+    [self.cookiesLayer addChild:scoreLabel];
+    
+    [BBQAnimations animateScoreLabel:scoreLabel];
 }
 
 - (void)animateNewCookies:(NSArray *)columns completion:(dispatch_block_t)completion {
@@ -459,6 +479,7 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)animateMatchedCookies:(NSSet *)chains completion:(dispatch_block_t)completion {
     for (BBQChain *chain in chains) {
+        [self animateScoreForChain:chain];
         for (BBQCookie *cookie in chain.cookiesInChain) {
             if (cookie.sprite != nil) {
                 CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:0.3 scale:0.1];
