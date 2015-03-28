@@ -62,6 +62,7 @@ static const CGFloat TileHeight = 36.0;
     _movesLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.movesLeft];
     _scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.currentScore];
     [self addSpritesForOrders];
+    [self.gameLogic resetMultiChainMultiplier];
     
     [self addSpritesForCookies:cookies];
     [self addTiles];
@@ -311,6 +312,7 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)beginNextTurn {
     self.userInteractionEnabled = YES;
+    [self.gameLogic resetMultiChainMultiplier];
     
     //check whether the player has finished the level
     if ([self.gameLogic isLevelComplete]) {

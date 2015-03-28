@@ -27,6 +27,7 @@
 @property (strong, nonatomic) BBQLevel *level;
 @property (nonatomic) NSInteger currentScore;
 @property (nonatomic) NSInteger movesLeft;
+@property (assign, nonatomic) NSInteger multiChainMultiplier;
 
 
 - (NSSet *)setupGameLogicWithLevel:(NSInteger)level;
@@ -36,6 +37,7 @@
 - (NSArray *)movementsForSwipe:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow;
 - (NSInteger)returnColumnOrRowWithSwipeDirection:(NSString *)swipeDirection column:(NSInteger)column row:(NSInteger)row;
 - (NSSet *)removeMatches;
+- (void)resetMultiChainMultiplier;
 
 
 @end

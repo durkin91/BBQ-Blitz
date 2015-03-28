@@ -63,9 +63,6 @@
     NSArray *firstSection = sections[0];
     BBQCookie *firstCookieOverall = firstSection[0];
     
-    NSArray *lastSection = [sections lastObject];
-    BBQCookie *lastCookieOverall = [lastSection lastObject];
-    
     NSInteger numberOfSections = [sections count];
     
     for (NSInteger sectionIndex = 0; sectionIndex < [sections count]; sectionIndex++) {
@@ -173,8 +170,9 @@
 
 - (void)calculateScoresForChains:(NSSet *)chains {
     for (BBQChain *chain in chains) {
-        chain.score = 30 * ([chain.cookiesInChain count] - 2);
+        chain.score = 30 * ([chain.cookiesInChain count] - 2) * self.multiChainMultiplier;
         self.currentScore = self.currentScore + chain.score;
+        self.multiChainMultiplier ++;
     }
 }
 
@@ -262,6 +260,10 @@
         movesLeft = YES;
     }
     return movesLeft;
+}
+
+- (void)resetMultiChainMultiplier {
+    self.multiChainMultiplier = 1;
 }
 
 
