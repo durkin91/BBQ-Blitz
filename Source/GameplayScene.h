@@ -3,6 +3,9 @@
 #import "BBQCookieNode.h"
 #import "BBQCombo.h"
 
+#define HORIZONTAL @"Horizontal"
+#define VERTICAL @"Vertical"
+
 @class BBQLevel;
 @class BBQComboAnimation;
 

@@ -31,6 +31,8 @@ static const CGFloat TileHeight = 36.0;
 @property (assign, nonatomic) NSInteger swipeFromRow;
 @property (assign, nonatomic) NSInteger rootColumnForSwipe;
 @property (assign, nonatomic) NSInteger rootRowForSwipe;
+@property (assign, nonatomic) double touchBeganTimestamp;
+@property (assign, nonatomic) NSTimeInterval tileDuration;
 
 @end
 
@@ -233,6 +235,9 @@ static const CGFloat TileHeight = 36.0;
             self.swipeFromRow = row;
             self.rootColumnForSwipe = column;
             self.rootRowForSwipe = row;
+            
+            self.touchBeganTimestamp = touch.timestamp;
+            
         }
     }
 }
@@ -245,27 +250,35 @@ static const CGFloat TileHeight = 36.0;
     NSInteger column, row;
     if ([self convertPoint:location toColumn:&column row:&row]) {
         
-        NSString *swipeDirection;
-        if (column < self.swipeFromColumn && row == self.swipeFromRow) {
-            swipeDirection = @"Left";
+        if (column != self.swipeFromColumn || row != self.swipeFromRow) {
+            
+            NSString *swipeDirection;
+            if (column < self.swipeFromColumn && row == self.swipeFromRow) {
+                swipeDirection = @"Left";
+            }
+            else if (column > self.swipeFromColumn && row == self.swipeFromRow) {
+                swipeDirection = @"Right";
+            }
+            else if (row < self.swipeFromRow && column == self.swipeFromColumn) {
+                swipeDirection = @"Down";
+            }
+            else if (row > self.swipeFromRow && column == self.swipeFromColumn) {
+                swipeDirection = @"Up";
+            }
+            
+            self.tileDuration = touch.timestamp - self.touchBeganTimestamp;
+            NSLog(@"Tile Duration = %f", self.tileDuration);
+            self.touchBeganTimestamp = touch.timestamp;
+            
+            NSLog(@"Swipe direction: %@", swipeDirection);
+            if (swipeDirection) {
+                [self swipeDirection:swipeDirection];
+            }
+            
+            self.swipeFromColumn = column;
+            self.swipeFromRow = row;
+            
         }
-        else if (column > self.swipeFromColumn && row == self.swipeFromRow) {
-            swipeDirection = @"Right";
-        }
-        else if (row < self.swipeFromRow && column == self.swipeFromColumn) {
-            swipeDirection = @"Down";
-        }
-        else if (row > self.swipeFromRow && column == self.swipeFromColumn) {
-            swipeDirection = @"Up";
-        }
-        
-        NSLog(@"Swipe direction: %@", swipeDirection);
-        if (swipeDirection) {
-            [self swipeDirection:swipeDirection];
-        }
-        
-        self.swipeFromColumn = column;
-        self.swipeFromRow = row;
     }
 }
 
@@ -337,6 +350,141 @@ static const CGFloat TileHeight = 36.0;
         cookie.sprite.zOrder = z;
         z = z + 10;
     }
+}
+
+#pragma  mark - creating initial cookie sprites for swipe
+
+- (NSArray *)createInitialSpritesForSwipeInDirection:(NSString *)direction {
+    NSMutableArray *allSectionsWithSprites = [NSMutableArray array];
+    
+    //I'm using DOWN and LEFT so that for vertical sections the cookies are ordered from the bottom up, and for horiz sections from left to right
+    NSArray *sections = [self.gameLogic.level breakColumnOrRowIntoSectionsForDirection:DOWN columnOrRow:self.swipeFromColumn];
+    sections = [self turnCookieSectionsIntoSprites:sections];
+    
+    //All sprites in ordered array
+    NSMutableArray *allSprites = [NSMutableArray array];
+    for (NSArray *section in sections) {
+        [allSprites addObjectsFromArray:section];
+    }
+    
+    
+    //Find the root cookie for the swipe
+    BBQCookie *rootCookie = [self.gameLogic.level cookieAtColumn:self.rootColumnForSwipe row:self.rootRowForSwipe];
+    NSInteger rootCookieIndex = [allSprites indexOfObject:rootCookie.sprite];
+    NSInteger numberOfSpritesAboveRoot = [allSprites count] - rootCookieIndex - 1;
+    NSInteger numberOfSpritesBelowRoot = rootCookieIndex;
+    
+    //for each section, create an array containing 3 arrays for cookies below, cookies in the middle on screen, and cookies above
+    for (NSArray *section in sections) {
+        NSMutableArray *cookieNodes = [NSMutableArray array];
+        [allSectionsWithSprites addObject:cookieNodes];
+        NSMutableArray *cookiesOnTiles = [NSMutableArray array];
+        for (BBQCookieNode *sprite in section) {
+            [cookiesOnTiles addObject:sprite];
+        }
+        [cookieNodes addObject:cookiesOnTiles];
+        
+        //Create cookies above the section
+        NSMutableArray *aboveSection = [self allSpritesAboveSprite:rootCookie.sprite allSprites:allSprites number:numberOfSpritesAboveRoot];
+        BBQCookieNode *lastCookie = [cookieNodes lastObject];
+        for (BBQCookieNode *sprite in aboveSection) {
+            
+            if ([direction isEqualToString:VERTICAL]) {
+                sprite.column = lastCookie.column;
+                sprite.row = lastCookie.row + 1;
+            }
+            else if ([direction isEqualToString:HORIZONTAL]) {
+                sprite.column = lastCookie.column + 1;
+                sprite.row = lastCookie.row;
+            }
+            sprite.position = [GameplayScene pointForColumn:sprite.column row:sprite.row];
+            [_cookiesLayer addChild:sprite];
+        }
+        [cookieNodes addObject:aboveSection];
+        
+        //Create cookies below the section
+        NSMutableArray *belowSection = [self allSpritesBelowSprite:rootCookie.sprite allSprites:allSprites number:numberOfSpritesBelowRoot];
+        BBQCookieNode *firstCookie = [cookieNodes firstObject];
+        for (BBQCookieNode *sprite in belowSection) {
+            if ([direction isEqualToString:VERTICAL]) {
+                sprite.column = firstCookie.column;
+                sprite.row = firstCookie.row - 1;
+            }
+            else if ([direction isEqualToString:HORIZONTAL]) {
+                sprite.column = firstCookie.column - 1;
+                sprite.row = firstCookie.row;
+            }
+            sprite.position = [GameplayScene pointForColumn:sprite.column row:sprite.row];
+            [_cookiesLayer addChild:sprite];
+        }
+        [cookieNodes insertObject:belowSection atIndex:0];
+    }
+    
+    return allSectionsWithSprites;
+}
+
+- (NSMutableArray *)allSpritesBelowSprite:(BBQCookieNode *)sprite allSprites:(NSArray *)allSprites number:(NSInteger)number {
+    NSInteger indexOfSprite = [allSprites indexOfObject:sprite];
+    NSMutableArray *orderedSprites = [NSMutableArray array];
+    
+    NSInteger count = 0;
+    for (NSInteger i = indexOfSprite - 1; i >= 0 && count <= number ; i--) {
+        BBQCookieNode *cookieNode = allSprites[i];
+        [orderedSprites addObject:cookieNode];
+        count++;
+    }
+    for (NSInteger i = [allSprites count] - 1; i > indexOfSprite && count <= number; i--) {
+        BBQCookieNode *cookieNode = allSprites[i];
+        [orderedSprites addObject:cookieNode];
+        count++;
+    }
+    
+    return [orderedSprites mutableCopy];
+}
+
+- (NSMutableArray *)allSpritesAboveSprite:(BBQCookieNode *)sprite allSprites:(NSArray *)allSprites number:(NSInteger)number {
+    NSInteger indexOfSprite = [allSprites indexOfObject:sprite];
+    NSMutableArray *orderedSprites = [NSMutableArray array];
+    
+    NSInteger count = 0;
+    for (NSInteger i = indexOfSprite + 1; i < [allSprites count] && count <= number ; i++) {
+        BBQCookieNode *cookieNode = allSprites[i];
+        [orderedSprites addObject:cookieNode];
+        count++;
+    }
+    for (NSInteger i = 0; i < indexOfSprite && count <= number ; i++) {
+        BBQCookieNode *cookieNode = allSprites[i];
+        [orderedSprites addObject:cookieNode];
+        count++;
+    }
+    
+    return [orderedSprites mutableCopy];
+}
+
+- (NSArray *)turnCookieSectionsIntoSprites:(NSArray *)sections {
+    NSMutableArray *sectionsWithSprites = [NSMutableArray array];
+    
+    for (NSInteger i = 0; i < [sections count]; i++) {
+        NSArray *section = sections[i];
+        
+        //Turn the section's cookies into just sprites
+        NSMutableArray *spritesForSection = [NSMutableArray array];
+        for (BBQCookie *cookie in section) {
+            cookie.sprite.column = cookie.column;
+            cookie.sprite.row = cookie.row;
+            cookie.sprite.cookieType = cookie.cookieType;
+            [spritesForSection addObject:cookie.sprite];
+        }
+        
+        [sectionsWithSprites addObject:spritesForSection];
+    }
+    
+    return sectionsWithSprites;
+}
+
+- (NSArray *)spritesAboveCookieSprite:(BBQCookieNode *)cookieSprite {
+    NSMutableArray *sprites = [NSMutableArray array];
+    
 }
 
 #pragma mark - Animate Swipe
@@ -513,7 +661,8 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)animateMovements:(NSArray *)movements swipeDirection:(NSString *)swipeDirection completion: (dispatch_block_t)completion {
     
-    __block NSTimeInterval tileDuration = 0.1;
+    __block NSTimeInterval tileDuration = MIN(self.tileDuration - 0.07, 0.1);
+    NSLog(@"Adjusted Tile Duration: %f", tileDuration);
     
     [movements enumerateObjectsUsingBlock:^(BBQMovement *movement, NSUInteger idx, BOOL *stop) {
         CGPoint newPosition = [GameplayScene pointForColumn:movement.destinationColumn row:movement.destinationRow];

@@ -15,4 +15,8 @@
 @property (strong, nonatomic) CCLabelTTF *countLabel;
 @property (strong, nonatomic) CCSprite *tickSprite;
 
+@property (assign, nonatomic) NSInteger column;
+@property (assign, nonatomic) NSInteger row;
+@property (assign, nonatomic) NSInteger cookieType;
+
 @end
