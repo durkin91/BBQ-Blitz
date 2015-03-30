@@ -117,9 +117,6 @@
         }
     }
     
-    //Update moves
-    self.movesLeft --;
-    
     return movements;
 }
 

@@ -26,9 +26,11 @@ static const CGFloat TileHeight = 36.0;
 @property (strong, nonatomic) CCClippingNode *cropLayer;
 @property (strong, nonatomic) CCNode *maskLayer;
 @property (strong, nonatomic) BBQGameLogic *gameLogic;
+
 @property (assign, nonatomic) NSInteger swipeFromColumn;
 @property (assign, nonatomic) NSInteger swipeFromRow;
-@property (assign, nonatomic) CGPoint swipeFromLocation;
+@property (assign, nonatomic) NSInteger rootColumnForSwipe;
+@property (assign, nonatomic) NSInteger rootRowForSwipe;
 
 @end
 
@@ -45,7 +47,7 @@ static const CGFloat TileHeight = 36.0;
 -(void)didLoadFromCCB {
     _menuNode.delegate = self;
     
-    self.swipeFromColumn = self.swipeFromRow = NSNotFound;
+    self.swipeFromColumn = self.swipeFromRow = self.rootColumnForSwipe = self.rootRowForSwipe = NSNotFound;
     self.userInteractionEnabled = YES;
     
 
@@ -225,11 +227,12 @@ static const CGFloat TileHeight = 36.0;
     
     NSInteger column, row;
     if ([self convertPoint:location toColumn:&column row:&row]) {
-        BBQTile *tile = [self.gameLogic.level tileAtColumn:column row:row];
-        if (tile.tileType != 0) {
+        BBQCookie *cookie = [self.gameLogic.level cookieAtColumn:column row:row];
+        if (cookie != nil) {
             self.swipeFromColumn = column;
             self.swipeFromRow = row;
-            self.swipeFromLocation = location;
+            self.rootColumnForSwipe = column;
+            self.rootRowForSwipe = row;
         }
     }
 }
@@ -243,16 +246,16 @@ static const CGFloat TileHeight = 36.0;
     if ([self convertPoint:location toColumn:&column row:&row]) {
         
         NSString *swipeDirection;
-        if (location.x < self.swipeFromLocation.x) {
+        if (column < self.swipeFromColumn && row == self.swipeFromRow) {
             swipeDirection = @"Left";
         }
-        else if (location.x > self.swipeFromLocation.x) {
+        else if (column > self.swipeFromColumn && row == self.swipeFromRow) {
             swipeDirection = @"Right";
         }
-        else if (location.y < self.swipeFromLocation.y) {
+        else if (row < self.swipeFromRow && column == self.swipeFromColumn) {
             swipeDirection = @"Down";
         }
-        else if (location.y > self.swipeFromLocation.y) {
+        else if (row > self.swipeFromRow && column == self.swipeFromColumn) {
             swipeDirection = @"Up";
         }
         
@@ -260,17 +263,19 @@ static const CGFloat TileHeight = 36.0;
         if (swipeDirection) {
             [self swipeDirection:swipeDirection];
         }
-        self.swipeFromColumn = NSNotFound;
+        
+        self.swipeFromColumn = column;
+        self.swipeFromRow = row;
     }
 }
 
 - (void)touchEnded:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
-    self.swipeFromColumn = self.swipeFromRow = NSNotFound;
-    self.swipeFromLocation = CGPointMake(0, 0);
+    self.swipeFromColumn = self.swipeFromRow = self.rootRowForSwipe = self.rootColumnForSwipe = NSNotFound;
+    [self handleMatches];
 }
 
 - (void)touchCancelled:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
-    [self touchEnded:touch withEvent:event];
+    self.swipeFromColumn = self.swipeFromRow = self.rootRowForSwipe = self.rootColumnForSwipe = NSNotFound;
 }
 
 - (void)swipeDirection:(NSString *)direction {
@@ -281,12 +286,11 @@ static const CGFloat TileHeight = 36.0;
     [self changeCookieZIndex:movements];
     [self animateMovements:movements swipeDirection:direction completion:^{
         
-        [self handleMatches];
-        
     }];
 }
 
 - (void)handleMatches {
+    self.userInteractionEnabled = NO;
     NSSet *chains = [self.gameLogic removeMatches];
     [self animateMatchedCookies:chains completion:^{
         
@@ -509,7 +513,7 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)animateMovements:(NSArray *)movements swipeDirection:(NSString *)swipeDirection completion: (dispatch_block_t)completion {
     
-    __block NSTimeInterval tileDuration = 0.3;
+    __block NSTimeInterval tileDuration = 0.1;
     
     [movements enumerateObjectsUsingBlock:^(BBQMovement *movement, NSUInteger idx, BOOL *stop) {
         CGPoint newPosition = [GameplayScene pointForColumn:movement.destinationColumn row:movement.destinationRow];
