@@ -249,35 +249,38 @@ static const CGFloat TileHeight = 36.0;
     
     NSInteger column, row;
     if ([self convertPoint:location toColumn:&column row:&row]) {
-        
-        if (column != self.swipeFromColumn || row != self.swipeFromRow) {
+        BBQCookie *cookie = [self.gameLogic.level cookieAtColumn:column row:row];
+        if (cookie != nil) {
             
-            NSString *swipeDirection;
-            if (column < self.swipeFromColumn && row == self.swipeFromRow) {
-                swipeDirection = @"Left";
+            if (column != self.swipeFromColumn || row != self.swipeFromRow) {
+                
+                NSString *swipeDirection;
+                if (column < self.swipeFromColumn && row == self.swipeFromRow) {
+                    swipeDirection = @"Left";
+                }
+                else if (column > self.swipeFromColumn && row == self.swipeFromRow) {
+                    swipeDirection = @"Right";
+                }
+                else if (row < self.swipeFromRow && column == self.swipeFromColumn) {
+                    swipeDirection = @"Down";
+                }
+                else if (row > self.swipeFromRow && column == self.swipeFromColumn) {
+                    swipeDirection = @"Up";
+                }
+                
+                self.tileDuration = touch.timestamp - self.touchBeganTimestamp;
+                NSLog(@"Tile Duration = %f", self.tileDuration);
+                self.touchBeganTimestamp = touch.timestamp;
+                
+                NSLog(@"Swipe direction: %@", swipeDirection);
+                if (swipeDirection) {
+                    [self swipeDirection:swipeDirection];
+                }
+                
+                self.swipeFromColumn = column;
+                self.swipeFromRow = row;
+                
             }
-            else if (column > self.swipeFromColumn && row == self.swipeFromRow) {
-                swipeDirection = @"Right";
-            }
-            else if (row < self.swipeFromRow && column == self.swipeFromColumn) {
-                swipeDirection = @"Down";
-            }
-            else if (row > self.swipeFromRow && column == self.swipeFromColumn) {
-                swipeDirection = @"Up";
-            }
-            
-            self.tileDuration = touch.timestamp - self.touchBeganTimestamp;
-            NSLog(@"Tile Duration = %f", self.tileDuration);
-            self.touchBeganTimestamp = touch.timestamp;
-            
-            NSLog(@"Swipe direction: %@", swipeDirection);
-            if (swipeDirection) {
-                [self swipeDirection:swipeDirection];
-            }
-            
-            self.swipeFromColumn = column;
-            self.swipeFromRow = row;
-            
         }
     }
 }
