@@ -146,8 +146,8 @@
 }
 
 - (NSSet *)removeMatches {
-    NSSet *horizontalChains = [self.level detectHorizontalMatches];
-    NSSet *verticalChains = [self.level detectVerticalMatches];
+    NSSet *horizontalChains = [self.level detectHorizontalChains];
+    NSSet *verticalChains = [self.level detectVerticalChains];
     NSSet *allChains = [horizontalChains setByAddingObjectsFromSet:verticalChains];
     [self removeCookies:allChains];
     [self calculateScoresForChains:allChains];

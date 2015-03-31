@@ -34,7 +34,7 @@ static const CGFloat TileHeight = 36.0;
 @property (assign, nonatomic) double touchBeganTimestamp;
 @property (assign, nonatomic) NSTimeInterval tileDuration;
 @property (assign, nonatomic) BOOL canStartNextAnimation;
-@property (assign, nonatomic) BOOL unnecessaryHighlightedSpritesRemoved;
+@property (strong, nonatomic) NSSet *allChains;
 
 @end
 
@@ -303,9 +303,6 @@ static const CGFloat TileHeight = 36.0;
             
             self.touchBeganTimestamp = touch.timestamp;
             
-            [self highlightCookiesInColumn:column row:row];
-            self.unnecessaryHighlightedSpritesRemoved = NO;
-            
         }
     }
 }
@@ -323,31 +320,15 @@ static const CGFloat TileHeight = 36.0;
             
             if (column < self.swipeFromColumn && row == self.rootRowForSwipe) {
                 swipeDirection = @"Left";
-                if (!self.unnecessaryHighlightedSpritesRemoved) {
-                    [self removeHighlightFromCookiesInColumn:self.rootColumnForSwipe row:-100 includingRootCookie:NO];
-                    self.unnecessaryHighlightedSpritesRemoved = YES;
-                }
             }
             else if (column > self.swipeFromColumn && row == self.rootRowForSwipe) {
                 swipeDirection = @"Right";
-                if (!self.unnecessaryHighlightedSpritesRemoved) {
-                    [self removeHighlightFromCookiesInColumn:self.rootColumnForSwipe row:-100 includingRootCookie:NO];
-                    self.unnecessaryHighlightedSpritesRemoved = YES;
-                }
             }
             else if (row < self.swipeFromRow && column == self.rootColumnForSwipe) {
                 swipeDirection = @"Down";
-                if (!self.unnecessaryHighlightedSpritesRemoved) {
-                    [self removeHighlightFromCookiesInColumn:-100 row:self.rootRowForSwipe includingRootCookie:NO];
-                    self.unnecessaryHighlightedSpritesRemoved = YES;
-                }
             }
             else if (row > self.swipeFromRow && column == self.rootColumnForSwipe) {
                 swipeDirection = @"Up";
-                if (!self.unnecessaryHighlightedSpritesRemoved) {
-                    [self removeHighlightFromCookiesInColumn:-100 row:self.swipeFromColumn includingRootCookie:NO];
-                    self.unnecessaryHighlightedSpritesRemoved = YES;
-                }
             }
             
             
@@ -369,25 +350,27 @@ static const CGFloat TileHeight = 36.0;
 }
 
 - (void)touchEnded:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
-    [self removeHighlightFromCookiesInColumn:self.rootColumnForSwipe row:self.rootRowForSwipe includingRootCookie:YES];
     self.swipeFromColumn = self.swipeFromRow = self.rootRowForSwipe = self.rootColumnForSwipe = NSNotFound;
+    self.allChains = nil;
     [self handleMatches];
 }
 
 - (void)touchCancelled:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
-    [self removeHighlightFromCookiesInColumn:self.rootColumnForSwipe row:self.rootRowForSwipe includingRootCookie:YES];
     self.swipeFromColumn = self.swipeFromRow = self.rootRowForSwipe = self.rootColumnForSwipe = NSNotFound;
+    self.allChains = nil;
 }
 
 - (void)swipeDirection:(NSString *)direction {
     NSLog(@"Swipe %@", direction);
     self.userInteractionEnabled = NO;
     self.canStartNextAnimation = NO;
+    [self removeHighlightedChains];
     
     NSArray *movements = [self.gameLogic movementsForSwipe:direction columnOrRow:[self.gameLogic returnColumnOrRowWithSwipeDirection:direction column:self.swipeFromColumn row:self.swipeFromRow]];
     [self changeCookieZIndex:movements];
     [self animateMovements:movements swipeDirection:direction completion:^{
         self.canStartNextAnimation = YES;
+        [self highlightChains];
     }];
 }
 
@@ -405,10 +388,12 @@ static const CGFloat TileHeight = 36.0;
             [self animateNewCookies:columns completion:^{
                 
                 if ([chains count] == 0) {
+                    self.allChains = nil;
                     [self beginNextTurn];
                 }
                 
                 else {
+                    [self highlightChains];
                     [self handleMatches];
                 }
                 
@@ -439,6 +424,27 @@ static const CGFloat TileHeight = 36.0;
         cookie.sprite.zOrder = z;
         z = z + 10;
     }
+}
+
+- (void)highlightChains {
+    NSSet *allChains = [self.gameLogic.level allChains];
+    for (BBQChain *chain in allChains) {
+        for (BBQCookie *cookie in chain.cookiesInChain) {
+            [cookie.sprite removeFromParent];
+            cookie.sprite = [self createCookieNodeForCookie:cookie column:cookie.column row:cookie.row highlighted:YES];
+        }
+    }
+    self.allChains = allChains;
+}
+
+- (void)removeHighlightedChains {
+    for (BBQChain *chain in self.allChains) {
+        for (BBQCookie *cookie in chain.cookiesInChain) {
+            [cookie.sprite removeFromParent];
+            cookie.sprite = [self createCookieNodeForCookie:cookie column:cookie.column row:cookie.row highlighted:NO];
+        }
+    }
+    self.allChains = nil;
 }
 
 #pragma mark - Animate Swipe
@@ -553,8 +559,7 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)animateMovements:(NSArray *)movements swipeDirection:(NSString *)swipeDirection completion: (dispatch_block_t)completion {
     
-    __block NSTimeInterval tileDuration = MIN(self.tileDuration, 0.1);
-    NSLog(@"Adjusted Tile Duration: %f", tileDuration);
+    __block NSTimeInterval tileDuration = 0.1;
     
     [movements enumerateObjectsUsingBlock:^(BBQMovement *movement, NSUInteger idx, BOOL *stop) {
         CGPoint newPosition = [GameplayScene pointForColumn:movement.destinationColumn row:movement.destinationRow];
@@ -563,16 +568,16 @@ static const CGFloat TileHeight = 36.0;
             
             BBQCookieNode *sprite;
             if ([swipeDirection isEqualToString:UP]) {
-                sprite = [self createCookieNodeForCookie:movement.cookie column:movement.destinationColumn row:movement.destinationRow - 1 highlighted:YES];
+                sprite = [self createCookieNodeForCookie:movement.cookie column:movement.destinationColumn row:movement.destinationRow - 1 highlighted:NO];
             }
             else if ([swipeDirection isEqualToString:DOWN]) {
-                sprite = [self createCookieNodeForCookie:movement.cookie column:movement.destinationColumn row:movement.destinationRow + 1 highlighted:YES];
+                sprite = [self createCookieNodeForCookie:movement.cookie column:movement.destinationColumn row:movement.destinationRow + 1 highlighted:NO];
             }
             else if ([swipeDirection isEqualToString:LEFT]) {
-                sprite = [self createCookieNodeForCookie:movement.cookie column:movement.destinationColumn + 1 row:movement.destinationRow highlighted:YES];
+                sprite = [self createCookieNodeForCookie:movement.cookie column:movement.destinationColumn + 1 row:movement.destinationRow highlighted:NO];
             }
             else if ([swipeDirection isEqualToString:RIGHT]) {
-                sprite = [self createCookieNodeForCookie:movement.cookie column:movement.destinationColumn - 1 row:movement.destinationRow highlighted:YES];
+                sprite = [self createCookieNodeForCookie:movement.cookie column:movement.destinationColumn - 1 row:movement.destinationRow highlighted:NO];
             }
             movement.sprite = sprite;
             movement.cookie.sprite = sprite;

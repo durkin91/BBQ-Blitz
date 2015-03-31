@@ -43,9 +43,17 @@
     return set;
 }
 
+- (NSSet *)allChains {
+    NSMutableSet *horizontalChains = [[self detectHorizontalChains] mutableCopy];
+    NSMutableSet *verticalChains = [[self detectVerticalChains] mutableCopy];
+    NSMutableSet *allChains = [NSMutableSet setWithSet:horizontalChains];
+    for (BBQChain *chain in verticalChains) {
+        [allChains addObject:chain];
+    }
+    return allChains;
+}
 
-
-- (NSSet *)detectHorizontalMatches {
+- (NSSet *)detectHorizontalChains {
     NSMutableSet *set = [NSMutableSet set];
     
     for (NSInteger row = 0; row < NumRows; row ++) {
@@ -76,7 +84,7 @@
     return set;
 }
 
-- (NSSet *)detectVerticalMatches {
+- (NSSet *)detectVerticalChains {
     NSMutableSet *set = [NSMutableSet set];
     
     for (NSInteger column = 0; column < NumColumns; column++) {
