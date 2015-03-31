@@ -7,13 +7,25 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "BBQCookieOrder.h"
+
+@class BBQCookie;
+
+typedef NS_ENUM(NSUInteger, ChainType) {
+    ChainTypeHorizontal,
+    ChainTypeVertical,
+};
 
 @interface BBQChain : NSObject
 
-@property (strong, nonatomic) NSMutableArray *cookiesInChain;
-@property (assign, nonatomic) NSInteger activeRow;
-@property (assign, nonatomic) NSInteger activeColumn;
+@property (strong, nonatomic, readonly) NSArray *cookiesInChain;
+@property (assign, nonatomic) ChainType chainType;
+@property (assign, nonatomic) NSUInteger score;
+@property (strong, nonatomic) BBQCookieOrder *cookieOrder;
+@property (assign, nonatomic) NSInteger numberOfCookiesForOrder;
+@property (assign, nonatomic) NSInteger cookieType;
 
-- (instancetype)initWithColumn:(NSInteger)column row:(NSInteger)row;
+
+- (void)addCookie:(BBQCookie *)cookie;
 
 @end

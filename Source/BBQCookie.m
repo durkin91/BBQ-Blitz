@@ -34,6 +34,10 @@
             spriteName = @"Macaroon";
             break;
             
+        case 6:
+            spriteName = @"SugarCookie";
+            break;
+            
         default:
             break;
     }

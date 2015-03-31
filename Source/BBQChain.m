@@ -9,20 +9,19 @@
 #import "BBQChain.h"
 #import "BBQLevel.h"
 
-@implementation BBQChain
+@implementation BBQChain {
+    NSMutableArray *_cookies;
+}
 
-- (instancetype)initWithColumn:(NSInteger)column row:(NSInteger)row {
-    self = [super init];
-    if (self) {
-        if (column >= 0 && column < NumColumns) {
-            self.activeColumn = column;
-        }
-        
-        if (row >= 0 && row < NumRows) {
-            self.activeRow = row;
-        }
+- (void)addCookie:(BBQCookie *)cookie {
+    if (_cookies == nil) {
+        _cookies = [NSMutableArray array];
     }
-    return self;
+    [_cookies addObject:cookie];
+}
+
+- (NSArray *)cookiesInChain {
+    return _cookies;
 }
 
 -(NSString *)description {
