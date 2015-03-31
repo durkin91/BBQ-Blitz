@@ -319,52 +319,51 @@ static const CGFloat TileHeight = 36.0;
     if ([self convertPoint:location toColumn:&column row:&row]) {
         BBQCookie *cookie = [self.gameLogic.level cookieAtColumn:column row:row];
         if (cookie != nil) {
+            NSString *swipeDirection;
             
-            if (column != self.swipeFromColumn || row != self.swipeFromRow) {
-                
-                NSString *swipeDirection;
-                if (column < self.swipeFromColumn && row == self.swipeFromRow) {
-                    swipeDirection = @"Left";
-                    if (!self.unnecessaryHighlightedSpritesRemoved) {
-                        [self removeHighlightFromCookiesInColumn:self.rootColumnForSwipe row:-100 includingRootCookie:NO];
-                        self.unnecessaryHighlightedSpritesRemoved = YES;
-                    }
+            if (column < self.swipeFromColumn && row == self.rootRowForSwipe) {
+                swipeDirection = @"Left";
+                if (!self.unnecessaryHighlightedSpritesRemoved) {
+                    [self removeHighlightFromCookiesInColumn:self.rootColumnForSwipe row:-100 includingRootCookie:NO];
+                    self.unnecessaryHighlightedSpritesRemoved = YES;
                 }
-                else if (column > self.swipeFromColumn && row == self.swipeFromRow) {
-                    swipeDirection = @"Right";
-                    if (!self.unnecessaryHighlightedSpritesRemoved) {
-                        [self removeHighlightFromCookiesInColumn:self.rootColumnForSwipe row:-100 includingRootCookie:NO];
-                        self.unnecessaryHighlightedSpritesRemoved = YES;
-                    }
-                }
-                else if (row < self.swipeFromRow && column == self.swipeFromColumn) {
-                    swipeDirection = @"Down";
-                    if (!self.unnecessaryHighlightedSpritesRemoved) {
-                        [self removeHighlightFromCookiesInColumn:-100 row:self.rootRowForSwipe includingRootCookie:NO];
-                        self.unnecessaryHighlightedSpritesRemoved = YES;
-                    }
-                }
-                else if (row > self.swipeFromRow && column == self.swipeFromColumn) {
-                    swipeDirection = @"Up";
-                    if (!self.unnecessaryHighlightedSpritesRemoved) {
-                        [self removeHighlightFromCookiesInColumn:-100 row:self.swipeFromColumn includingRootCookie:NO];
-                        self.unnecessaryHighlightedSpritesRemoved = YES;
-                    }
-                }
-                
-                self.tileDuration = touch.timestamp - self.touchBeganTimestamp;
-                NSLog(@"Tile Duration = %f", self.tileDuration);
-                self.touchBeganTimestamp = touch.timestamp;
-                
-                NSLog(@"Swipe direction: %@", swipeDirection);
-                if (swipeDirection) {
-                    [self swipeDirection:swipeDirection];
-                }
-                
-                self.swipeFromColumn = column;
-                self.swipeFromRow = row;
-                
             }
+            else if (column > self.swipeFromColumn && row == self.rootRowForSwipe) {
+                swipeDirection = @"Right";
+                if (!self.unnecessaryHighlightedSpritesRemoved) {
+                    [self removeHighlightFromCookiesInColumn:self.rootColumnForSwipe row:-100 includingRootCookie:NO];
+                    self.unnecessaryHighlightedSpritesRemoved = YES;
+                }
+            }
+            else if (row < self.swipeFromRow && column == self.rootColumnForSwipe) {
+                swipeDirection = @"Down";
+                if (!self.unnecessaryHighlightedSpritesRemoved) {
+                    [self removeHighlightFromCookiesInColumn:-100 row:self.rootRowForSwipe includingRootCookie:NO];
+                    self.unnecessaryHighlightedSpritesRemoved = YES;
+                }
+            }
+            else if (row > self.swipeFromRow && column == self.rootRowForSwipe) {
+                swipeDirection = @"Up";
+                if (!self.unnecessaryHighlightedSpritesRemoved) {
+                    [self removeHighlightFromCookiesInColumn:-100 row:self.swipeFromColumn includingRootCookie:NO];
+                    self.unnecessaryHighlightedSpritesRemoved = YES;
+                }
+            }
+            
+            
+            self.tileDuration = touch.timestamp - self.touchBeganTimestamp;
+            NSLog(@"Tile Duration = %f", self.tileDuration);
+            self.touchBeganTimestamp = touch.timestamp;
+            
+            NSLog(@"Swipe direction: %@", swipeDirection);
+            if (swipeDirection) {
+                [self swipeDirection:swipeDirection];
+            }
+            
+            self.swipeFromColumn = column;
+            self.swipeFromRow = row;
+            
+            
         }
     }
 }
