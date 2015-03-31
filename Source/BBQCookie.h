@@ -30,5 +30,6 @@ static const NSUInteger NumCookiesToUpgrade = 40;
 
 
 - (NSString *)spriteName;
+- (NSString *)highlightedSpriteName;
 
 @end

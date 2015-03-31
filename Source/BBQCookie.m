@@ -46,6 +46,43 @@
     
 }
 
+- (NSString *)highlightedSpriteName {
+    NSString *spriteName;
+    
+    switch (self.cookieType) {
+        case 1:
+            spriteName = @"Croissant-Highlighted";
+            break;
+            
+        case 2:
+            spriteName = @"Cupcake-Highlighted";
+            break;
+            
+        case 3:
+            spriteName = @"Danish-Highlighted";
+            break;
+            
+        case 4:
+            spriteName = @"Donut-Highlighted";
+            break;
+            
+        case 5:
+            spriteName = @"Macaroon-Highlighted";
+            break;
+            
+        case 6:
+            spriteName = @"SugarCookie-Highlighted";
+            break;
+            
+        default:
+            break;
+    }
+    
+    return spriteName;
+    
+}
+
+
 - (NSString *)description {
     return [NSString stringWithFormat:@"type:%ld square:(%ld, %ld)", (long)self.cookieType, (long)self.column, (long)self.row];
 }
