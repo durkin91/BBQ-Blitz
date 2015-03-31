@@ -342,7 +342,7 @@ static const CGFloat TileHeight = 36.0;
                     self.unnecessaryHighlightedSpritesRemoved = YES;
                 }
             }
-            else if (row > self.swipeFromRow && column == self.rootRowForSwipe) {
+            else if (row > self.swipeFromRow && column == self.rootColumnForSwipe) {
                 swipeDirection = @"Up";
                 if (!self.unnecessaryHighlightedSpritesRemoved) {
                     [self removeHighlightFromCookiesInColumn:-100 row:self.swipeFromColumn includingRootCookie:NO];
@@ -553,7 +553,7 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)animateMovements:(NSArray *)movements swipeDirection:(NSString *)swipeDirection completion: (dispatch_block_t)completion {
     
-    __block NSTimeInterval tileDuration = MIN(self.tileDuration, 0.2);
+    __block NSTimeInterval tileDuration = MIN(self.tileDuration, 0.1);
     NSLog(@"Adjusted Tile Duration: %f", tileDuration);
     
     [movements enumerateObjectsUsingBlock:^(BBQMovement *movement, NSUInteger idx, BOOL *stop) {
