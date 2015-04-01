@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "BBQLevel.h"
+#import "BBQChain.h"
 
 #define COMBOS @"Combos"
 #define MOVEMENTS @"Movements"
@@ -27,17 +28,18 @@
 @property (strong, nonatomic) BBQLevel *level;
 @property (nonatomic) NSInteger currentScore;
 @property (nonatomic) NSInteger movesLeft;
-@property (assign, nonatomic) NSInteger multiChainMultiplier;
+@property (strong, nonatomic) BBQChain *chain;
+@property (strong, nonatomic) NSMutableArray *chainIncludingLinkingCookies;
 
 
 - (NSSet *)setupGameLogicWithLevel:(NSInteger)level;
-- (NSDictionary *)swipe:(NSString *)swipeDirection column:(NSInteger)columnToSwipe row:(NSInteger)rowToSwipe;
 - (BOOL)isLevelComplete;
 - (BOOL)areThereMovesLeft;
-- (NSArray *)movementsForSwipe:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow;
-- (NSInteger)returnColumnOrRowWithSwipeDirection:(NSString *)swipeDirection column:(NSInteger)column row:(NSInteger)row;
-- (NSSet *)removeMatches;
-- (void)resetMultiChainMultiplier;
 
+- (void)startChainWithCookie:(BBQCookie *)cookie;
+- (BOOL)tryAddingCookieToChain:(BBQCookie *)cookie;
+- (BOOL)isValidLinkingCookie:(BBQCookie *)cookie;
+- (BBQChain *)removeCookiesInChain;
+- (void)resetEverythingForNextTurn;
 
 @end

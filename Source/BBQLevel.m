@@ -7,7 +7,6 @@
 //
 
 #import "BBQLevel.h"
-#import "BBQChain.h"
 #import "BBQGameLogic.h"
 #import "BBQCookieOrder.h"
 
@@ -43,75 +42,69 @@
     return set;
 }
 
-- (NSSet *)allChains {
-    NSMutableSet *horizontalChains = [[self detectHorizontalChains] mutableCopy];
-    NSMutableSet *verticalChains = [[self detectVerticalChains] mutableCopy];
-    NSMutableSet *allChains = [NSMutableSet setWithSet:horizontalChains];
-    for (BBQChain *chain in verticalChains) {
-        [allChains addObject:chain];
-    }
-    return allChains;
-}
-
-- (NSSet *)detectHorizontalChains {
-    NSMutableSet *set = [NSMutableSet set];
+- (NSSet *)allValidCookiesThatCanBeChainedToCookie:(BBQCookie *)cookie existingChain:(BBQChain *)existingChain {
     
-    for (NSInteger row = 0; row < NumRows; row ++) {
-        for (NSInteger column = 0; column < NumColumns - 2; ) {
-            if (_cookies[column][row] != nil) {
-                NSUInteger matchType = _cookies[column][row].cookieType;
-                
-                if (_cookies[column + 1][row].cookieType == matchType &&
-                    _cookies[column + 2][row].cookieType == matchType) {
-                    BBQChain *chain = [[BBQChain alloc] init];
-                    chain.chainType = ChainTypeHorizontal;
-                    chain.cookieType = _cookies[column][row].cookieType;
-                    do {
-                        [chain addCookie:_cookies[column][row]];
-                        column += 1;
-                    }
-                    while (column < NumColumns && _cookies[column][row].cookieType == matchType);
-                    
-                    [set addObject:chain];
-                    continue;
-                    
-                }
-            }
-            
-            column += 1;
+    NSMutableSet *set = [NSMutableSet set];
+    NSSet *allValidLinkableCookies = [self allValidCookiesThatCanBeLinkedToCookie:cookie existingChain:existingChain];
+    
+    for (BBQCookie *linkableCookie in allValidLinkableCookies) {
+        if (cookie.cookieType == linkableCookie.cookieType) {
+            [set addObject:linkableCookie];
         }
     }
+    
     return set;
 }
 
-- (NSSet *)detectVerticalChains {
+- (NSSet *)allValidCookiesThatCanBeLinkedToCookie:(BBQCookie *)cookie existingChain:(BBQChain *)existingChain {
     NSMutableSet *set = [NSMutableSet set];
     
-    for (NSInteger column = 0; column < NumColumns; column++) {
-        for (NSInteger row = 0; row < NumRows - 2; ) {
-            if (_cookies[column][row] != nil) {
-                NSUInteger matchType = _cookies[column][row].cookieType;
-                
-                if (_cookies[column][row + 1].cookieType == matchType
-                    && _cookies[column][row + 2].cookieType == matchType) {
-                    
-                    BBQChain *chain = [[BBQChain alloc] init];
-                    chain.chainType = ChainTypeVertical;
-                    chain.cookieType = _cookies[column][row].cookieType;
-                    do {
-                        [chain addCookie:_cookies[column][row]];
-                        row += 1;
-                    }
-                    while (row < NumRows && _cookies[column][row].cookieType == matchType);
-                    
-                    [set addObject:chain];
-                    continue;
-                }
-            }
-            row += 1;
+    //look above cookie
+    for (NSInteger i = cookie.row + 1; i < NumRows; i++) {
+        BBQCookie *potentialCookie = _cookies[cookie.column][i];
+        if (potentialCookie && ![existingChain containsCookie:potentialCookie]) {
+            [set addObject:potentialCookie];
+        }
+        else {
+            break;
         }
     }
+    
+    //look below cookie
+    for (NSInteger i = cookie.row - 1; i >= 0; i--) {
+        BBQCookie *potentialCookie = _cookies[cookie.column][i];
+        if (potentialCookie && ![existingChain containsCookie:potentialCookie]) {
+            [set addObject:potentialCookie];
+        }
+        else {
+            break;
+        }
+    }
+    
+    //look to right of cookie
+    for (NSInteger i = cookie.column + 1; i < NumColumns; i++) {
+        BBQCookie *potentialCookie = _cookies[i][cookie.row];
+        if (potentialCookie && ![existingChain containsCookie:potentialCookie]) {
+            [set addObject:potentialCookie];
+        }
+        else {
+            break;
+        }
+    }
+    
+    //look below cookie
+    for (NSInteger i = cookie.column - 1; i >= 0; i--) {
+        BBQCookie *potentialCookie = _cookies[i][cookie.row];
+        if (potentialCookie && ![existingChain containsCookie:potentialCookie]) {
+            [set addObject:potentialCookie];
+        }
+        else {
+            break;
+        }
+    }
+    
     return set;
+
 }
 
 

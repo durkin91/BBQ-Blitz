@@ -18,7 +18,7 @@ typedef NS_ENUM(NSUInteger, ChainType) {
 
 @interface BBQChain : NSObject
 
-@property (strong, nonatomic, readonly) NSArray *cookiesInChain;
+@property (strong, nonatomic) NSMutableArray *cookiesInChain;
 @property (assign, nonatomic) ChainType chainType;
 @property (assign, nonatomic) NSUInteger score;
 @property (strong, nonatomic) BBQCookieOrder *cookieOrder;
@@ -27,5 +27,6 @@ typedef NS_ENUM(NSUInteger, ChainType) {
 
 
 - (void)addCookie:(BBQCookie *)cookie;
-
+- (BOOL)containsCookie:(BBQCookie *)cookie;
+- (BOOL)isACompleteChain;
 @end
