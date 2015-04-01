@@ -47,6 +47,25 @@
     return canBeAdded;
 }
 
+- (BOOL)isCookieABackTrack:(BBQCookie *)cookie {
+    if ([self.chain containsCookie:cookie]) {
+        return YES;
+    }
+    else return NO;
+}
+
+- (NSArray *)backtrackedCookiesForCookie:(BBQCookie *)cookie {
+    NSMutableArray *cookiesToRemove = [NSMutableArray array];
+    for (NSInteger i = [self.chain.cookiesInChain indexOfObject:cookie] + 1; i < [self.chain.cookiesInChain count]; i++) {
+        BBQCookie *cookieToRemove = self.chain.cookiesInChain[i];
+        [cookiesToRemove addObject:cookieToRemove];
+    }
+    for (BBQCookie *cookieToRemove in cookiesToRemove) {
+        [self.chain.cookiesInChain removeObject:cookieToRemove];
+    }
+    return cookiesToRemove;
+}
+
 - (BOOL)isValidLinkingCookie:(BBQCookie *)cookie {
     NSSet *allValidLinkingCookies = [self.level allValidCookiesThatCanBeLinkedToCookie:cookie existingChain:self.chain];
     BOOL isValid = [allValidLinkingCookies containsObject:cookie];
@@ -57,24 +76,19 @@
 }
 
 - (BBQChain *)removeCookiesInChain {
-    if ([self.chain isACompleteChain]) {
-        [self cookieOrdersForChain];
-        for (BBQCookie *cookie in self.chain.cookiesInChain) {
-            [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
-        }
-        return self.chain;
+    [self cookieOrdersForChain];
+    for (BBQCookie *cookie in self.chain.cookiesInChain) {
+        [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
     }
-    else return nil;
+    return self.chain;
 }
 
 
-//- (void)calculateScoresForChains:(NSSet *)chains {
-//    for (BBQChain *chain in chains) {
-//        chain.score = 30 * ([chain.cookiesInChain count] - 2) * self.multiChainMultiplier;
-//        self.currentScore = self.currentScore + chain.score;
-//        self.multiChainMultiplier ++;
-//    }
-//}
+- (void)calculateScoreForChain {
+    _chain.scorePerCookie = 30 + (([_chain.cookiesInChain count] - 2) * 10);
+    _chain.score = _chain.scorePerCookie * [_chain.cookiesInChain count];
+    self.currentScore = self.currentScore + _chain.score;
+}
 
 - (void)cookieOrdersForChain {
     

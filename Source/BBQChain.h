@@ -24,6 +24,7 @@ typedef NS_ENUM(NSUInteger, ChainType) {
 @property (strong, nonatomic) BBQCookieOrder *cookieOrder;
 @property (assign, nonatomic) NSInteger numberOfCookiesForOrder;
 @property (assign, nonatomic) NSInteger cookieType;
+@property (assign, nonatomic) NSInteger scorePerCookie;
 
 
 - (void)addCookie:(BBQCookie *)cookie;

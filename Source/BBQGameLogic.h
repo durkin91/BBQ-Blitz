@@ -41,5 +41,8 @@
 - (BOOL)isValidLinkingCookie:(BBQCookie *)cookie;
 - (BBQChain *)removeCookiesInChain;
 - (void)resetEverythingForNextTurn;
+- (BOOL)isCookieABackTrack:(BBQCookie *)cookie;
+- (NSArray *)backtrackedCookiesForCookie:(BBQCookie *)cookie;
+- (void)calculateScoreForChain;
 
 @end
