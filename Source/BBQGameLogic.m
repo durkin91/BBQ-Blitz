@@ -106,6 +106,19 @@
     }
 }
 
+- (BBQCookie *)lastCookieInChain {
+    return [_chain.cookiesInChain lastObject];
+}
+
+- (BBQCookie *)previousCookieToCookieInChain:(BBQCookie *)cookie {
+    NSInteger i = [_chain.cookiesInChain indexOfObject:cookie];
+    BBQCookie *previousCookie;
+    if (i > 0) {
+        previousCookie = _chain.cookiesInChain[i - 1];
+    }
+    return previousCookie;
+}
+
 #pragma mark - Obstacle methods
 
 //- (void)explodeSteelBlockerTiles:(BBQComboAnimation *)combo {

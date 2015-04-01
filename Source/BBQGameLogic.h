@@ -44,5 +44,7 @@
 - (BOOL)isCookieABackTrack:(BBQCookie *)cookie;
 - (NSArray *)backtrackedCookiesForCookie:(BBQCookie *)cookie;
 - (void)calculateScoreForChain;
+- (BBQCookie *)lastCookieInChain;
+- (BBQCookie *)previousCookieToCookieInChain:(BBQCookie *)cookie;
 
 @end

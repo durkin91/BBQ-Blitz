@@ -45,6 +45,7 @@ static const CGFloat TileHeight = 36.0;
     CCSprite *_orderDisplayNode;
     CCSprite *_scoreboardBackground;
     BBQMenu *_menuNode;
+    CCDrawNode *_drawNode;
 }
 
 #pragma mark - Setting Up
@@ -55,7 +56,8 @@ static const CGFloat TileHeight = 36.0;
     self.swipeFromColumn = self.swipeFromRow = self.rootColumnForSwipe = self.rootRowForSwipe = NSNotFound;
     self.userInteractionEnabled = YES;
     
-
+    _drawNode = [[CCDrawNode alloc] init];
+    [_cookiesLayer addChild:_drawNode];
 }
 
 #pragma mark - Helper methods
@@ -330,6 +332,7 @@ static const CGFloat TileHeight = 36.0;
     
     NSInteger column, row;
     if ([self convertPoint:location toColumn:&column row:&row]) {
+
         if (column != self.swipeFromColumn || row != self.swipeFromRow) {
             
             BBQCookie *cookie = [self.gameLogic.level cookieAtColumn:column row:row];
@@ -337,12 +340,14 @@ static const CGFloat TileHeight = 36.0;
                 NSArray *removedCookies = [self.gameLogic backtrackedCookiesForCookie:cookie];
                 [self removeHighlightedCookies:removedCookies];
                 [self animateActivatedCookieInChain:cookie];
+                [self redrawSegmentsForCookiesInChain];
                 //Code to illustrate the removal of previous cookies from chain
             }
             
             else if ([self.gameLogic tryAddingCookieToChain:cookie] == YES) {
                 [self highlightCookie:cookie];
                 [self animateActivatedCookieInChain:cookie];
+                [self drawSegmentToCookie:cookie];
             }
             
             self.swipeFromColumn = column;
@@ -386,10 +391,12 @@ static const CGFloat TileHeight = 36.0;
 - (void)touchCancelled:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
     self.swipeFromColumn = self.swipeFromRow = self.rootRowForSwipe = self.rootColumnForSwipe = NSNotFound;
     [self.gameLogic resetEverythingForNextTurn];
+    [_drawNode clear];
 }
 
 - (void)beginNextTurn {
     self.userInteractionEnabled = YES;
+    [_drawNode clear];
     [self.gameLogic resetEverythingForNextTurn];
     
     //check whether the player has finished the level
@@ -409,6 +416,22 @@ static const CGFloat TileHeight = 36.0;
     for (BBQCookie *cookie in cookies) {
         cookie.sprite.zOrder = z;
         z = z + 10;
+    }
+}
+
+- (void)drawSegmentToCookie:(BBQCookie *)cookie {
+    CGPoint cookiePosition = [GameplayScene pointForColumn:cookie.column row:cookie.row];
+    BBQCookie *previousCookie = [self.gameLogic previousCookieToCookieInChain:cookie];
+    CGPoint previousCookiePosition = [GameplayScene pointForColumn:previousCookie.column row:previousCookie.row];
+    [_drawNode drawSegmentFrom:previousCookiePosition to:cookiePosition radius:2.0 color:[cookie lineColor]];
+}
+
+- (void)redrawSegmentsForCookiesInChain {
+    [_drawNode clear];
+    NSArray *cookiesInChain = self.gameLogic.chain.cookiesInChain;
+    for (NSInteger i = 1; i < [cookiesInChain count]; i++) {
+        BBQCookie *cookie = cookiesInChain[i];
+        [self drawSegmentToCookie:cookie];
     }
 }
 
@@ -503,6 +526,7 @@ static const CGFloat TileHeight = 36.0;
 - (void)animateChain:(BBQChain *)chain completion:(dispatch_block_t)completion {
     [self animateScoreForChain:chain];
     [self changeCookieZIndex:chain.cookiesInChain];
+    [_drawNode clear];
     
     for (NSInteger i = 0; i < [chain.cookiesInChain count]; i++) {
         BBQCookie *cookie = chain.cookiesInChain[i];

@@ -10,8 +10,8 @@
               [0, 0, 0, 0, 1, 0, 0, 0, 0 ] ],
 
   "targetScore" : 1000,
-  "moves" : 30,
+  "moves" : 10,
   "orderCookieType" : [1, 2, 3, 4],
-  "orderCookieQuantity" : [5, 4, 2, 1],
+  "orderCookieQuantity" : [10, 10, 10, 10],
 
 }
