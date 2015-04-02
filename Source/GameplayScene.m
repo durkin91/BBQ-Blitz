@@ -289,59 +289,15 @@ static const CGFloat TileHeight = 36.0;
     NSInteger column, row;
     if ([self convertPoint:location toColumn:&column row:&row]) {
         
-        [_inProgressDrawNode clear];
-        
-        //Take care of drawing the in progress line
-        CGPoint rootPoint = [GameplayScene pointForColumn:self.rootCookie.column row:self.rootCookie.row];
-        float distanceAboveOrBelow = location.y - rootPoint.y;
-        float distanceAcross = location.x - rootPoint.x;
-        float x = rootPoint.x;
-        float y = rootPoint.y;
-        
-        if (ABS(distanceAboveOrBelow) >= ABS(distanceAcross)) {
-            y = location.y;
-            
-        }
-        else {
-            x = location.x;
-        }
-        
-        CGPoint endPoint = CGPointMake(x, y);
-        
-        NSInteger columnAdjusted, rowAdjusted;
-        [self convertPoint:endPoint toColumn:&columnAdjusted row:&rowAdjusted];
-        
-        if (endPoint.y > rootPoint.y) {
-            BBQCookie *upperLimitCookie = self.rootCookieLimits[UP];
-            CGPoint upperLimit = [GameplayScene pointForColumn:upperLimitCookie.column row:upperLimitCookie.row];
-            endPoint.y = MIN(endPoint.y, upperLimit.y);
-        }
-        
-        else if (endPoint.y < rootPoint.y) {
-            BBQCookie *lowerLimitCookie = self.rootCookieLimits[DOWN];
-            CGPoint lowerLimit = [GameplayScene pointForColumn:lowerLimitCookie.column row:lowerLimitCookie.row];
-            endPoint.y = MAX(endPoint.y, lowerLimit.y);
-        }
-        
-        else if (endPoint.x > rootPoint.x) {
-            BBQCookie *rightLimitCookie = self.rootCookieLimits[RIGHT];
-            CGPoint rightLimit = [GameplayScene pointForColumn:rightLimitCookie.column row:rightLimitCookie.row];
-            endPoint.x = MIN(endPoint.x, rightLimit.x);
-        }
-        
-        else if (endPoint.x < rootPoint.x) {
-            BBQCookie *leftLimitCookie = self.rootCookieLimits[LEFT];
-            CGPoint leftLimit = [GameplayScene pointForColumn:leftLimitCookie.column row:leftLimitCookie.row];
-            endPoint.x = MAX(endPoint.x, leftLimit.x);
-        }
-        
-        [_inProgressDrawNode drawSegmentFrom:rootPoint to:endPoint radius:2.0 color:[self.rootCookie lineColor]];
+        [self drawInProgressLineForColumn:column row:row touchLocation:location];
         
         if (column != self.swipeFromColumn || row != self.swipeFromRow) {
             
             //Check for backtracked Cookie
             BBQCookie *cookie = [self.gameLogic.level cookieAtColumn:column row:row];
-            [self checkForBacktrackedCookie:cookie];
+            if ([self.gameLogic isCookieABackTrack:cookie]) {
+                [self handleBacktrackedCookie:cookie];
+            }
             
             //UP
             if (row > self.rootCookie.row && column == self.rootCookie.column) {
@@ -453,14 +409,84 @@ static const CGFloat TileHeight = 36.0;
     }
 }
 
-- (void)checkForBacktrackedCookie:(BBQCookie *)cookie {
-    if ([self.gameLogic isCookieABackTrack:cookie]) {
-        NSArray *removedCookies = [self.gameLogic backtrackedCookiesForCookie:cookie];
-        [self removeHighlightedCookies:removedCookies];
-        [self animateActivatedCookieInChain:cookie];
-        [self redrawSegmentsForCookiesInChain];
-        self.rootCookie = cookie;
+- (void)drawInProgressLineForColumn:(NSInteger)column row:(NSInteger)row touchLocation:(CGPoint)location {
+    [_inProgressDrawNode clear];
+    
+    //Take care of drawing the in progress line
+    CGPoint rootPoint = [GameplayScene pointForColumn:self.rootCookie.column row:self.rootCookie.row];
+    float distanceAboveOrBelow = location.y - rootPoint.y;
+    float distanceAcross = location.x - rootPoint.x;
+    float x = rootPoint.x;
+    float y = rootPoint.y;
+    
+    if (ABS(distanceAboveOrBelow) >= ABS(distanceAcross)) {
+        y = location.y;
+        
     }
+    else {
+        x = location.x;
+    }
+    
+    CGPoint endPoint = CGPointMake(x, y);
+    
+    NSInteger columnAdjusted, rowAdjusted;
+    [self convertPoint:endPoint toColumn:&columnAdjusted row:&rowAdjusted];
+    
+    if (endPoint.y > rootPoint.y) {
+        BBQCookie *upperLimitCookie = self.rootCookieLimits[UP];
+        CGPoint upperLimit = [GameplayScene pointForColumn:upperLimitCookie.column row:upperLimitCookie.row];
+        endPoint.y = MIN(endPoint.y, upperLimit.y);
+    }
+    
+    else if (endPoint.y < rootPoint.y) {
+        BBQCookie *lowerLimitCookie = self.rootCookieLimits[DOWN];
+        CGPoint lowerLimit = [GameplayScene pointForColumn:lowerLimitCookie.column row:lowerLimitCookie.row];
+        endPoint.y = MAX(endPoint.y, lowerLimit.y);
+    }
+    
+    else if (endPoint.x > rootPoint.x) {
+        BBQCookie *rightLimitCookie = self.rootCookieLimits[RIGHT];
+        CGPoint rightLimit = [GameplayScene pointForColumn:rightLimitCookie.column row:rightLimitCookie.row];
+        endPoint.x = MIN(endPoint.x, rightLimit.x);
+    }
+    
+    else if (endPoint.x < rootPoint.x) {
+        BBQCookie *leftLimitCookie = self.rootCookieLimits[LEFT];
+        CGPoint leftLimit = [GameplayScene pointForColumn:leftLimitCookie.column row:leftLimitCookie.row];
+        endPoint.x = MAX(endPoint.x, leftLimit.x);
+    }
+    
+    if ([self isBacktracking:endPoint rootPoint:rootPoint] && (columnAdjusted != self.rootCookie.column || rowAdjusted != self.rootCookie.row)) {
+        BBQCookie *previousCookie = [self.gameLogic previousCookieToCookieInChain:self.rootCookie];
+        [self handleBacktrackedCookie:previousCookie];
+        rootPoint = [GameplayScene pointForColumn:self.rootCookie.column row:self.rootCookie.row];
+    }
+    
+    [_inProgressDrawNode drawSegmentFrom:rootPoint to:endPoint radius:2.0 color:[self.rootCookie lineColor]];
+}
+
+- (BOOL)isBacktracking:(CGPoint)location rootPoint:(CGPoint)rootPoint {
+    BOOL isBacktracking = NO;
+    BBQCookie *previousCookie = [self.gameLogic previousCookieToCookieInChain:self.rootCookie];
+    if (previousCookie) {
+        CGPoint previousCookieLocation = [GameplayScene pointForColumn:previousCookie.column row:previousCookie.row];
+        
+        if ((location.x > rootPoint.x && location.x < previousCookieLocation.x && location.y == rootPoint.y && location.y == previousCookieLocation.y) ||
+            (location.x > previousCookieLocation.x && location.x < rootPoint.x && location.y == rootPoint.y && location.y == previousCookieLocation.y) ||
+            (location.y > rootPoint.y && location.y < previousCookieLocation.y && location.x == rootPoint.x && location.x == previousCookieLocation.x) ||
+            (location.y > previousCookieLocation.y && location.y < rootPoint.y && location.x == rootPoint.x && location.x == previousCookieLocation.x)) {
+            isBacktracking = YES;
+        }
+    }
+    return isBacktracking;
+}
+
+- (void)handleBacktrackedCookie:(BBQCookie *)cookie {
+    NSArray *removedCookies = [self.gameLogic backtrackedCookiesForCookie:cookie];
+    [self removeHighlightedCookies:removedCookies];
+    //[self animateActivatedCookieInChain:cookie];
+    [self redrawSegmentsForCookiesInChain];
+    self.rootCookie = cookie;
 }
 
 - (void)activateCookies:(NSArray *)cookies {
