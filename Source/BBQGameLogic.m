@@ -137,6 +137,28 @@
     return previousCookie;
 }
 
+- (BOOL)isThereATileNextToColumn:(NSInteger)column row:(NSInteger)row direction:(NSString *)direction {
+    BBQTile *tile;
+    BOOL isTile = NO;
+    if ([direction isEqualToString:UP] && row < NumRows - 1) {
+        tile = [self.level tileAtColumn:column row:row + 1];
+    }
+    else if ([direction isEqualToString:DOWN] && row > 0) {
+        tile = [self.level tileAtColumn:column row:row -1];
+    }
+    else if ([direction isEqualToString:LEFT] && column > 0) {
+        tile = [self.level tileAtColumn:column - 1 row:row];
+    }
+    else if ([direction isEqualToString:RIGHT] && column < NumColumns - 1) {
+        tile = [self.level tileAtColumn:column + 1 row:row];
+    }
+    
+    if (tile && tile.tileType != 0) {
+        isTile = YES;
+    }
+    return isTile;
+}
+
 #pragma mark - Obstacle methods
 
 //- (void)explodeSteelBlockerTiles:(BBQComboAnimation *)combo {

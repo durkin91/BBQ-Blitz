@@ -292,12 +292,12 @@ static const CGFloat TileHeight = 36.0;
         
         //Take care of drawing the in progress line
         CGPoint rootPoint = [GameplayScene pointForColumn:self.rootCookie.column row:self.rootCookie.row];
-        float distanceAboveOrBelow = ABS(location.y - rootPoint.y);
-        float distanceAcross = ABS(location.x - rootPoint.x);
+        float distanceAboveOrBelow = location.y - rootPoint.y;
+        float distanceAcross = location.x - rootPoint.x;
         float x = rootPoint.x;
         float y = rootPoint.y;
         
-        if (distanceAboveOrBelow >= distanceAcross) {
+        if (ABS(distanceAboveOrBelow) >= ABS(distanceAcross)) {
             y = location.y;
         }
         else {
@@ -305,6 +305,25 @@ static const CGFloat TileHeight = 36.0;
         }
         
         CGPoint endPoint = CGPointMake(x, y);
+        
+        NSInteger columnAdjusted, rowAdjusted;
+        [self convertPoint:endPoint toColumn:&columnAdjusted row:&rowAdjusted];
+        
+        if (endPoint.y > rootPoint.y && ![self.gameLogic isThereATileNextToColumn:columnAdjusted row:rowAdjusted direction:UP]) {
+            endPoint = [GameplayScene pointForColumn:columnAdjusted row:rowAdjusted];
+        }
+        
+        else if (endPoint.y < rootPoint.y && ![self.gameLogic isThereATileNextToColumn:columnAdjusted row:rowAdjusted direction:DOWN]) {
+            endPoint = [GameplayScene pointForColumn:columnAdjusted row:rowAdjusted];
+        }
+        
+        else if (endPoint.x > rootPoint.x && ![self.gameLogic isThereATileNextToColumn:columnAdjusted row:rowAdjusted direction:RIGHT]) {
+            endPoint = [GameplayScene pointForColumn:columnAdjusted row:rowAdjusted];
+        }
+        else if (endPoint.x < rootPoint.x && ![self.gameLogic isThereATileNextToColumn:columnAdjusted row:rowAdjusted direction:LEFT]) {
+            endPoint = [GameplayScene pointForColumn:columnAdjusted row:rowAdjusted];
+        }
+        
         [_inProgressDrawNode drawSegmentFrom:rootPoint to:endPoint radius:2.0 color:[self.rootCookie lineColor]];
         
         if (column != self.swipeFromColumn || row != self.swipeFromRow) {
@@ -340,8 +359,7 @@ static const CGFloat TileHeight = 36.0;
 }
 
 - (void)touchEnded:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
-    self.swipeFromColumn = self.swipeFromRow = NSNotFound;
-    self.rootCookie = nil;
+    [self reset];
     self.userInteractionEnabled = NO;
     
     //If the chain isn't a valid chain
@@ -373,15 +391,19 @@ static const CGFloat TileHeight = 36.0;
 }
 
 - (void)touchCancelled:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
+    [self beginNextTurn];
+}
+
+- (void)reset {
     self.swipeFromColumn = self.swipeFromRow = NSNotFound;
     self.rootCookie = nil;
-    [self.gameLogic resetEverythingForNextTurn];
     [_drawNode clear];
+    [_inProgressDrawNode clear];
 }
 
 - (void)beginNextTurn {
     self.userInteractionEnabled = YES;
-    [_drawNode clear];
+    [self reset];
     [self.gameLogic resetEverythingForNextTurn];
     
     //check whether the player has finished the level
@@ -472,7 +494,7 @@ static const CGFloat TileHeight = 36.0;
         CGPoint relativeToSelfPos = [self convertToNodeSpace:cookieSpriteWorldPos];
         
         NSString *score = [NSString stringWithFormat:@"%lu", (long)chain.scorePerCookie];
-        CCLabelTTF *scoreLabel = [CCLabelTTF labelWithString:score fontName:@"GillSans-BoldItalic" fontSize:16];
+        CCLabelTTF *scoreLabel = [CCLabelTTF labelWithString:score fontName:@"GillSans-BoldItalic" fontSize:12];
         scoreLabel.position = relativeToSelfPos;
         scoreLabel.zOrder = 300;
         scoreLabel.outlineColor = [CCColor blackColor];

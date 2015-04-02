@@ -48,5 +48,6 @@
 - (BBQCookie *)previousCookieToCookieInChain:(BBQCookie *)cookie;
 
 - (NSArray *)tryAddingCookieToChain:(BBQCookie *)cookie inDirection:(NSString *)direction;
+- (BOOL)isThereATileNextToColumn:(NSInteger)column row:(NSInteger)row direction:(NSString *)direction;
 
 @end
