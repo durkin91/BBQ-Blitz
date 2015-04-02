@@ -29,8 +29,7 @@ static const CGFloat TileHeight = 36.0;
 
 @property (assign, nonatomic) NSInteger swipeFromColumn;
 @property (assign, nonatomic) NSInteger swipeFromRow;
-@property (assign, nonatomic) NSInteger rootColumnForSwipe;
-@property (assign, nonatomic) NSInteger rootRowForSwipe;
+@property (strong, nonatomic) BBQCookie *rootCookie;
 @property (assign, nonatomic) double touchBeganTimestamp;
 @property (assign, nonatomic) NSTimeInterval tileDuration;
 @property (assign, nonatomic) BOOL canStartNextAnimation;
@@ -46,6 +45,7 @@ static const CGFloat TileHeight = 36.0;
     CCSprite *_scoreboardBackground;
     BBQMenu *_menuNode;
     CCDrawNode *_drawNode;
+    CCDrawNode *_inProgressDrawNode;
 }
 
 #pragma mark - Setting Up
@@ -53,7 +53,8 @@ static const CGFloat TileHeight = 36.0;
 -(void)didLoadFromCCB {
     _menuNode.delegate = self;
     
-    self.swipeFromColumn = self.swipeFromRow = self.rootColumnForSwipe = self.rootRowForSwipe = NSNotFound;
+    self.swipeFromColumn = self.swipeFromRow = NSNotFound;
+    self.rootCookie = nil;
     self.userInteractionEnabled = YES;
 }
 
@@ -73,6 +74,9 @@ static const CGFloat TileHeight = 36.0;
     
     _drawNode = [[CCDrawNode alloc] init];
     [_cookiesLayer addChild:_drawNode z:20];
+    
+    _inProgressDrawNode = [[CCDrawNode alloc] init];
+    [_cookiesLayer addChild:_inProgressDrawNode z:20];
     
     [self addTiles];
     
@@ -271,8 +275,7 @@ static const CGFloat TileHeight = 36.0;
             
             self.swipeFromColumn = column;
             self.swipeFromRow = row;
-            self.rootColumnForSwipe = column;
-            self.rootRowForSwipe = row;
+            self.rootCookie = cookie;
         }
     }
 }
@@ -285,6 +288,25 @@ static const CGFloat TileHeight = 36.0;
     NSInteger column, row;
     if ([self convertPoint:location toColumn:&column row:&row]) {
         
+        [_inProgressDrawNode clear];
+        
+        //Take care of drawing the in progress line
+        CGPoint rootPoint = [GameplayScene pointForColumn:self.rootCookie.column row:self.rootCookie.row];
+        float distanceAboveOrBelow = ABS(location.y - rootPoint.y);
+        float distanceAcross = ABS(location.x - rootPoint.x);
+        float x = rootPoint.x;
+        float y = rootPoint.y;
+        
+        if (distanceAboveOrBelow >= distanceAcross) {
+            y = location.y;
+        }
+        else {
+            x = location.x;
+        }
+        
+        CGPoint endPoint = CGPointMake(x, y);
+        [_inProgressDrawNode drawSegmentFrom:rootPoint to:endPoint radius:2.0 color:[self.rootCookie lineColor]];
+        
         if (column != self.swipeFromColumn || row != self.swipeFromRow) {
             
             //Check for backtracked Cookie
@@ -292,22 +314,22 @@ static const CGFloat TileHeight = 36.0;
             [self checkForBacktrackedCookie:cookie];
             
             //UP
-            if (row > self.rootRowForSwipe && column == self.rootColumnForSwipe) {
+            if (row > self.rootCookie.row && column == self.rootCookie.column) {
                 [self tryAddingCookieToChainInDirection:UP cookie:cookie];
             }
             
             //DOWN
-            else if (row < self.rootRowForSwipe && column == self.rootColumnForSwipe) {
+            else if (row < self.rootCookie.row && column == self.rootCookie.column) {
                 [self tryAddingCookieToChainInDirection:DOWN cookie:cookie];
             }
             
             //RIGHT
-            else if (column > self.rootColumnForSwipe && row == self.rootRowForSwipe) {
+            else if (column > self.rootCookie.column && row == self.rootCookie.row) {
                 [self tryAddingCookieToChainInDirection:RIGHT cookie:cookie];
             }
             
             //LEFT
-            else if (column < self.rootColumnForSwipe && row == self.rootRowForSwipe) {
+            else if (column < self.rootCookie.column && row == self.rootCookie.row) {
                 [self tryAddingCookieToChainInDirection:LEFT cookie:cookie];
             }
             
@@ -318,7 +340,8 @@ static const CGFloat TileHeight = 36.0;
 }
 
 - (void)touchEnded:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
-    self.swipeFromColumn = self.swipeFromRow = self.rootRowForSwipe = self.rootColumnForSwipe = NSNotFound;
+    self.swipeFromColumn = self.swipeFromRow = NSNotFound;
+    self.rootCookie = nil;
     self.userInteractionEnabled = NO;
     
     //If the chain isn't a valid chain
@@ -350,7 +373,8 @@ static const CGFloat TileHeight = 36.0;
 }
 
 - (void)touchCancelled:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
-    self.swipeFromColumn = self.swipeFromRow = self.rootRowForSwipe = self.rootColumnForSwipe = NSNotFound;
+    self.swipeFromColumn = self.swipeFromRow = NSNotFound;
+    self.rootCookie = nil;
     [self.gameLogic resetEverythingForNextTurn];
     [_drawNode clear];
 }
@@ -402,8 +426,7 @@ static const CGFloat TileHeight = 36.0;
         [self removeHighlightedCookies:removedCookies];
         [self animateActivatedCookieInChain:cookie];
         [self redrawSegmentsForCookiesInChain];
-        self.rootRowForSwipe = cookie.row;
-        self.rootColumnForSwipe = cookie.column;
+        self.rootCookie = cookie;
     }
 }
 
@@ -420,10 +443,8 @@ static const CGFloat TileHeight = 36.0;
     NSArray *cookiesToActivate = [self.gameLogic tryAddingCookieToChain:cookie inDirection:direction];
     if (cookiesToActivate) {
         [self activateCookies:cookiesToActivate];
-        self.rootColumnForSwipe = cookie.column;
-        self.rootRowForSwipe = cookie.row;
+        self.rootCookie = cookie;
     }
-
 }
 
 #pragma mark - Animate Swipe
@@ -518,6 +539,7 @@ static const CGFloat TileHeight = 36.0;
     [self animateScoreForChain:chain];
     [self changeCookieZIndex:chain.cookiesInChain];
     [_drawNode clear];
+    [_inProgressDrawNode clear];
     
     for (NSInteger i = 0; i < [chain.cookiesInChain count]; i++) {
         BBQCookie *cookie = chain.cookiesInChain[i];
