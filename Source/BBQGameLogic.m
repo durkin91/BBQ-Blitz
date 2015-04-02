@@ -57,7 +57,7 @@
         array = [NSMutableArray array];
         for (NSInteger i = 0; i <= [potentialCookies indexOfObject:cookie]; i++) {
             BBQCookie *cookieToActivate = potentialCookies[i];
-            [self.chain addCookie:cookie];
+            [self.chain addCookie:cookieToActivate];
             [array addObject:cookieToActivate];
         }
     }

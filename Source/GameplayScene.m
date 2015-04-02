@@ -415,10 +415,10 @@ static const CGFloat TileHeight = 36.0;
     NSArray *cookiesToActivate = [self.gameLogic tryAddingCookieToChain:cookie inDirection:direction];
     if (cookiesToActivate) {
         [self activateCookies:cookiesToActivate];
+        self.swipeFromColumn = column;
+        self.swipeFromRow = row;
     }
-    
-    self.swipeFromColumn = column;
-    self.swipeFromRow = row;
+
 }
 
 #pragma mark - Animate Swipe
