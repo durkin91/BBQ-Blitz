@@ -31,9 +31,6 @@ static const CGFloat TileHeight = 36.0;
 @property (assign, nonatomic) NSInteger swipeFromRow;
 @property (strong, nonatomic) BBQCookie *rootCookie;
 @property (strong, nonatomic) NSDictionary *rootCookieLimits;
-@property (assign, nonatomic) double touchBeganTimestamp;
-@property (assign, nonatomic) NSTimeInterval tileDuration;
-@property (assign, nonatomic) BOOL canStartNextAnimation;
 
 @property (strong, nonatomic) BBQCookie *firstCookieInChain;
 
@@ -116,6 +113,13 @@ static const CGFloat TileHeight = 36.0;
     NSMutableArray *tiles = [_tilesLayer.children mutableCopy];
     for (CCSprite *tile in tiles) {
         [tile removeFromParent];
+    }
+    
+    NSArray *cookieOrders = [_orderDisplayNode children];
+    for (BBQCookieOrderNode *cookieOrder in cookieOrders) {
+        [cookieOrder.cookieSprite.children[0] removeFromParent];
+        cookieOrder.tickSprite.visible = NO;
+        cookieOrder.quantityLabel.visible = YES;
     }
 }
 
@@ -263,7 +267,6 @@ static const CGFloat TileHeight = 36.0;
 - (void)touchBegan:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
     
     CGPoint location = [touch locationInNode:self.cookiesLayer];
-    self.canStartNextAnimation = YES;
     
     NSInteger column, row;
     if ([self convertPoint:location toColumn:&column row:&row]) {
