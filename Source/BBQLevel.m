@@ -56,6 +56,69 @@
     return set;
 }
 
+- (NSArray *)allValidCookiesThatCanBeChainedToCookie:(BBQCookie *)cookie direction:(NSString *)direction {
+    NSMutableArray *array = [NSMutableArray array];
+    
+    if ([direction isEqualToString:UP]) {
+        //look above cookie
+        for (NSInteger i = cookie.row + 1; i < NumRows; i++) {
+            BBQCookie *potentialCookie = _cookies[cookie.column][i];
+            if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
+                [array addObject:potentialCookie];
+            }
+            else if (!potentialCookie) {
+                break;
+            }
+        }
+    }
+    
+    else if ([direction isEqualToString:DOWN]) {
+        //look below cookie
+        for (NSInteger i = cookie.row - 1; i >= 0; i--) {
+            BBQCookie *potentialCookie = _cookies[cookie.column][i];
+            if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
+                [array addObject:potentialCookie];
+            }
+            else if (!potentialCookie) {
+                break;
+            }
+        }
+
+    }
+    
+    else if ([direction isEqualToString:LEFT]) {
+        //look to left of cookie
+        for (NSInteger i = cookie.column - 1; i >= 0; i--) {
+            BBQCookie *potentialCookie = _cookies[i][cookie.row];
+            if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
+                [array addObject:potentialCookie];
+            }
+            else if (!potentialCookie) {
+                break;
+            }
+        }
+
+    }
+    
+    else if ([direction isEqualToString:RIGHT]) {
+        //look to right of cookie
+        for (NSInteger i = cookie.column + 1; i < NumColumns; i++) {
+            BBQCookie *potentialCookie = _cookies[i][cookie.row];
+            if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
+                [array addObject:potentialCookie];
+            }
+            else if (!potentialCookie) {
+                break;
+            }
+        }
+
+    }
+    
+    return array;
+
+}
+
+
 - (NSSet *)allValidCookiesThatCanBeLinkedToCookie:(BBQCookie *)cookie existingChain:(BBQChain *)existingChain {
     NSMutableSet *set = [NSMutableSet set];
     

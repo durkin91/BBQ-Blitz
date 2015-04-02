@@ -47,4 +47,6 @@
 - (BBQCookie *)lastCookieInChain;
 - (BBQCookie *)previousCookieToCookieInChain:(BBQCookie *)cookie;
 
+- (NSArray *)tryAddingCookieToChain:(BBQCookie *)cookie inDirection:(NSString *)direction;
+
 @end

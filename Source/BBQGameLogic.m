@@ -47,6 +47,24 @@
     return canBeAdded;
 }
 
+- (NSArray *)tryAddingCookieToChain:(BBQCookie *)cookie inDirection:(NSString *)direction {
+    BBQCookie *lastCookieInChain = [_chain.cookiesInChain lastObject];
+    NSArray *potentialCookies = [self.level allValidCookiesThatCanBeChainedToCookie:lastCookieInChain direction:direction];
+    
+    //Return an array of cookies that need to be highlighted on the path to the touched cookie
+    NSMutableArray *array;
+    if ([potentialCookies containsObject:cookie]) {
+        array = [NSMutableArray array];
+        for (NSInteger i = 0; i <= [potentialCookies indexOfObject:cookie]; i++) {
+            BBQCookie *cookieToActivate = potentialCookies[i];
+            [self.chain addCookie:cookie];
+            [array addObject:cookieToActivate];
+        }
+    }
+    NSLog(@"Cookies in chain:%@", self.chain.cookiesInChain);
+    return array;
+}
+
 - (BOOL)isCookieABackTrack:(BBQCookie *)cookie {
     if ([self.chain containsCookie:cookie]) {
         return YES;
@@ -107,14 +125,14 @@
 }
 
 - (BBQCookie *)lastCookieInChain {
-    return [_chain.cookiesInChain lastObject];
+    return [self.chain.cookiesInChain lastObject];
 }
 
 - (BBQCookie *)previousCookieToCookieInChain:(BBQCookie *)cookie {
-    NSInteger i = [_chain.cookiesInChain indexOfObject:cookie];
+    NSInteger i = [self.chain.cookiesInChain indexOfObject:cookie];
     BBQCookie *previousCookie;
     if (i > 0) {
-        previousCookie = _chain.cookiesInChain[i - 1];
+        previousCookie = self.chain.cookiesInChain[i - 1];
     }
     return previousCookie;
 }
