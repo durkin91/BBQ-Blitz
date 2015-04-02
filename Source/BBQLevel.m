@@ -118,6 +118,63 @@
 
 }
 
+- (NSDictionary *)rootCookieLimits:(BBQCookie *)cookie {
+    NSMutableDictionary *limits = [NSMutableDictionary dictionary];
+    
+    //look above cookie
+    [limits setObject:cookie forKey:UP];
+    for (NSInteger i = cookie.row + 1; i < NumRows; i++) {
+        BBQCookie *potentialCookie = _cookies[cookie.column][i];
+        if (potentialCookie) {
+            [limits setObject:potentialCookie forKey:UP];
+        }
+        else if (!potentialCookie) {
+            break;
+        }
+    }
+    
+    
+    
+    //look below cookie
+    [limits setObject:cookie forKey:DOWN];
+    for (NSInteger i = cookie.row - 1; i >= 0; i--) {
+        BBQCookie *potentialCookie = _cookies[cookie.column][i];
+        if (potentialCookie) {
+            [limits setObject:potentialCookie forKey:DOWN];
+        }
+        else if (!potentialCookie) {
+            break;
+        }
+    }
+    
+    //look to left of cookie
+    [limits setObject:cookie forKey:LEFT];
+    for (NSInteger i = cookie.column - 1; i >= 0; i--) {
+        BBQCookie *potentialCookie = _cookies[i][cookie.row];
+        if (potentialCookie) {
+            [limits setObject:potentialCookie forKey:LEFT];
+        }
+        else if (!potentialCookie) {
+            break;
+        }
+    }
+    
+    //look to right of cookie
+    [limits setObject:cookie forKey:RIGHT];
+    for (NSInteger i = cookie.column + 1; i < NumColumns; i++) {
+        BBQCookie *potentialCookie = _cookies[i][cookie.row];
+        if (potentialCookie) {
+            [limits setObject:potentialCookie forKey:RIGHT];
+        }
+        else if (!potentialCookie) {
+            break;
+        }
+    }
+    
+    return limits;
+}
+
+
 
 - (NSSet *)allValidCookiesThatCanBeLinkedToCookie:(BBQCookie *)cookie existingChain:(BBQChain *)existingChain {
     NSMutableSet *set = [NSMutableSet set];

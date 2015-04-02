@@ -30,6 +30,7 @@ static const CGFloat TileHeight = 36.0;
 @property (assign, nonatomic) NSInteger swipeFromColumn;
 @property (assign, nonatomic) NSInteger swipeFromRow;
 @property (strong, nonatomic) BBQCookie *rootCookie;
+@property (strong, nonatomic) NSDictionary *rootCookieLimits;
 @property (assign, nonatomic) double touchBeganTimestamp;
 @property (assign, nonatomic) NSTimeInterval tileDuration;
 @property (assign, nonatomic) BOOL canStartNextAnimation;
@@ -299,6 +300,7 @@ static const CGFloat TileHeight = 36.0;
         
         if (ABS(distanceAboveOrBelow) >= ABS(distanceAcross)) {
             y = location.y;
+            
         }
         else {
             x = location.x;
@@ -309,19 +311,28 @@ static const CGFloat TileHeight = 36.0;
         NSInteger columnAdjusted, rowAdjusted;
         [self convertPoint:endPoint toColumn:&columnAdjusted row:&rowAdjusted];
         
-        if (endPoint.y > rootPoint.y && ![self.gameLogic isThereATileNextToColumn:columnAdjusted row:rowAdjusted direction:UP]) {
-            endPoint = [GameplayScene pointForColumn:columnAdjusted row:rowAdjusted];
+        if (endPoint.y > rootPoint.y) {
+            BBQCookie *upperLimitCookie = self.rootCookieLimits[UP];
+            CGPoint upperLimit = [GameplayScene pointForColumn:upperLimitCookie.column row:upperLimitCookie.row];
+            endPoint.y = MIN(endPoint.y, upperLimit.y);
         }
         
-        else if (endPoint.y < rootPoint.y && ![self.gameLogic isThereATileNextToColumn:columnAdjusted row:rowAdjusted direction:DOWN]) {
-            endPoint = [GameplayScene pointForColumn:columnAdjusted row:rowAdjusted];
+        else if (endPoint.y < rootPoint.y) {
+            BBQCookie *lowerLimitCookie = self.rootCookieLimits[DOWN];
+            CGPoint lowerLimit = [GameplayScene pointForColumn:lowerLimitCookie.column row:lowerLimitCookie.row];
+            endPoint.y = MAX(endPoint.y, lowerLimit.y);
         }
         
-        else if (endPoint.x > rootPoint.x && ![self.gameLogic isThereATileNextToColumn:columnAdjusted row:rowAdjusted direction:RIGHT]) {
-            endPoint = [GameplayScene pointForColumn:columnAdjusted row:rowAdjusted];
+        else if (endPoint.x > rootPoint.x) {
+            BBQCookie *rightLimitCookie = self.rootCookieLimits[RIGHT];
+            CGPoint rightLimit = [GameplayScene pointForColumn:rightLimitCookie.column row:rightLimitCookie.row];
+            endPoint.x = MIN(endPoint.x, rightLimit.x);
         }
-        else if (endPoint.x < rootPoint.x && ![self.gameLogic isThereATileNextToColumn:columnAdjusted row:rowAdjusted direction:LEFT]) {
-            endPoint = [GameplayScene pointForColumn:columnAdjusted row:rowAdjusted];
+        
+        else if (endPoint.x < rootPoint.x) {
+            BBQCookie *leftLimitCookie = self.rootCookieLimits[LEFT];
+            CGPoint leftLimit = [GameplayScene pointForColumn:leftLimitCookie.column row:leftLimitCookie.row];
+            endPoint.x = MAX(endPoint.x, leftLimit.x);
         }
         
         [_inProgressDrawNode drawSegmentFrom:rootPoint to:endPoint radius:2.0 color:[self.rootCookie lineColor]];
@@ -585,48 +596,6 @@ static const CGFloat TileHeight = 36.0;
     [self runAction:[CCActionSequence actions:[CCActionDelay actionWithDuration:0.3], [CCActionCallBlock actionWithBlock:completion], nil]];
 }
 
-- (void)animateMovements:(NSArray *)movements swipeDirection:(NSString *)swipeDirection completion: (dispatch_block_t)completion {
-    
-    __block NSTimeInterval tileDuration = 0.1;
-    
-    [movements enumerateObjectsUsingBlock:^(BBQMovement *movement, NSUInteger idx, BOOL *stop) {
-        CGPoint newPosition = [GameplayScene pointForColumn:movement.destinationColumn row:movement.destinationRow];
-        
-        if (movement.isEnteringCookie) {
-            
-            BBQCookieNode *sprite;
-            if ([swipeDirection isEqualToString:UP]) {
-                sprite = [self createCookieNodeForCookie:movement.cookie column:movement.destinationColumn row:movement.destinationRow - 1 highlighted:NO];
-            }
-            else if ([swipeDirection isEqualToString:DOWN]) {
-                sprite = [self createCookieNodeForCookie:movement.cookie column:movement.destinationColumn row:movement.destinationRow + 1 highlighted:NO];
-            }
-            else if ([swipeDirection isEqualToString:LEFT]) {
-                sprite = [self createCookieNodeForCookie:movement.cookie column:movement.destinationColumn + 1 row:movement.destinationRow highlighted:NO];
-            }
-            else if ([swipeDirection isEqualToString:RIGHT]) {
-                sprite = [self createCookieNodeForCookie:movement.cookie column:movement.destinationColumn - 1 row:movement.destinationRow highlighted:NO];
-            }
-            movement.sprite = sprite;
-            movement.cookie.sprite = sprite;
-        }
-        
-        CCActionMoveTo *moveSprite = [CCActionMoveTo actionWithDuration:tileDuration position:newPosition];
-        CCActionSequence *sequence;
-        if (movement.isExitingCookie) {
-            sequence = [CCActionSequence actions:moveSprite, [CCActionRemove action], nil];
-        }
-        else {
-            sequence = [CCActionSequence actions:moveSprite, nil];
-        }
-        
-        [movement.sprite runAction:sequence];
-        
-    }];
-    
-    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:tileDuration], [CCActionCallBlock actionWithBlock:completion], nil];
-    [self runAction:sequence];
-}
 
 - (CCActionSequence *)animateCookieOrderCollection:(BBQCookie *)cookie cookieOrder:(BBQCookieOrder *)cookieOrder {
     CCSprite *orderSprite = cookieOrder.orderNode.cookieSprite;
@@ -660,6 +629,13 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)didPlay {
     [_menuNode dismissMenu:START_LEVEL withBackgroundFadeOut:YES];
+}
+
+- (void)setRootCookie:(BBQCookie *)rootCookie {
+    _rootCookie = rootCookie;
+    if (rootCookie) {
+        self.rootCookieLimits = [self.gameLogic rootCookieLimits:rootCookie];
+    }
 }
 
 
