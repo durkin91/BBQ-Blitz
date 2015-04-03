@@ -120,6 +120,29 @@
     return [self.level rootCookieLimits:cookie];
 }
 
+- (NSString *)directionOfPreviousCookieInChain:(BBQCookie *)cookie {
+    BBQCookie *previousCookie = [self previousCookieToCookieInChain:cookie];
+    NSString *direction;
+    
+    if (previousCookie) {
+        if (previousCookie.column == cookie.column && previousCookie.row > cookie.row) {
+            direction = UP;
+        }
+        
+        else if (previousCookie.column == cookie.column && previousCookie.row < cookie.row) {
+            direction = DOWN;
+        }
+        
+        else if (previousCookie.row == cookie.row && previousCookie.column > cookie.column) {
+            direction = RIGHT;
+        }
+        else if (previousCookie.row == cookie.row && previousCookie.column < cookie.column) {
+            direction = LEFT;
+        }
+    }
+    return direction;
+}
+
 
 #pragma mark - Obstacle methods
 

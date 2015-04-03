@@ -503,8 +503,26 @@ static const CGFloat TileHeight = 36.0;
         BBQCookie *previousCookie = [self.gameLogic previousCookieToCookieInChain:self.rootCookie];
         [self handleBacktrackedCookie:previousCookie];
         rootPoint = [GameplayScene pointForColumn:self.rootCookie.column row:self.rootCookie.row];
+        [_inProgressDrawNode drawSegmentFrom:rootPoint to:endPoint radius:2.0 color:[self.rootCookie lineColor]];
+        return;
     }
     
+    //Make sure not to draw the line at all if its on the wrong side of the root cookie
+    NSString *previousCookieDirection = [self.gameLogic directionOfPreviousCookieInChain:self.rootCookie];
+    if ([previousCookieDirection isEqualToString:UP] && rootPoint.x == endPoint.x && rootPoint.y < endPoint.y) {
+        return;
+    }
+    else if ([previousCookieDirection isEqualToString:DOWN] && rootPoint.x == endPoint.x && rootPoint.y > endPoint.y) {
+        return;
+    }
+    else if ([previousCookieDirection isEqualToString:RIGHT] && rootPoint.y == endPoint.y && rootPoint.x < endPoint.x) {
+        return;
+    }
+    else if ([previousCookieDirection isEqualToString:LEFT] && rootPoint.y == endPoint.y && rootPoint.x > endPoint.x) {
+        return;
+    }
+    
+    //Finally, draw the line
     [_inProgressDrawNode drawSegmentFrom:rootPoint to:endPoint radius:2.0 color:[self.rootCookie lineColor]];
 }
 
