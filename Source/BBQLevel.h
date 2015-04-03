@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "BBQCookie.h"
 #import "BBQTile.h"
+#import "BBQChain.h"
 
 
 @class BBQCookieOrder;
@@ -37,14 +38,9 @@ static const NSInteger NumRows = 9;
 - (BBQCookie *)createCookieAtColumn:(NSInteger)column row:(NSInteger)row withType:(NSUInteger)cookieType;
 - (NSArray *)fillHoles;
 - (NSArray *)topUpCookies;
-- (NSArray *)breakColumnOrRowIntoSectionsForDirection:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow;
-- (NSSet *)chainsForColumnOrRow:(NSInteger)columnOrRow swipeDirection:(NSString *)swipeDirection;
-- (NSArray *)allCookiesInColumnOrRow:(NSInteger)columnOrRow swipeDirection:(NSString *)swipeDirection;
-- (NSArray *)chainsInSection:(NSArray *)section;
-- (BBQCookieOrder *)cookieOrderForType:(NSInteger)cookieType;
-- (NSSet *)removeMatches;
-- (NSSet *)detectHorizontalMatches;
-- (NSSet *)detectVerticalMatches;
+
+- (NSArray *)allValidCookiesThatCanBeChainedToCookie:(BBQCookie *)cookie direction:(NSString *)direction existingChain:(BBQChain *)existingChain;
+- (NSDictionary *)rootCookieLimits:(BBQCookie *)cookie;
 
 
 @end

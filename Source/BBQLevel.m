@@ -7,7 +7,6 @@
 //
 
 #import "BBQLevel.h"
-#import "BBQChain.h"
 #import "BBQGameLogic.h"
 #import "BBQCookieOrder.h"
 
@@ -38,119 +37,225 @@
 
 
 - (NSSet *)shuffle {
-    NSSet *set;
-    set = [self createCookiesInBlankTiles];
+    NSSet *set = [self createCookiesInBlankTiles];
+    self.possibleChains = [self detectPossibleChains];
+    while ([self.possibleChains count] == 0) {
+        set = [self createCookiesInBlankTiles];
+        self.possibleChains = [self detectPossibleChains];
+    }
+    
     return set;
 }
 
-
-
-- (NSSet *)detectHorizontalMatches {
-    NSMutableSet *set = [NSMutableSet set];
+- (NSSet *)detectPossibleChains {
+    NSMutableSet *possibleChains = [NSMutableSet set];
     
-    for (NSInteger row = 0; row < NumRows; row ++) {
-        for (NSInteger column = 0; column < NumColumns - 2; ) {
-            if (_cookies[column][row] != nil) {
-                NSUInteger matchType = _cookies[column][row].cookieType;
-                
-                if (_cookies[column + 1][row].cookieType == matchType &&
-                    _cookies[column + 2][row].cookieType == matchType) {
-                    BBQChain *chain = [[BBQChain alloc] init];
-                    chain.chainType = ChainTypeHorizontal;
-                    chain.cookieType = _cookies[column][row].cookieType;
-                    do {
-                        [chain addCookie:_cookies[column][row]];
-                        column += 1;
-                    }
-                    while (column < NumColumns && _cookies[column][row].cookieType == matchType);
-                    
-                    [set addObject:chain];
-                    continue;
-                    
-                }
-            }
-            
-            column += 1;
-        }
-    }
-    return set;
-}
-
-- (NSSet *)detectVerticalMatches {
-    NSMutableSet *set = [NSMutableSet set];
-    
-    for (NSInteger column = 0; column < NumColumns; column++) {
-        for (NSInteger row = 0; row < NumRows - 2; ) {
-            if (_cookies[column][row] != nil) {
-                NSUInteger matchType = _cookies[column][row].cookieType;
-                
-                if (_cookies[column][row + 1].cookieType == matchType
-                    && _cookies[column][row + 2].cookieType == matchType) {
-                    
-                    BBQChain *chain = [[BBQChain alloc] init];
-                    chain.chainType = ChainTypeVertical;
-                    chain.cookieType = _cookies[column][row].cookieType;
-                    do {
-                        [chain addCookie:_cookies[column][row]];
-                        row += 1;
-                    }
-                    while (row < NumRows && _cookies[column][row].cookieType == matchType);
-                    
-                    [set addObject:chain];
-                    continue;
-                }
-            }
-            row += 1;
-        }
-    }
-    return set;
-}
-
-
-- (NSArray *)allCookiesInColumnOrRow:(NSInteger)columnOrRow swipeDirection:(NSString *)swipeDirection {
-    NSMutableArray *array = [NSMutableArray array];
-    
-    if ([swipeDirection isEqualToString:UP]) {
-        NSInteger column = columnOrRow;
-        for (NSInteger row = NumRows - 1; row >= 0; row --) {
-            BBQCookie *cookie = _cookies[column][row];
-            if (cookie) {
-                [array addObject:cookie];
-            }
-        }
-    }
-    
-    else if ([swipeDirection isEqualToString:DOWN]) {
-        NSInteger column = columnOrRow;
+    for (NSInteger column = 0; column < NumColumns; column ++) {
         for (NSInteger row = 0; row < NumRows; row ++) {
-            BBQCookie *cookie = _cookies[column][row];
-            if (cookie) {
-                [array addObject:cookie];
+            BBQCookie *middleCookie = _cookies[column][row];
+            if (middleCookie) {
+                NSArray *matchingCookies = [self nearestMatchingCookieInAllDirections:middleCookie];
+                for (NSInteger i = 0; i < [matchingCookies count]; i++ ) {
+                    BBQCookie *firstCookie = matchingCookies[i];
+                    for (NSInteger x = i + 1; i < [matchingCookies count] - 1; i++) {
+                        BBQCookie *lastCookie = matchingCookies[x];
+                        BBQChain *chain = [[BBQChain alloc] init];
+                        chain.cookieType = middleCookie.cookieType;
+                        chain.cookiesInChain = [NSMutableArray arrayWithObjects:firstCookie, middleCookie, lastCookie, nil];
+                        [possibleChains addObject:chain];
+                    }
+                }
             }
         }
     }
     
-    else if ([swipeDirection isEqualToString:LEFT]) {
-        NSInteger row = columnOrRow;
-        for (NSInteger column = 0; column < NumColumns; column++) {
-            BBQCookie *cookie = _cookies[column][row];
-            if (cookie) {
-                [array addObject:cookie];
-            }
+    return possibleChains;
+}
+
+- (NSArray *)nearestMatchingCookieInAllDirections:(BBQCookie *)cookie {
+    NSMutableArray *array = [NSMutableArray array];
+    BBQCookie *testCookie;
+    
+    //UP
+    for (NSInteger i = cookie.row + 1; i < NumRows; i++) {
+        testCookie = _cookies[cookie.column][i];
+        if (testCookie && testCookie.cookieType == cookie.cookieType) {
+            [array addObject:testCookie];
+            break;
+        }
+        else if (!testCookie) {
+            break;
         }
     }
     
-    else if ([swipeDirection isEqualToString:RIGHT]) {
-        NSInteger row = columnOrRow;
-        for (NSInteger column = NumColumns - 1; column >= 0; column --) {
-            BBQCookie *cookie = _cookies[column][row];
-            if (cookie) {
-                [array addObject:cookie];
-            }
+    //RIGHT
+    for (NSInteger i = cookie.column + 1; i < NumColumns; i++) {
+        testCookie = _cookies[i][cookie.row];
+        if (testCookie && testCookie.cookieType == cookie.cookieType) {
+            [array addObject:testCookie];
+            break;
+        }
+        else if (!testCookie) {
+            break;
+        }
+    }
+    
+    //DOWN
+    for (NSInteger i = cookie.row - 1; i >= 0; i --) {
+        testCookie = _cookies[cookie.column][i];
+        if (testCookie && testCookie.cookieType == cookie.cookieType) {
+            [array addObject:testCookie];
+            break;
+        }
+        else if (!testCookie) {
+            break;
+        }
+    }
+    
+    
+    //LEFT
+    for (NSInteger i = cookie.column - 1; i >= 0; i++ ) {
+        testCookie = _cookies[i][cookie.row];
+        if (testCookie && testCookie.cookieType == cookie.cookieType) {
+            [array addObject:testCookie];
+            break;
+        }
+        else if (!testCookie) {
+            break;
         }
     }
     
     return array;
+}
+
+- (NSArray *)allValidCookiesThatCanBeChainedToCookie:(BBQCookie *)cookie direction:(NSString *)direction existingChain:(BBQChain *)existingChain {
+    NSMutableArray *array = [NSMutableArray array];
+    
+    if ([direction isEqualToString:UP]) {
+        //look above cookie
+        for (NSInteger i = cookie.row + 1; i < NumRows; i++) {
+            BBQCookie *potentialCookie = _cookies[cookie.column][i];
+            if (potentialCookie && [existingChain.cookiesInChain containsObject:potentialCookie]) {
+                break;
+            }
+            else if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
+                [array addObject:potentialCookie];
+            }
+            else if (!potentialCookie) {
+                break;
+            }
+        }
+    }
+    
+    else if ([direction isEqualToString:DOWN]) {
+        //look below cookie
+        for (NSInteger i = cookie.row - 1; i >= 0; i--) {
+            BBQCookie *potentialCookie = _cookies[cookie.column][i];
+            if (potentialCookie && [existingChain.cookiesInChain containsObject:potentialCookie]) {
+                break;
+            }
+            else if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
+                [array addObject:potentialCookie];
+            }
+            else if (!potentialCookie) {
+                break;
+            }
+        }
+
+    }
+    
+    else if ([direction isEqualToString:LEFT]) {
+        //look to left of cookie
+        for (NSInteger i = cookie.column - 1; i >= 0; i--) {
+            BBQCookie *potentialCookie = _cookies[i][cookie.row];
+            if (potentialCookie && [existingChain.cookiesInChain containsObject:potentialCookie]) {
+                break;
+            }
+            else if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
+                [array addObject:potentialCookie];
+            }
+            else if (!potentialCookie) {
+                break;
+            }
+        }
+
+    }
+    
+    else if ([direction isEqualToString:RIGHT]) {
+        //look to right of cookie
+        for (NSInteger i = cookie.column + 1; i < NumColumns; i++) {
+            BBQCookie *potentialCookie = _cookies[i][cookie.row];
+            if (potentialCookie && [existingChain.cookiesInChain containsObject:potentialCookie]) {
+                break;
+            }
+            else if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
+                [array addObject:potentialCookie];
+            }
+            else if (!potentialCookie) {
+                break;
+            }
+        }
+
+    }
+    
+    return array;
+
+}
+
+- (NSDictionary *)rootCookieLimits:(BBQCookie *)cookie {
+    NSMutableDictionary *limits = [NSMutableDictionary dictionary];
+    
+    //look above cookie
+    [limits setObject:cookie forKey:UP];
+    for (NSInteger i = cookie.row + 1; i < NumRows; i++) {
+        BBQCookie *potentialCookie = _cookies[cookie.column][i];
+        if (potentialCookie) {
+            [limits setObject:potentialCookie forKey:UP];
+        }
+        else if (!potentialCookie) {
+            break;
+        }
+    }
+    
+    
+    
+    //look below cookie
+    [limits setObject:cookie forKey:DOWN];
+    for (NSInteger i = cookie.row - 1; i >= 0; i--) {
+        BBQCookie *potentialCookie = _cookies[cookie.column][i];
+        if (potentialCookie) {
+            [limits setObject:potentialCookie forKey:DOWN];
+        }
+        else if (!potentialCookie) {
+            break;
+        }
+    }
+    
+    //look to left of cookie
+    [limits setObject:cookie forKey:LEFT];
+    for (NSInteger i = cookie.column - 1; i >= 0; i--) {
+        BBQCookie *potentialCookie = _cookies[i][cookie.row];
+        if (potentialCookie) {
+            [limits setObject:potentialCookie forKey:LEFT];
+        }
+        else if (!potentialCookie) {
+            break;
+        }
+    }
+    
+    //look to right of cookie
+    [limits setObject:cookie forKey:RIGHT];
+    for (NSInteger i = cookie.column + 1; i < NumColumns; i++) {
+        BBQCookie *potentialCookie = _cookies[i][cookie.row];
+        if (potentialCookie) {
+            [limits setObject:potentialCookie forKey:RIGHT];
+        }
+        else if (!potentialCookie) {
+            break;
+        }
+    }
+    
+    return limits;
 }
 
 - (NSSet *)createCookiesInBlankTiles {
@@ -265,152 +370,6 @@
     }
     return columns;
 }
-
-
-- (NSArray *)breakColumnOrRowIntoSectionsForDirection:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow {
-    NSMutableArray *allSections = [NSMutableArray array];
-    
-    if ([swipeDirection isEqualToString:UP]) {
-        NSInteger column = columnOrRow;
-        NSInteger row = NumRows - 1;
-        while (row >= 0) {
-            NSMutableArray *section = [NSMutableArray array];
-            for (row = row; row >= 0; row --) {
-                BBQCookie *cookie = _cookies[column][row];
-                
-                //If there is a gap, end the section
-                if (cookie == nil) {
-                    row --;
-                    break;
-                }
-                
-                //If there isn't a gap, add it to the section
-                else {
-                    [section addObject:cookie];
-                    if ([section count] == 1) {
-                        [allSections addObject:section];
-                    }
-                }
-            }
-        }
-
-    }
-    
-    if ([swipeDirection isEqualToString:DOWN]) {
-        NSInteger column = columnOrRow;
-        NSInteger row = 0;
-        while (row < NumRows) {
-            NSMutableArray *section = [NSMutableArray array];
-            for (row = row; row < NumRows; row ++) {
-                BBQCookie *cookie = _cookies[column][row];
-                
-                //If there is a gap, end the section
-                if (cookie == nil) {
-                    row ++;
-                    break;
-                }
-                
-                //If there isn't a gap, add it to the section
-                else {
-                    [section addObject:cookie];
-                    if ([section count] == 1) {
-                        [allSections addObject:section];
-                    }
-                }
-            }
-        }
-    }
-    
-    if ([swipeDirection isEqualToString:RIGHT]) {
-        NSInteger row = columnOrRow;
-        NSInteger column = NumColumns - 1;
-        while (column >= 0) {
-            NSMutableArray *section = [NSMutableArray array];
-            for (column = column; column >= 0; column --) {
-                BBQCookie *cookie = _cookies[column][row];
-                
-                //If there is a gap, end the section
-                if (cookie == nil) {
-                    column --;
-                    break;
-                }
-                
-                //If there isn't a gap, add it to the section
-                else {
-                    [section addObject:cookie];
-                    if ([section count] == 1) {
-                        [allSections addObject:section];
-                    }
-                }
-            }
-        }
-        
-    }
-    
-    if ([swipeDirection isEqualToString:LEFT]) {
-        NSInteger row = columnOrRow;
-        NSInteger column = 0;
-        while (column < NumColumns) {
-            NSMutableArray *section = [NSMutableArray array];
-            for (column = column; column < NumColumns; column ++) {
-                BBQCookie *cookie = _cookies[column][row];
-                
-                //If there is a gap, end the section
-                if (cookie == nil) {
-                    column ++;
-                    break;
-                }
-                
-                //If there isn't a gap, add it to the section
-                else {
-                    [section addObject:cookie];
-                    if ([section count] == 1) {
-                        [allSections addObject:section];
-                    }
-                }
-            }
-        }
-    }
-    
-    return [allSections copy];
-}
-
-- (NSArray *)chainsInSection:(NSArray *)section {
-    NSMutableArray *chains = [NSMutableArray array];
-    
-    for (NSInteger i = 0; i < [section count]; i++) {
-        NSMutableArray *chain = [NSMutableArray array];
-        [chains addObject:chain];
-        BBQCookie *cookie = section[i];
-        [chain addObject:cookie];
-        
-        if (i == [section count] - 1) break;
-        
-        BBQCookie *nextCookie = section[i + 1];
-        NSInteger x = 2;
-        NSInteger index = i;
-        while (cookie.cookieType == nextCookie.cookieType && index + x <= [section count]) {
-            [chain addObject:nextCookie];
-            i++;
-            
-            if (index + x >= [section count]) break;
-            
-            nextCookie = section[index + x];
-            x++;
-        }
-    }
-    
-//    NSMutableArray *cleanedUpChains = [NSMutableArray array];
-//    for (NSInteger i = 0; i < [chains count]; i++) {
-//        NSArray *chain = chains[i];
-//        if ([chain count] > 1) {
-//            [cleanedUpChains addObject:chain];
-//        }
-//    }
-    
-    return chains;
-}
-
 
 
 #pragma mark - Level loading methods

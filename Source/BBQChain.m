@@ -14,14 +14,22 @@
 }
 
 - (void)addCookie:(BBQCookie *)cookie {
-    if (_cookies == nil) {
-        _cookies = [NSMutableArray array];
+    if (_cookiesInChain == nil) {
+        _cookiesInChain = [NSMutableArray array];
+        _cookieType = cookie.cookieType;
     }
-    [_cookies addObject:cookie];
+    [_cookiesInChain addObject:cookie];
 }
 
-- (NSArray *)cookiesInChain {
-    return _cookies;
+- (BOOL)containsCookie:(BBQCookie *)cookie {
+    return [self.cookiesInChain containsObject:cookie];
+}
+
+- (BOOL)isACompleteChain {
+    if ([self.cookiesInChain count] >= 3) {
+        return YES;
+    }
+    else return NO;
 }
 
 -(NSString *)description {

@@ -13,5 +13,5 @@
     "moves" : 15,
     "securityGuardCountdown" : 10,
     "orderCookieType" : [1, 2, 3, 4],
-    "orderCookieQuantity" : [10, 10, 10, 10],
+    "orderCookieQuantity" : [20, 20, 20, 20],
 }
