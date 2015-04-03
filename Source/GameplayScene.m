@@ -614,31 +614,72 @@ static const CGFloat TileHeight = 36.0;
     
 }
 
+- (NSTimeInterval)animatePowerupForCookie:(BBQCookie *)cookie {
+    
+    __block NSTimeInterval longestDuration = 0;
+    
+    //Take care of root cookie
+    CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:0.3 scale:0.1];
+    [cookie.sprite runAction:[CCActionSequence actions:scaleAction, [CCActionRemove action], nil]];
+    cookie.sprite = nil;
+
+    //And all the other cookies
+    for (NSArray *array in cookie.powerup.arraysOfDisappearingCookies) {
+        [array enumerateObjectsUsingBlock:^(BBQCookie *powerupCookie, NSUInteger idx, BOOL *stop) {
+            NSTimeInterval delay = 0.05*idx;
+            NSTimeInterval duration = 0.3;
+            
+            longestDuration = MAX(longestDuration, duration + delay);
+            
+            CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:duration scale:0.1];
+            [powerupCookie.sprite runAction:[CCActionSequence actions:[CCActionDelay actionWithDuration:delay], scaleAction, [CCActionRemove action], nil]];
+            
+            powerupCookie.sprite = nil;
+        }];
+    }
+    
+    return longestDuration;
+}
+
 - (void)animateChain:(BBQChain *)chain completion:(dispatch_block_t)completion {
     [self animateScoreForChain:chain];
     [_drawNode clear];
     [_inProgressDrawNode clear];
     
+    NSTimeInterval longestDuration = 0.3;
+    
     for (NSInteger i = 0; i < [chain.cookiesInChain count]; i++) {
         BBQCookie *cookie = chain.cookiesInChain[i];
         
-        if (i < chain.numberOfCookiesForOrder && cookie.sprite != nil) {
-            [self removeHighlightFromCookie:cookie];
-            CCActionSequence *sequence = [self animateCookieOrderCollection:cookie cookieOrder:chain.cookieOrder];
-            [cookie.sprite runAction:sequence];
-            cookie.sprite = nil;
+        if ([self.gameLogic doesCookieNeedRemoving:cookie]) {
+            
+            if (cookie.powerup.hasBeenActivated) {
+                NSTimeInterval powerupDuration = [self animatePowerupForCookie:cookie];
+                longestDuration = MAX(powerupDuration, longestDuration);
+            }
+            
+            if (i < chain.numberOfCookiesForOrder && cookie.sprite != nil) {
+                [self removeHighlightFromCookie:cookie];
+                CCActionSequence *sequence = [self animateCookieOrderCollection:cookie cookieOrder:chain.cookieOrder];
+                [cookie.sprite runAction:sequence];
+                cookie.sprite = nil;
+            }
+            
+            
+            else if (cookie.sprite != nil) {
+                CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:0.3 scale:0.1];
+                [cookie.sprite runAction:[CCActionSequence actions:scaleAction, [CCActionRemove action], nil]];
+                
+                cookie.sprite = nil;
+            }
         }
         
-        
-        else if (cookie.sprite != nil) {
-            CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:0.3 scale:0.1];
-            [cookie.sprite runAction:[CCActionSequence actions:scaleAction, [CCActionRemove action], nil]];
-            
-            cookie.sprite = nil;
+        else {
+            [self removeHighlightFromCookie:cookie];
         }
     }
     
-    [self runAction:[CCActionSequence actions:[CCActionDelay actionWithDuration:0.3], [CCActionCallBlock actionWithBlock:completion], nil]];
+    [self runAction:[CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil]];
 }
 
 

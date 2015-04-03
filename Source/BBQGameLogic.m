@@ -69,6 +69,7 @@
     }
     for (BBQCookie *cookieToRemove in cookiesToRemove) {
         [self.chain.cookiesInChain removeObject:cookieToRemove];
+        cookieToRemove.powerup = nil;
     }
     return cookiesToRemove;
 }
@@ -76,11 +77,33 @@
 - (BBQChain *)removeCookiesInChain {
     [self cookieOrdersForChain];
     for (BBQCookie *cookie in self.chain.cookiesInChain) {
-        [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
+
+        if (cookie.powerup && cookie.powerup.isCurrentlyTemporary == NO) {
+            [self activatePowerupForCookie:cookie];
+        }
+        else if (cookie.powerup && cookie.powerup.isCurrentlyTemporary == YES) {
+            cookie.powerup.isCurrentlyTemporary = NO;
+        }
+        else if (!cookie.powerup) {
+            [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
+        }
     }
+    
     return self.chain;
 }
 
+- (void)activatePowerupForCookie:(BBQCookie *)cookie {
+    [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
+    [cookie.powerup performPowerupWithLevel:self.level cookie:cookie];
+    [cookie.powerup removeDuplicateCookiesFromChainsCookies:self.chain.cookiesInChain];
+}
+
+- (BOOL)doesCookieNeedRemoving:(BBQCookie *)cookie {
+    if (!cookie.powerup || cookie.powerup.hasBeenActivated == YES) {
+        return YES;
+    }
+    else return NO;
+}
 
 - (void)calculateScoreForChain {
     _chain.scorePerCookie = 30 + (([_chain.cookiesInChain count] - 2) * 10);
