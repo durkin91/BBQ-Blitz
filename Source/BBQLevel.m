@@ -128,54 +128,17 @@
     return array;
 }
 
-
-//- (BBQCookie *)nearestMatchingCookie:(BBQCookie *)cookie inDirection:(NSString *)direction {
-//    BBQCookie *matchingCookie;
-//    
-//    if ([direction isEqualToString:UP]) {
-//        for (NSInteger i = cookie.row + 1; i < NumRows; i++) {
-//            if (_cookies[cookie.column][i].cookieType == cookie.cookieType) {
-//                matchingCookie = _cookies[cookie.column][i];
-//            }
-//        }
-//    }
-//    
-//    else if ([direction isEqualToString:DOWN]) {
-//        for (NSInteger i = cookie.row - 1; i >= 0; i --) {
-//            if (_cookies[cookie.column][i].cookieType == cookie.cookieType) {
-//                matchingCookie = _cookies[cookie.column][i];
-//            }
-//        }
-//    }
-//    
-//    else if ([direction isEqualToString:RIGHT]) {
-//        for (NSInteger i = cookie.column + 1; i < NumColumns; i++) {
-//            if (_cookies[i][cookie.row].cookieType == cookie.cookieType) {
-//                matchingCookie = _cookies[cookie.column][i];
-//            }
-//        }
-//    }
-//    
-//    else if ([direction isEqualToString:LEFT]) {
-//        for (NSInteger i = cookie.column - 1; i >= 0; i++ ) {
-//            if (_cookies[i][cookie.row].cookieType == cookie.cookieType) {
-//                matchingCookie = _cookies[cookie.column][i];
-//            }
-//        }
-//    }
-//    
-//    return matchingCookie;
-//}
-
-
-- (NSArray *)allValidCookiesThatCanBeChainedToCookie:(BBQCookie *)cookie direction:(NSString *)direction {
+- (NSArray *)allValidCookiesThatCanBeChainedToCookie:(BBQCookie *)cookie direction:(NSString *)direction existingChain:(BBQChain *)existingChain {
     NSMutableArray *array = [NSMutableArray array];
     
     if ([direction isEqualToString:UP]) {
         //look above cookie
         for (NSInteger i = cookie.row + 1; i < NumRows; i++) {
             BBQCookie *potentialCookie = _cookies[cookie.column][i];
-            if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
+            if (potentialCookie && [existingChain.cookiesInChain containsObject:potentialCookie]) {
+                break;
+            }
+            else if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
                 [array addObject:potentialCookie];
             }
             else if (!potentialCookie) {
@@ -188,7 +151,10 @@
         //look below cookie
         for (NSInteger i = cookie.row - 1; i >= 0; i--) {
             BBQCookie *potentialCookie = _cookies[cookie.column][i];
-            if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
+            if (potentialCookie && [existingChain.cookiesInChain containsObject:potentialCookie]) {
+                break;
+            }
+            else if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
                 [array addObject:potentialCookie];
             }
             else if (!potentialCookie) {
@@ -202,7 +168,10 @@
         //look to left of cookie
         for (NSInteger i = cookie.column - 1; i >= 0; i--) {
             BBQCookie *potentialCookie = _cookies[i][cookie.row];
-            if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
+            if (potentialCookie && [existingChain.cookiesInChain containsObject:potentialCookie]) {
+                break;
+            }
+            else if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
                 [array addObject:potentialCookie];
             }
             else if (!potentialCookie) {
@@ -216,7 +185,10 @@
         //look to right of cookie
         for (NSInteger i = cookie.column + 1; i < NumColumns; i++) {
             BBQCookie *potentialCookie = _cookies[i][cookie.row];
-            if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
+            if (potentialCookie && [existingChain.cookiesInChain containsObject:potentialCookie]) {
+                break;
+            }
+            else if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
                 [array addObject:potentialCookie];
             }
             else if (!potentialCookie) {

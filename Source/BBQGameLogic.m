@@ -37,7 +37,7 @@
 
 - (NSArray *)tryAddingCookieToChain:(BBQCookie *)cookie inDirection:(NSString *)direction {
     BBQCookie *lastCookieInChain = [_chain.cookiesInChain lastObject];
-    NSArray *potentialCookies = [self.level allValidCookiesThatCanBeChainedToCookie:lastCookieInChain direction:direction];
+    NSArray *potentialCookies = [self.level allValidCookiesThatCanBeChainedToCookie:lastCookieInChain direction:direction existingChain:self.chain];
     
     //Return an array of cookies that need to be highlighted on the path to the touched cookie
     NSMutableArray *array;
