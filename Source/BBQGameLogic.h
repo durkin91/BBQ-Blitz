@@ -37,8 +37,6 @@
 - (BOOL)areThereMovesLeft;
 
 - (void)startChainWithCookie:(BBQCookie *)cookie;
-- (BOOL)tryAddingCookieToChain:(BBQCookie *)cookie;
-- (BOOL)isValidLinkingCookie:(BBQCookie *)cookie;
 - (BBQChain *)removeCookiesInChain;
 - (void)resetEverythingForNextTurn;
 - (BOOL)isCookieABackTrack:(BBQCookie *)cookie;
@@ -46,9 +44,7 @@
 - (void)calculateScoreForChain;
 - (BBQCookie *)lastCookieInChain;
 - (BBQCookie *)previousCookieToCookieInChain:(BBQCookie *)cookie;
-
 - (NSArray *)tryAddingCookieToChain:(BBQCookie *)cookie inDirection:(NSString *)direction;
-- (BOOL)isThereATileNextToColumn:(NSInteger)column row:(NSInteger)row direction:(NSString *)direction;
 - (NSDictionary *)rootCookieLimits:(BBQCookie *)cookie;
 
 @end

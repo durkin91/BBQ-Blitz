@@ -52,7 +52,6 @@ static const CGFloat TileHeight = 36.0;
     _menuNode.delegate = self;
     
     self.swipeFromColumn = self.swipeFromRow = NSNotFound;
-    self.rootCookie = nil;
     self.userInteractionEnabled = YES;
 }
 
@@ -103,6 +102,14 @@ static const CGFloat TileHeight = 36.0;
     [[CCDirector sharedDirector] replaceScene:scene];
     [worlds.worldNode progressToNextLevel];
 }
+
+- (void)enableInteraction {
+    self.userInteractionEnabled = TRUE;
+    NSLog(@"User interaction enabled: %hhd", self.userInteractionEnabled);
+}
+
+
+#pragma mark - Adding and removing sprites
 
 - (void)clearOutAllCookiesAndTiles {
     NSMutableArray *cookies = [_cookiesLayer.children mutableCopy];
@@ -257,12 +264,7 @@ static const CGFloat TileHeight = 36.0;
     }
 }
 
-- (void)enableInteraction {
-    self.userInteractionEnabled = TRUE;
-    NSLog(@"User interaction enabled: %hhd", self.userInteractionEnabled);
-}
-
-#pragma  mark - Swipe Methods
+#pragma  mark - Touch Methods
 
 - (void)touchBegan:(CCTouch *)touch withEvent:(CCTouchEvent *)event {
     
@@ -388,13 +390,51 @@ static const CGFloat TileHeight = 36.0;
     }
 }
 
-- (void)changeCookieZIndex:(NSArray *)cookies {
-    NSInteger z = 10;
+
+#pragma mark - Touch Helper Methods
+
+- (BOOL)isBacktracking:(CGPoint)location rootPoint:(CGPoint)rootPoint {
+    BOOL isBacktracking = NO;
+    BBQCookie *previousCookie = [self.gameLogic previousCookieToCookieInChain:self.rootCookie];
+    if (previousCookie) {
+        CGPoint previousCookieLocation = [GameplayScene pointForColumn:previousCookie.column row:previousCookie.row];
+        
+        if ((location.x > rootPoint.x && location.x < previousCookieLocation.x && location.y == rootPoint.y && location.y == previousCookieLocation.y) ||
+            (location.x > previousCookieLocation.x && location.x < rootPoint.x && location.y == rootPoint.y && location.y == previousCookieLocation.y) ||
+            (location.y > rootPoint.y && location.y < previousCookieLocation.y && location.x == rootPoint.x && location.x == previousCookieLocation.x) ||
+            (location.y > previousCookieLocation.y && location.y < rootPoint.y && location.x == rootPoint.x && location.x == previousCookieLocation.x)) {
+            isBacktracking = YES;
+        }
+    }
+    return isBacktracking;
+}
+
+- (void)handleBacktrackedCookie:(BBQCookie *)cookie {
+    NSArray *removedCookies = [self.gameLogic backtrackedCookiesForCookie:cookie];
+    [self removeHighlightedCookies:removedCookies];
+    //[self animateActivatedCookieInChain:cookie];
+    [self redrawSegmentsForCookiesInChain];
+    self.rootCookie = cookie;
+}
+
+- (void)activateCookies:(NSArray *)cookies {
     for (BBQCookie *cookie in cookies) {
-        cookie.sprite.zOrder = z;
-        z = z + 10;
+        [self highlightCookie:cookie];
+        [self animateActivatedCookieInChain:cookie];
+        [self drawSegmentToCookie:cookie];
     }
 }
+
+- (void)tryAddingCookieToChainInDirection:(NSString *)direction cookie:(BBQCookie *)cookie {
+    
+    NSArray *cookiesToActivate = [self.gameLogic tryAddingCookieToChain:cookie inDirection:direction];
+    if (cookiesToActivate) {
+        [self activateCookies:cookiesToActivate];
+        self.rootCookie = cookie;
+    }
+}
+
+#pragma mark - Line Drawing methods
 
 - (void)drawSegmentToCookie:(BBQCookie *)cookie {
     CGPoint cookiePosition = [GameplayScene pointForColumn:cookie.column row:cookie.row];
@@ -468,48 +508,7 @@ static const CGFloat TileHeight = 36.0;
     [_inProgressDrawNode drawSegmentFrom:rootPoint to:endPoint radius:2.0 color:[self.rootCookie lineColor]];
 }
 
-- (BOOL)isBacktracking:(CGPoint)location rootPoint:(CGPoint)rootPoint {
-    BOOL isBacktracking = NO;
-    BBQCookie *previousCookie = [self.gameLogic previousCookieToCookieInChain:self.rootCookie];
-    if (previousCookie) {
-        CGPoint previousCookieLocation = [GameplayScene pointForColumn:previousCookie.column row:previousCookie.row];
-        
-        if ((location.x > rootPoint.x && location.x < previousCookieLocation.x && location.y == rootPoint.y && location.y == previousCookieLocation.y) ||
-            (location.x > previousCookieLocation.x && location.x < rootPoint.x && location.y == rootPoint.y && location.y == previousCookieLocation.y) ||
-            (location.y > rootPoint.y && location.y < previousCookieLocation.y && location.x == rootPoint.x && location.x == previousCookieLocation.x) ||
-            (location.y > previousCookieLocation.y && location.y < rootPoint.y && location.x == rootPoint.x && location.x == previousCookieLocation.x)) {
-            isBacktracking = YES;
-        }
-    }
-    return isBacktracking;
-}
-
-- (void)handleBacktrackedCookie:(BBQCookie *)cookie {
-    NSArray *removedCookies = [self.gameLogic backtrackedCookiesForCookie:cookie];
-    [self removeHighlightedCookies:removedCookies];
-    //[self animateActivatedCookieInChain:cookie];
-    [self redrawSegmentsForCookiesInChain];
-    self.rootCookie = cookie;
-}
-
-- (void)activateCookies:(NSArray *)cookies {
-    for (BBQCookie *cookie in cookies) {
-        [self highlightCookie:cookie];
-        [self animateActivatedCookieInChain:cookie];
-        [self drawSegmentToCookie:cookie];
-    }
-}
-
-- (void)tryAddingCookieToChainInDirection:(NSString *)direction cookie:(BBQCookie *)cookie {
-    
-    NSArray *cookiesToActivate = [self.gameLogic tryAddingCookieToChain:cookie inDirection:direction];
-    if (cookiesToActivate) {
-        [self activateCookies:cookiesToActivate];
-        self.rootCookie = cookie;
-    }
-}
-
-#pragma mark - Animate Swipe
+#pragma mark - Animations
 
 - (void)animateActivatedCookieInChain:(BBQCookie *)cookie {
     CCActionScaleTo *scaleUp = [CCActionScaleTo actionWithDuration:0.1 scale:1.2];
@@ -599,7 +598,6 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)animateChain:(BBQChain *)chain completion:(dispatch_block_t)completion {
     [self animateScoreForChain:chain];
-    [self changeCookieZIndex:chain.cookiesInChain];
     [_drawNode clear];
     [_inProgressDrawNode clear];
     
@@ -659,6 +657,8 @@ static const CGFloat TileHeight = 36.0;
 - (void)didPlay {
     [_menuNode dismissMenu:START_LEVEL withBackgroundFadeOut:YES];
 }
+
+#pragma mark - Getters & Setters
 
 - (void)setRootCookie:(BBQCookie *)rootCookie {
     _rootCookie = rootCookie;

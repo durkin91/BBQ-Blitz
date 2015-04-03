@@ -38,13 +38,8 @@ static const NSInteger NumRows = 9;
 - (BBQCookie *)createCookieAtColumn:(NSInteger)column row:(NSInteger)row withType:(NSUInteger)cookieType;
 - (NSArray *)fillHoles;
 - (NSArray *)topUpCookies;
-- (NSArray *)breakColumnOrRowIntoSectionsForDirection:(NSString *)swipeDirection columnOrRow:(NSInteger)columnOrRow;
-- (NSArray *)allCookiesInColumnOrRow:(NSInteger)columnOrRow swipeDirection:(NSString *)swipeDirection;
-- (NSSet *)allValidCookiesThatCanBeChainedToCookie:(BBQCookie *)cookie existingChain:(BBQChain *)existingChain;
-- (NSSet *)allValidCookiesThatCanBeLinkedToCookie:(BBQCookie *)cookie existingChain:(BBQChain *)existingChain;
-
-- (NSSet *)allValidCookiesThatCanBeChainedVerticallyToCookie:(BBQCookie *)cookie;
-- (NSSet *)allValidCookiesThatCanBeChainedHorizontallyToCookie:(BBQCookie *)cookie;
+//- (NSSet *)allValidCookiesThatCanBeChainedToCookie:(BBQCookie *)cookie existingChain:(BBQChain *)existingChain;
+//- (NSSet *)allValidCookiesThatCanBeLinkedToCookie:(BBQCookie *)cookie existingChain:(BBQChain *)existingChain;
 
 - (NSArray *)allValidCookiesThatCanBeChainedToCookie:(BBQCookie *)cookie direction:(NSString *)direction;
 - (NSDictionary *)rootCookieLimits:(BBQCookie *)cookie;

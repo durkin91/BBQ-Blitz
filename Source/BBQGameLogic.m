@@ -35,18 +35,6 @@
     [self.chainIncludingLinkingCookies addObject:cookie];
 }
 
-- (BOOL)tryAddingCookieToChain:(BBQCookie *)cookie {
-    
-    //See if the cookie matches any potential cookies that can be chained to the previous cookie
-    BBQCookie *lastCookieInChain = [self.chain.cookiesInChain lastObject];
-    NSSet *potentialCookies = [self.level allValidCookiesThatCanBeChainedToCookie:lastCookieInChain existingChain:self.chain];
-    BOOL canBeAdded = [potentialCookies containsObject:cookie];
-    if (canBeAdded) {
-        [self.chain addCookie:cookie];
-    }
-    return canBeAdded;
-}
-
 - (NSArray *)tryAddingCookieToChain:(BBQCookie *)cookie inDirection:(NSString *)direction {
     BBQCookie *lastCookieInChain = [_chain.cookiesInChain lastObject];
     NSArray *potentialCookies = [self.level allValidCookiesThatCanBeChainedToCookie:lastCookieInChain direction:direction];
@@ -82,15 +70,6 @@
         [self.chain.cookiesInChain removeObject:cookieToRemove];
     }
     return cookiesToRemove;
-}
-
-- (BOOL)isValidLinkingCookie:(BBQCookie *)cookie {
-    NSSet *allValidLinkingCookies = [self.level allValidCookiesThatCanBeLinkedToCookie:cookie existingChain:self.chain];
-    BOOL isValid = [allValidLinkingCookies containsObject:cookie];
-    if (isValid) {
-        [self.chainIncludingLinkingCookies addObject:cookie];
-    }
-    return isValid;
 }
 
 - (BBQChain *)removeCookiesInChain {
@@ -135,28 +114,6 @@
         previousCookie = self.chain.cookiesInChain[i - 1];
     }
     return previousCookie;
-}
-
-- (BOOL)isThereATileNextToColumn:(NSInteger)column row:(NSInteger)row direction:(NSString *)direction {
-    BBQTile *tile;
-    BOOL isTile = NO;
-    if ([direction isEqualToString:UP] && row < NumRows - 1) {
-        tile = [self.level tileAtColumn:column row:row + 1];
-    }
-    else if ([direction isEqualToString:DOWN] && row > 0) {
-        tile = [self.level tileAtColumn:column row:row -1];
-    }
-    else if ([direction isEqualToString:LEFT] && column > 0) {
-        tile = [self.level tileAtColumn:column - 1 row:row];
-    }
-    else if ([direction isEqualToString:RIGHT] && column < NumColumns - 1) {
-        tile = [self.level tileAtColumn:column + 1 row:row];
-    }
-    
-    if (tile && tile.tileType != 0) {
-        isTile = YES;
-    }
-    return isTile;
 }
 
 - (NSDictionary *)rootCookieLimits:(BBQCookie *)cookie {
@@ -238,7 +195,6 @@
         }
     }
 
-    
     return isComplete;
 }
 
@@ -267,19 +223,6 @@
     }
     return x;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 @end
