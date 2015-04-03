@@ -37,10 +37,135 @@
 
 
 - (NSSet *)shuffle {
-    NSSet *set;
-    set = [self createCookiesInBlankTiles];
+    NSSet *set = [self createCookiesInBlankTiles];
+    self.possibleChains = [self detectPossibleChains];
+    while ([self.possibleChains count] == 0) {
+        set = [self createCookiesInBlankTiles];
+        self.possibleChains = [self detectPossibleChains];
+    }
+    
     return set;
 }
+
+- (NSSet *)detectPossibleChains {
+    NSMutableSet *possibleChains = [NSMutableSet set];
+    
+    for (NSInteger column = 0; column < NumColumns; column ++) {
+        for (NSInteger row = 0; row < NumRows; row ++) {
+            BBQCookie *middleCookie = _cookies[column][row];
+            if (middleCookie) {
+                NSArray *matchingCookies = [self nearestMatchingCookieInAllDirections:middleCookie];
+                for (NSInteger i = 0; i < [matchingCookies count]; i++ ) {
+                    BBQCookie *firstCookie = matchingCookies[i];
+                    for (NSInteger x = i + 1; i < [matchingCookies count] - 1; i++) {
+                        BBQCookie *lastCookie = matchingCookies[x];
+                        BBQChain *chain = [[BBQChain alloc] init];
+                        chain.cookieType = middleCookie.cookieType;
+                        chain.cookiesInChain = [NSMutableArray arrayWithObjects:firstCookie, middleCookie, lastCookie, nil];
+                        [possibleChains addObject:chain];
+                    }
+                }
+            }
+        }
+    }
+    
+    return possibleChains;
+}
+
+- (NSArray *)nearestMatchingCookieInAllDirections:(BBQCookie *)cookie {
+    NSMutableArray *array = [NSMutableArray array];
+    BBQCookie *testCookie;
+    
+    //UP
+    for (NSInteger i = cookie.row + 1; i < NumRows; i++) {
+        testCookie = _cookies[cookie.column][i];
+        if (testCookie && testCookie.cookieType == cookie.cookieType) {
+            [array addObject:testCookie];
+            break;
+        }
+        else if (!testCookie) {
+            break;
+        }
+    }
+    
+    //RIGHT
+    for (NSInteger i = cookie.column + 1; i < NumColumns; i++) {
+        testCookie = _cookies[i][cookie.row];
+        if (testCookie && testCookie.cookieType == cookie.cookieType) {
+            [array addObject:testCookie];
+            break;
+        }
+        else if (!testCookie) {
+            break;
+        }
+    }
+    
+    //DOWN
+    for (NSInteger i = cookie.row - 1; i >= 0; i --) {
+        testCookie = _cookies[cookie.column][i];
+        if (testCookie && testCookie.cookieType == cookie.cookieType) {
+            [array addObject:testCookie];
+            break;
+        }
+        else if (!testCookie) {
+            break;
+        }
+    }
+    
+    
+    //LEFT
+    for (NSInteger i = cookie.column - 1; i >= 0; i++ ) {
+        testCookie = _cookies[i][cookie.row];
+        if (testCookie && testCookie.cookieType == cookie.cookieType) {
+            [array addObject:testCookie];
+            break;
+        }
+        else if (!testCookie) {
+            break;
+        }
+    }
+    
+    return array;
+}
+
+
+//- (BBQCookie *)nearestMatchingCookie:(BBQCookie *)cookie inDirection:(NSString *)direction {
+//    BBQCookie *matchingCookie;
+//    
+//    if ([direction isEqualToString:UP]) {
+//        for (NSInteger i = cookie.row + 1; i < NumRows; i++) {
+//            if (_cookies[cookie.column][i].cookieType == cookie.cookieType) {
+//                matchingCookie = _cookies[cookie.column][i];
+//            }
+//        }
+//    }
+//    
+//    else if ([direction isEqualToString:DOWN]) {
+//        for (NSInteger i = cookie.row - 1; i >= 0; i --) {
+//            if (_cookies[cookie.column][i].cookieType == cookie.cookieType) {
+//                matchingCookie = _cookies[cookie.column][i];
+//            }
+//        }
+//    }
+//    
+//    else if ([direction isEqualToString:RIGHT]) {
+//        for (NSInteger i = cookie.column + 1; i < NumColumns; i++) {
+//            if (_cookies[i][cookie.row].cookieType == cookie.cookieType) {
+//                matchingCookie = _cookies[cookie.column][i];
+//            }
+//        }
+//    }
+//    
+//    else if ([direction isEqualToString:LEFT]) {
+//        for (NSInteger i = cookie.column - 1; i >= 0; i++ ) {
+//            if (_cookies[i][cookie.row].cookieType == cookie.cookieType) {
+//                matchingCookie = _cookies[cookie.column][i];
+//            }
+//        }
+//    }
+//    
+//    return matchingCookie;
+//}
 
 
 - (NSArray *)allValidCookiesThatCanBeChainedToCookie:(BBQCookie *)cookie direction:(NSString *)direction {
