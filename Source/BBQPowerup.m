@@ -14,16 +14,16 @@
     BBQLevel *_level;
 }
 
-- (instancetype)initWithCookie:(BBQCookie *)cookie type:(NSInteger)type direction:(NSString *)swipeDirection {
+- (instancetype)initWithType:(NSInteger)type direction:(NSString *)direction {
     self = [super init];
     if (self) {
-        self.rootCookie = cookie;
         self.type = type;
+        self.hasBeenActivated = NO;
         
-        if ([swipeDirection isEqualToString:RIGHT] || [swipeDirection isEqualToString:LEFT]) {
+        if ([direction isEqualToString:RIGHT] || [direction isEqualToString:LEFT]) {
             self.direction = HORIZONTAL;
         }
-        else if ([swipeDirection isEqualToString:UP] || [swipeDirection isEqualToString:DOWN]) {
+        else if ([direction isEqualToString:UP] || [direction isEqualToString:DOWN]) {
             self.direction = VERTICAL;
         }
     }
@@ -31,49 +31,49 @@
     return self;
 }
 
-- (void)performPowerupWithLevel:(BBQLevel *)level {
+- (void)performPowerupWithLevel:(BBQLevel *)level cookie:(BBQCookie *)rootCookie {
     
     _level = level;
     
     switch (self.type) {
         case 3:
             if ([self.direction isEqualToString:HORIZONTAL]) {
-                [self destroyOneCookieVertically];
+                [self destroyOneCookieVertically:rootCookie];
             }
             else if ([self.direction isEqualToString:VERTICAL]) {
-                [self destroyOneCookieHorizontally];
+                [self destroyOneCookieHorizontally:rootCookie];
             }
             break;
             
         case 4:
-            [self destroyOneCookieHorizontally];
-            [self destroyOneCookieVertically];
+            [self destroyOneCookieHorizontally:rootCookie];
+            [self destroyOneCookieVertically:rootCookie];
             break;
             
         case 5:
             if ([self.direction isEqualToString:HORIZONTAL]) {
-                [self destroyEntireColumnOfCookies];
+                [self destroyEntireColumnOfCookies:rootCookie];
             }
             else if ([self.direction isEqualToString:VERTICAL]) {
-                [self destroyEntireRowOfCookies];
+                [self destroyEntireRowOfCookies:rootCookie];
             }
             break;
             
         case 6:
-            [self destroyCrissCrossCookies];
+            [self destroyCrissCrossCookies:rootCookie];
             break;
             
         case 7:
-            [self destroyEntireColumnOfCookies];
-            [self destroyEntireRowOfCookies];
+            [self destroyEntireColumnOfCookies:rootCookie];
+            [self destroyEntireRowOfCookies:rootCookie];
             break;
             
         case 8:
-            [self destroyRowAndColumnAndAroundRootCookie];
+            [self destroyRowAndColumnAndAroundRootCookie:rootCookie];
             break;
             
         case 9:
-            [self destroyThreeByThree];
+            [self destroyThreeByThree:rootCookie];
             break;
             
         default:
@@ -93,45 +93,45 @@
     }
 }
 
-- (void)destroyOneCookieVertically {
-    NSInteger rootRow = self.rootCookie.row;
+- (void)destroyOneCookieVertically:(BBQCookie *)rootCookie {
+    NSInteger rootRow = rootCookie.row;
     if (rootRow < NumRows - 1) {
-        [self destroyCookieAtColumn:self.rootCookie.column row:rootRow + 1];
+        [self destroyCookieAtColumn:rootCookie.column row:rootRow + 1];
     }
     if (rootRow >= 1) {
-        [self destroyCookieAtColumn:self.rootCookie.column row:rootRow - 1];
+        [self destroyCookieAtColumn:rootCookie.column row:rootRow - 1];
     }
 }
 
-- (void)destroyOneCookieHorizontally {
-    NSInteger rootColumn = self.rootCookie.column;
+- (void)destroyOneCookieHorizontally:(BBQCookie *)rootCookie {
+    NSInteger rootColumn = rootCookie.column;
     if (rootColumn < NumColumns - 1) {
-        [self destroyCookieAtColumn:rootColumn + 1 row:self.rootCookie.row];
+        [self destroyCookieAtColumn:rootColumn + 1 row:rootCookie.row];
     }
     if (rootColumn >= 1) {
-        [self destroyCookieAtColumn:rootColumn - 1 row:self.rootCookie.row];
+        [self destroyCookieAtColumn:rootColumn - 1 row:rootCookie.row];
     }
 }
 
-- (void)destroyEntireColumnOfCookies {
+- (void)destroyEntireColumnOfCookies:(BBQCookie *)rootCookie {
     for (int i = 0; i < NumRows; i ++) {
-        if (i != self.rootCookie.row) {
-            [self destroyCookieAtColumn:self.rootCookie.column row:i];
+        if (i != rootCookie.row) {
+            [self destroyCookieAtColumn:rootCookie.column row:i];
         }
     }
 }
 
-- (void)destroyEntireRowOfCookies {
+- (void)destroyEntireRowOfCookies:(BBQCookie *)rootCookie {
     for (int i = 0; i < NumColumns; i ++) {
-        if (i != self.rootCookie.column) {
-            [self destroyCookieAtColumn:i row:self.rootCookie.row];
+        if (i != rootCookie.column) {
+            [self destroyCookieAtColumn:i row:rootCookie.row];
         }
     }
 }
 
-- (void)destroyCrissCrossCookies {
-    NSInteger rootColumn = self.rootCookie.column;
-    NSInteger rootRow = self.rootCookie.row;
+- (void)destroyCrissCrossCookies:(BBQCookie *)rootCookie {
+    NSInteger rootColumn = rootCookie.column;
+    NSInteger rootRow = rootCookie.row;
     NSInteger x = 1;
     while (rootColumn - x >= 0 && rootRow + x < NumRows) {
         [self destroyCookieAtColumn:rootColumn - x row:rootRow + x];
@@ -154,17 +154,17 @@
     }
 }
 
-- (void)destroyRowAndColumnAndAroundRootCookie {
+- (void)destroyRowAndColumnAndAroundRootCookie:(BBQCookie *)rootCookie {
     
     
-    [self destroyEntireRowOfCookies];
-    [self destroyEntireColumnOfCookies];
+    [self destroyEntireRowOfCookies:rootCookie];
+    [self destroyEntireColumnOfCookies:rootCookie];
     
     //Left side
     NSInteger x = 1;
-    NSInteger leftColumn = self.rootCookie.column - x;
+    NSInteger leftColumn = rootCookie.column - x;
     while (leftColumn >= 0 && x <= 2) {
-        NSInteger row = self.rootCookie.row + 2;
+        NSInteger row = rootCookie.row + 2;
         for (int i = 0; i <= 4; i ++) {
             if (row < NumRows && row > 0) {
                 [self destroyCookieAtColumn:leftColumn row:row - i];
@@ -176,9 +176,9 @@
     
     //Right side
     x = 1;
-    NSInteger rightColumn = self.rootCookie.column + x;
+    NSInteger rightColumn = rootCookie.column + x;
     while (rightColumn < NumColumns && x <= 2) {
-        NSInteger row = self.rootCookie.row + 2;
+        NSInteger row = rootCookie.row + 2;
         for (int i = 0; i <= 4; i ++) {
             if (row < NumRows && row > 0) {
                 [self destroyCookieAtColumn:rightColumn row:row - i];
@@ -189,24 +189,24 @@
     
 }
 
-- (void)destroyThreeByThree {
-    [self destroyEntireColumnOfCookies];
-    [self destroyEntireRowOfCookies];
+- (void)destroyThreeByThree:(BBQCookie *)rootCookie {
+    [self destroyEntireColumnOfCookies:rootCookie];
+    [self destroyEntireRowOfCookies:rootCookie];
     
     for (int i = 0; i < NumColumns; i ++) {
-        [self destroyCookieAtColumn:i row:self.rootCookie.row + 1];
+        [self destroyCookieAtColumn:i row:rootCookie.row + 1];
     }
     
     for (int i = 0; i < NumColumns; i ++) {
-        [self destroyCookieAtColumn:i row:self.rootCookie.row - 1];
+        [self destroyCookieAtColumn:i row:rootCookie.row - 1];
     }
     
     for (int i = 0; i < NumRows; i ++) {
-        [self destroyCookieAtColumn:self.rootCookie.column + 1 row:i];
+        [self destroyCookieAtColumn:rootCookie.column + 1 row:i];
     }
     
     for (int i = 0; i < NumRows; i ++) {
-        [self destroyCookieAtColumn:self.rootCookie.column - 1 row:i];
+        [self destroyCookieAtColumn:rootCookie.column - 1 row:i];
     }
  
 }

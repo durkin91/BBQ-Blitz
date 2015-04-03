@@ -10,7 +10,7 @@
 
 @implementation BBQCookie
 
-- (NSString *)spriteName {
+- (NSString *)spriteNameBase {
     NSString *spriteName;
     
     switch (self.cookieType) {
@@ -46,40 +46,24 @@
     
 }
 
-- (NSString *)highlightedSpriteName {
+- (NSString *)spriteName {
     NSString *spriteName;
     
-    switch (self.cookieType) {
-        case 1:
-            spriteName = @"Croissant-Highlighted";
-            break;
-            
-        case 2:
-            spriteName = @"Cupcake-Highlighted";
-            break;
-            
-        case 3:
-            spriteName = @"Danish-Highlighted";
-            break;
-            
-        case 4:
-            spriteName = @"Donut-Highlighted";
-            break;
-            
-        case 5:
-            spriteName = @"Macaroon-Highlighted";
-            break;
-            
-        case 6:
-            spriteName = @"SugarCookie-Highlighted";
-            break;
-            
-        default:
-            break;
+    if (self.powerup == nil) {
+        spriteName = [self spriteNameBase];
+    }
+    
+    else if (self.powerup && self.powerup.type == 6) {
+        spriteName = [NSString stringWithFormat:@"%@%@", [self spriteNameBase], self.powerup.direction];
     }
     
     return spriteName;
+}
+
+- (NSString *)highlightedSpriteName {
     
+    NSString *spriteName = [NSString stringWithFormat:@"%@-Highlighted", [self spriteName]];
+    return spriteName;
 }
 
 - (CCColor *)lineColor {

@@ -7,9 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "BBQCookie.h"
 
 @class BBQLevel;
+@class BBQCookie;
 
 
 #define HORIZONTAL @"Horizontal"
@@ -17,13 +17,13 @@
 
 @interface BBQPowerup : NSObject
 
-@property (strong, nonatomic) BBQCookie *rootCookie;
 @property (assign, nonatomic) NSInteger type;
 @property (strong, nonatomic) NSMutableArray *disappearingCookies;
 @property (strong, nonatomic) NSString *direction;
+@property (assign, nonatomic) BOOL hasBeenActivated;
 
-- (instancetype)initWithCookie:(BBQCookie *)cookie type:(NSInteger)type direction:(NSString *)swipeDirection;
-- (void)performPowerupWithLevel:(BBQLevel *)level;
+- (instancetype)initWithType:(NSInteger)type direction:(NSString *)swipeDirection;
+- (void)performPowerupWithLevel:(BBQLevel *)level cookie:(BBQCookie *)rootCookie;
 
 
 @end

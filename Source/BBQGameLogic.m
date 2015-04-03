@@ -47,9 +47,10 @@
             BBQCookie *cookieToActivate = potentialCookies[i];
             [self.chain addCookie:cookieToActivate];
             [array addObject:cookieToActivate];
+            [self checkForPowerups:cookieToActivate];
         }
     }
-    NSLog(@"Cookies in chain:%@", self.chain.cookiesInChain);
+    
     return array;
 }
 
@@ -141,6 +142,18 @@
         }
     }
     return direction;
+}
+
+#pragma mark - Powerup Methods
+
+- (void)checkForPowerups:(BBQCookie *)cookie {
+    
+    //The 6th cookie in a chain will blast out a row or column
+    if ([self.chain.cookiesInChain indexOfObject:cookie] == 5) {
+        NSString *direction = [self directionOfPreviousCookieInChain:cookie];
+        BBQPowerup *powerup = [[BBQPowerup alloc] initWithType:6 direction:direction];
+        cookie.powerup = powerup;
+    }
 }
 
 
