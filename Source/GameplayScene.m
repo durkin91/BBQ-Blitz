@@ -547,20 +547,24 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)animateScoreForCookies:(NSArray *)cookies scorePerCookie:(NSInteger)scorePerCookie {
     for (BBQCookie *cookie in cookies) {
-        //Add a label for the score that slowly fades up
-        CGPoint cookieSpriteWorldPos = [_cookiesLayer convertToWorldSpace:[GameplayScene pointForColumn:cookie.column row:cookie.row]];
-        CGPoint relativeToSelfPos = [self convertToNodeSpace:cookieSpriteWorldPos];
-        
-        NSString *score = [NSString stringWithFormat:@"%lu", (long)scorePerCookie];
-        CCLabelTTF *scoreLabel = [CCLabelTTF labelWithString:score fontName:@"GillSans-BoldItalic" fontSize:12];
-        scoreLabel.position = relativeToSelfPos;
-        scoreLabel.zOrder = 300;
-        scoreLabel.outlineColor = [CCColor blackColor];
-        scoreLabel.outlineWidth = 1.0;
-        [self addChild:scoreLabel];
-        
-        [BBQAnimations animateScoreLabel:scoreLabel];
+        [self animateScoreForSingleCookie:cookie scorePerCookie:scorePerCookie];
     }
+}
+
+- (void)animateScoreForSingleCookie:(BBQCookie *)cookie scorePerCookie:(NSInteger)scorePerCookie {
+    //Add a label for the score that slowly fades up
+    CGPoint cookieSpriteWorldPos = [_cookiesLayer convertToWorldSpace:[GameplayScene pointForColumn:cookie.column row:cookie.row]];
+    CGPoint relativeToSelfPos = [self convertToNodeSpace:cookieSpriteWorldPos];
+    
+    NSString *score = [NSString stringWithFormat:@"%lu", (long)scorePerCookie];
+    CCLabelTTF *scoreLabel = [CCLabelTTF labelWithString:score fontName:@"GillSans-BoldItalic" fontSize:12];
+    scoreLabel.position = relativeToSelfPos;
+    scoreLabel.zOrder = 300;
+    scoreLabel.outlineColor = [CCColor blackColor];
+    scoreLabel.outlineWidth = 1.0;
+    [self addChild:scoreLabel];
+    
+    [BBQAnimations animateScoreLabel:scoreLabel];
 }
 
 - (void)animateNewCookies:(NSArray *)columns completion:(dispatch_block_t)completion {
@@ -626,7 +630,10 @@ static const CGFloat TileHeight = 36.0;
 
     //And all the other cookies
     for (NSArray *array in cookie.powerup.arraysOfDisappearingCookies) {
+        
         [array enumerateObjectsUsingBlock:^(BBQCookie *powerupCookie, NSUInteger idx, BOOL *stop) {
+            [self animateScoreForSingleCookie:powerupCookie scorePerCookie:cookie.powerup.scorePerCookie];
+            
             NSTimeInterval delay = 0.05*idx;
             NSTimeInterval duration = 0.3;
             
@@ -638,6 +645,9 @@ static const CGFloat TileHeight = 36.0;
             powerupCookie.sprite = nil;
         }];
     }
+    
+    [self.gameLogic addPowerupScoreToCurrentScore:cookie.powerup];
+    [self runAction:[self updateScoreAndMoves]];
     
     return longestDuration;
 }
