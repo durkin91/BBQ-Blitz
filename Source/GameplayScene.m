@@ -621,6 +621,8 @@ static const CGFloat TileHeight = 36.0;
 
 - (NSTimeInterval)animatePowerupForCookie:(BBQCookie *)cookie {
     
+    [cookie.powerup addCookieOrders:self.gameLogic.level.cookieOrders];
+    
     __block NSTimeInterval longestDuration = 0;
     
     //Take care of root cookie
@@ -637,12 +639,14 @@ static const CGFloat TileHeight = 36.0;
             NSTimeInterval delay = 0.05*idx;
             NSTimeInterval duration = 0.3;
             
+            CCActionCallBlock *action = [CCActionCallBlock actionWithBlock:^{
+                [self animateCookieRemoval:powerupCookie powerupDuration:longestDuration scaleActionDuration:duration];
+            }];
+            
             longestDuration = MAX(longestDuration, duration + delay);
             
-            CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:duration scale:0.1];
-            [powerupCookie.sprite runAction:[CCActionSequence actions:[CCActionDelay actionWithDuration:delay], scaleAction, [CCActionRemove action], nil]];
+            [powerupCookie.sprite runAction:[CCActionSequence actions:[CCActionDelay actionWithDuration:delay], action, nil]];
             
-            powerupCookie.sprite = nil;
         }];
     }
     
@@ -665,24 +669,7 @@ static const CGFloat TileHeight = 36.0;
         
         if ([self.gameLogic doesCookieNeedRemoving:cookie]) {
             
-            if (cookie.powerup.hasBeenActivated) {
-                powerupDuration = [self animatePowerupForCookie:cookie];
-            }
-            
-            if (i < chain.numberOfCookiesForOrder && cookie.sprite != nil) {
-                [self removeHighlightFromCookie:cookie];
-                CCActionSequence *sequence = [self animateCookieOrderCollection:cookie cookieOrder:chain.cookieOrder];
-                [cookie.sprite runAction:sequence];
-                cookie.sprite = nil;
-            }
-            
-            
-            else if (cookie.sprite != nil) {
-                CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:duration scale:0.1];
-                [cookie.sprite runAction:[CCActionSequence actions:scaleAction, [CCActionRemove action], nil]];
-                
-                cookie.sprite = nil;
-            }
+            [self animateCookieRemoval:cookie powerupDuration:powerupDuration scaleActionDuration:duration];
         }
         
         else {
@@ -693,9 +680,30 @@ static const CGFloat TileHeight = 36.0;
     [self runAction:[CCActionSequence actions:[CCActionDelay actionWithDuration:duration], [self updateScoreAndMoves], [CCActionDelay actionWithDuration:powerupDuration], [CCActionCallBlock actionWithBlock:completion], nil]];
 }
 
+- (void)animateCookieRemoval:(BBQCookie *)cookie powerupDuration:(NSTimeInterval)powerupDuration scaleActionDuration:(NSTimeInterval)duration {
+    if (cookie.powerup.hasBeenActivated) {
+        powerupDuration = [self animatePowerupForCookie:cookie];
+    }
+    
+    if (cookie.cookieOrder && cookie.sprite != nil) {
+        [self removeHighlightFromCookie:cookie];
+        CCActionSequence *sequence = [self animateCookieOrderCollection:cookie];
+        [cookie.sprite runAction:sequence];
+        cookie.sprite = nil;
+    }
+    
+    
+    else if (cookie.sprite != nil) {
+        CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:duration scale:0.1];
+        [cookie.sprite runAction:[CCActionSequence actions:scaleAction, [CCActionRemove action], nil]];
+        
+        cookie.sprite = nil;
+    }
+}
 
-- (CCActionSequence *)animateCookieOrderCollection:(BBQCookie *)cookie cookieOrder:(BBQCookieOrder *)cookieOrder {
-    CCSprite *orderSprite = cookieOrder.orderNode.cookieSprite;
+
+- (CCActionSequence *)animateCookieOrderCollection:(BBQCookie *)cookie {
+    CCSprite *orderSprite = cookie.cookieOrder.orderNode.cookieSprite;
     CGPoint cookieSpriteWorldPos = [cookie.sprite.parent convertToWorldSpace:cookie.sprite.positionInPoints];
     CGPoint relativeToOrderSpritePos = [orderSprite convertToNodeSpace:cookieSpriteWorldPos];
     [cookie.sprite removeFromParent];
@@ -709,12 +717,11 @@ static const CGFloat TileHeight = 36.0;
     CCActionScaleTo *scaleDown = [CCActionScaleTo actionWithDuration:0.1 scale:1.0];
     CCActionRemove *removeSprite = [CCActionRemove action];
     CCActionCallBlock *updateOrderQuantity = [CCActionCallBlock actionWithBlock:^{
-        NSInteger quantityLeft = [cookieOrder.orderNode.quantityLabel.string integerValue];
-        quantityLeft --;
-        cookieOrder.orderNode.quantityLabel.string = [NSString stringWithFormat:@"%i", quantityLeft];
-        if (quantityLeft == 0) {
-            cookieOrder.orderNode.quantityLabel.visible = NO;
-            cookieOrder.orderNode.tickSprite.visible = YES;
+        NSInteger quantityLeft = [cookie.cookieOrder.orderNode.quantityLabel.string integerValue];
+        cookie.cookieOrder.orderNode.quantityLabel.string = [NSString stringWithFormat:@"%lu", (long)cookie.cookieOrder.quantityLeft];
+        if (quantityLeft <= 0) {
+            cookie.cookieOrder.orderNode.quantityLabel.visible = NO;
+            cookie.cookieOrder.orderNode.tickSprite.visible = YES;
         }
     }];
     

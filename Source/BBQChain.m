@@ -32,6 +32,35 @@
     else return NO;
 }
 
+- (void)addCookieOrders:(NSArray *)cookieOrders {
+    
+    //find the right order
+    for (BBQCookieOrder *cookieOrder in cookieOrders) {
+        NSInteger x = 0;
+        for (BBQCookie *cookie in self.cookiesInChain) {
+            if (cookieOrder.cookie.cookieType == cookie.cookieType && cookieOrder.quantityLeft > 0 && !cookie.powerup) {
+                cookie.cookieOrder = cookieOrder;
+                x++;
+            }
+        }
+        cookieOrder.quantityLeft = cookieOrder.quantityLeft - x;
+    }
+    
+    //    //find the right order
+    //    for (BBQCookieOrder *cookieOrder in self.level.cookieOrders) {
+    //        if (cookieOrder.cookie.cookieType == self.chain.cookieType) {
+    //            self.chain.cookieOrder = cookieOrder;
+    //
+    //            //Figure out how many of the cookies are used for the order
+    //            for (NSInteger i = 0; i < [self.chain.cookiesInChain count] && cookieOrder.quantityLeft > 0; i++) {
+    //                self.chain.numberOfCookiesForOrder ++;
+    //                cookieOrder.quantityLeft --;
+    //            }
+    //        }
+    //    }
+    
+}
+
 -(NSString *)description {
     return [NSString stringWithFormat:@"Cookies involved: %@", self.cookiesInChain];
 }

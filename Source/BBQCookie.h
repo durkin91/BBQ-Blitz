@@ -11,6 +11,7 @@
 #import "BBQTile.h"
 #import "BBQPowerup.h"
 
+@class BBQCookieOrder;
 @class BBQCombo;
 
 static const NSUInteger NumCookieTypes = 6;
@@ -26,6 +27,7 @@ static const NSUInteger NumCookiesToUpgrade = 40;
 @property (assign, nonatomic) BOOL isInStaticTile;
 @property (assign, nonatomic) NSInteger countdown;
 @property (strong, nonatomic) BBQPowerup *powerup;
+@property (strong, nonatomic) BBQCookieOrder *cookieOrder;
 
 
 

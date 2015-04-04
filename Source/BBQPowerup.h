@@ -30,5 +30,6 @@
 - (void)performPowerupWithLevel:(BBQLevel *)level cookie:(BBQCookie *)rootCookie;
 - (void)removeDuplicateCookiesFromChainsCookies:(NSArray *)cookiesInChain;
 - (void)scorePowerup;
+- (void)addCookieOrders:(NSArray *)cookieOrders;
 
 @end

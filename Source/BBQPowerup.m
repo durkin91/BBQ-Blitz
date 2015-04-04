@@ -104,6 +104,23 @@
     }
 }
 
+- (void)addCookieOrders:(NSArray *)cookieOrders {
+    
+    //find the right order
+    for (BBQCookieOrder *cookieOrder in cookieOrders) {
+        NSInteger x = 0;
+        for (NSArray *array in self.arraysOfDisappearingCookies) {
+            for (BBQCookie *cookie in array) {
+                if (cookieOrder.cookie.cookieType == cookie.cookieType && cookieOrder.quantityLeft > 0 && !cookie.powerup) {
+                    cookie.cookieOrder = cookieOrder;
+                    x++;
+                }
+            }
+        }
+        cookieOrder.quantityLeft = cookieOrder.quantityLeft - x;
+    }
+}
+
 - (void)destroyCookieAtColumn:(NSInteger)column row:(NSInteger)row array:(NSMutableArray *)array {
     
     BBQCookie *cookie = [_level cookieAtColumn:column row:row];

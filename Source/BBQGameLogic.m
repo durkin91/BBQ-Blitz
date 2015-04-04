@@ -75,7 +75,7 @@
 }
 
 - (BBQChain *)removeCookiesInChain {
-    [self cookieOrdersForChain];
+    [self.chain addCookieOrders:self.level.cookieOrders];
     for (BBQCookie *cookie in self.chain.cookiesInChain) {
 
         if (cookie.powerup && cookie.powerup.isCurrentlyTemporary == NO) {
@@ -96,8 +96,8 @@
     [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
     [cookie.powerup performPowerupWithLevel:self.level cookie:cookie];
     [cookie.powerup removeDuplicateCookiesFromChainsCookies:self.chain.cookiesInChain];
-    
     [cookie.powerup scorePowerup];
+    //[cookie.powerup addCookieOrders:self.level.cookieOrders];
 }
 
 - (void)addPowerupScoreToCurrentScore:(BBQPowerup *)powerup {
@@ -115,22 +115,6 @@
     _chain.scorePerCookie = 30 + (([_chain.cookiesInChain count] - 2) * 10);
     _chain.score = _chain.scorePerCookie * [_chain.cookiesInChain count];
     self.currentScore = self.currentScore + _chain.score;
-}
-
-- (void)cookieOrdersForChain {
-    
-    //find the right order
-    for (BBQCookieOrder *cookieOrder in self.level.cookieOrders) {
-        if (cookieOrder.cookie.cookieType == self.chain.cookieType) {
-            self.chain.cookieOrder = cookieOrder;
-            
-            //Figure out how many of the cookies are used for the order
-            for (NSInteger i = 0; i < [self.chain.cookiesInChain count] && cookieOrder.quantityLeft > 0; i++) {
-                self.chain.numberOfCookiesForOrder ++;
-                cookieOrder.quantityLeft --;
-            }
-        }
-    }
 }
 
 - (BBQCookie *)lastCookieInChain {
