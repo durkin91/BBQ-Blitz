@@ -18,6 +18,8 @@
 @interface BBQPowerup : NSObject
 
 @property (assign, nonatomic) NSInteger type;
+@property (assign, nonatomic) NSInteger scorePerCookie;
+@property (assign, nonatomic) NSInteger totalScore;
 @property (strong, nonatomic) NSMutableArray *arraysOfDisappearingCookies;
 @property (strong, nonatomic) NSString *direction;
 @property (assign, nonatomic) BOOL isCurrentlyTemporary;
@@ -27,5 +29,6 @@
 - (instancetype)initWithType:(NSInteger)type direction:(NSString *)swipeDirection;
 - (void)performPowerupWithLevel:(BBQLevel *)level cookie:(BBQCookie *)rootCookie;
 - (void)removeDuplicateCookiesFromChainsCookies:(NSArray *)cookiesInChain;
+- (void)scorePowerup;
 
 @end

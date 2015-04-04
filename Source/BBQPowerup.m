@@ -20,6 +20,7 @@
         self.type = type;
         self.isCurrentlyTemporary = YES;
         self.hasBeenActivated = NO;
+        self.scorePerCookie = 10;
         
         if ([direction isEqualToString:RIGHT] || [direction isEqualToString:LEFT]) {
             self.direction = HORIZONTAL;
@@ -84,6 +85,12 @@
     
     self.hasBeenActivated = YES;
     
+}
+
+- (void)scorePowerup {
+    for (NSArray *array in self.arraysOfDisappearingCookies) {
+        self.totalScore = self.totalScore + ([array count] * self.scorePerCookie);
+    }
 }
 
 - (void)removeDuplicateCookiesFromChainsCookies:(NSArray *)cookiesInChain {

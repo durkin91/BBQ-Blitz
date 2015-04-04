@@ -96,6 +96,12 @@
     [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
     [cookie.powerup performPowerupWithLevel:self.level cookie:cookie];
     [cookie.powerup removeDuplicateCookiesFromChainsCookies:self.chain.cookiesInChain];
+    
+    [cookie.powerup scorePowerup];
+}
+
+- (void)addPowerupScoreToCurrentScore:(BBQPowerup *)powerup {
+    self.currentScore = self.currentScore + powerup.totalScore;
 }
 
 - (BOOL)doesCookieNeedRemoving:(BBQCookie *)cookie {
