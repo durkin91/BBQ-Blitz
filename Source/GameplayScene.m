@@ -346,7 +346,6 @@ static const CGFloat TileHeight = 36.0;
         [self.gameLogic calculateScoreForChain];
         BBQChain *chain = [self.gameLogic removeCookiesInChain];
         [self animateChain:chain completion:^{
-            [self updateScoreAndMoves];
     
             NSArray *columns = [self.gameLogic.level fillHoles];
             [self animateFallingCookies:columns completion:^{
@@ -535,22 +534,24 @@ static const CGFloat TileHeight = 36.0;
     [cookie.sprite runAction:sequence];
 }
 
-- (void)updateScoreAndMoves {
-    NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-    [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
-    _scoreLabel.string = [formatter stringFromNumber:@(self.gameLogic.currentScore)];
-    _movesLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.movesLeft];
-    NSLog(@"Moves left label: %@", _movesLabel.string);
-
+- (CCActionCallBlock *)updateScoreAndMoves {
+    CCActionCallBlock *block = [CCActionCallBlock actionWithBlock:^{
+        NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+        [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
+        _scoreLabel.string = [formatter stringFromNumber:@(self.gameLogic.currentScore)];
+        _movesLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.movesLeft];
+        NSLog(@"Moves left label: %@", _movesLabel.string);
+    }];
+    return block;
 }
 
-- (void)animateScoreForChain:(BBQChain *)chain {
-    for (BBQCookie *cookie in chain.cookiesInChain) {
+- (void)animateScoreForCookies:(NSArray *)cookies scorePerCookie:(NSInteger)scorePerCookie {
+    for (BBQCookie *cookie in cookies) {
         //Add a label for the score that slowly fades up
         CGPoint cookieSpriteWorldPos = [_cookiesLayer convertToWorldSpace:[GameplayScene pointForColumn:cookie.column row:cookie.row]];
         CGPoint relativeToSelfPos = [self convertToNodeSpace:cookieSpriteWorldPos];
         
-        NSString *score = [NSString stringWithFormat:@"%lu", (long)chain.scorePerCookie];
+        NSString *score = [NSString stringWithFormat:@"%lu", (long)scorePerCookie];
         CCLabelTTF *scoreLabel = [CCLabelTTF labelWithString:score fontName:@"GillSans-BoldItalic" fontSize:12];
         scoreLabel.position = relativeToSelfPos;
         scoreLabel.zOrder = 300;
@@ -642,11 +643,12 @@ static const CGFloat TileHeight = 36.0;
 }
 
 - (void)animateChain:(BBQChain *)chain completion:(dispatch_block_t)completion {
-    [self animateScoreForChain:chain];
+    [self animateScoreForCookies:chain.cookiesInChain scorePerCookie:chain.scorePerCookie];
     [_drawNode clear];
     [_inProgressDrawNode clear];
     
-    NSTimeInterval longestDuration = 0.3;
+    NSTimeInterval powerupDuration = 0;
+    NSTimeInterval duration = 0.3;
     
     for (NSInteger i = 0; i < [chain.cookiesInChain count]; i++) {
         BBQCookie *cookie = chain.cookiesInChain[i];
@@ -654,8 +656,7 @@ static const CGFloat TileHeight = 36.0;
         if ([self.gameLogic doesCookieNeedRemoving:cookie]) {
             
             if (cookie.powerup.hasBeenActivated) {
-                NSTimeInterval powerupDuration = [self animatePowerupForCookie:cookie];
-                longestDuration = MAX(powerupDuration, longestDuration);
+                powerupDuration = [self animatePowerupForCookie:cookie];
             }
             
             if (i < chain.numberOfCookiesForOrder && cookie.sprite != nil) {
@@ -667,7 +668,7 @@ static const CGFloat TileHeight = 36.0;
             
             
             else if (cookie.sprite != nil) {
-                CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:0.3 scale:0.1];
+                CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:duration scale:0.1];
                 [cookie.sprite runAction:[CCActionSequence actions:scaleAction, [CCActionRemove action], nil]];
                 
                 cookie.sprite = nil;
@@ -679,7 +680,7 @@ static const CGFloat TileHeight = 36.0;
         }
     }
     
-    [self runAction:[CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil]];
+    [self runAction:[CCActionSequence actions:[CCActionDelay actionWithDuration:duration], [self updateScoreAndMoves], [CCActionDelay actionWithDuration:powerupDuration], [CCActionCallBlock actionWithBlock:completion], nil]];
 }
 
 
