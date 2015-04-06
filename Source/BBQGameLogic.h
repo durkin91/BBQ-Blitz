@@ -49,5 +49,6 @@
 - (NSString *)directionOfPreviousCookieInChain:(BBQCookie *)cookie;
 - (BOOL)doesCookieNeedRemoving:(BBQCookie *)cookie;
 - (void)addPowerupScoreToCurrentScore:(BBQPowerup *)powerup;
+- (void)activatePowerupForCookie:(BBQCookie *)cookie;
 
 @end

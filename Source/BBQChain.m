@@ -44,6 +44,7 @@
             }
         }
         cookieOrder.quantityLeft = cookieOrder.quantityLeft - x;
+        cookieOrder.quantityLeft = MAX(0, cookieOrder.quantityLeft);
     }
     
     //    //find the right order
