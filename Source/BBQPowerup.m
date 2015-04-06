@@ -20,6 +20,7 @@
         self.type = type;
         self.isCurrentlyTemporary = YES;
         self.hasBeenActivated = NO;
+        self.isReadyToDetonate = NO;
         self.scorePerCookie = 10;
         
         if ([direction isEqualToString:RIGHT] || [direction isEqualToString:LEFT]) {
@@ -127,6 +128,10 @@
     if (cookie != nil) {
         [_level replaceCookieAtColumn:column row:row withCookie:nil];
         [array addObject:cookie];
+        
+        if (cookie.powerup) {
+            cookie.powerup.isReadyToDetonate = YES;
+        }
     }
 }
 

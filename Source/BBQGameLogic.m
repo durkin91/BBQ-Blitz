@@ -79,7 +79,7 @@
     for (BBQCookie *cookie in self.chain.cookiesInChain) {
 
         if (cookie.powerup && cookie.powerup.isCurrentlyTemporary == NO) {
-            [self activatePowerupForCookie:cookie];
+            cookie.powerup.isReadyToDetonate = YES;
         }
         else if (cookie.powerup && cookie.powerup.isCurrentlyTemporary == YES) {
             cookie.powerup.isCurrentlyTemporary = NO;
@@ -97,7 +97,7 @@
     [cookie.powerup performPowerupWithLevel:self.level cookie:cookie];
     [cookie.powerup removeDuplicateCookiesFromChainsCookies:self.chain.cookiesInChain];
     [cookie.powerup scorePowerup];
-    //[cookie.powerup addCookieOrders:self.level.cookieOrders];
+    [cookie.powerup addCookieOrders:self.level.cookieOrders];
 }
 
 - (void)addPowerupScoreToCurrentScore:(BBQPowerup *)powerup {
@@ -105,7 +105,7 @@
 }
 
 - (BOOL)doesCookieNeedRemoving:(BBQCookie *)cookie {
-    if (!cookie.powerup || cookie.powerup.hasBeenActivated == YES) {
+    if (!cookie.powerup || cookie.powerup.isReadyToDetonate) {
         return YES;
     }
     else return NO;

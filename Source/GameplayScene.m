@@ -621,7 +621,7 @@ static const CGFloat TileHeight = 36.0;
 
 - (NSTimeInterval)animatePowerupForCookie:(BBQCookie *)cookie {
     
-    [cookie.powerup addCookieOrders:self.gameLogic.level.cookieOrders];
+    [self.gameLogic activatePowerupForCookie:cookie];
     
     __block NSTimeInterval longestDuration = 0;
     
@@ -681,7 +681,7 @@ static const CGFloat TileHeight = 36.0;
 }
 
 - (void)animateCookieRemoval:(BBQCookie *)cookie powerupDuration:(NSTimeInterval)powerupDuration scaleActionDuration:(NSTimeInterval)duration {
-    if (cookie.powerup.hasBeenActivated) {
+    if (cookie.powerup.isReadyToDetonate) {
         powerupDuration = [self animatePowerupForCookie:cookie];
     }
     
