@@ -94,8 +94,15 @@
 }
 
 - (void)activatePowerupForCookie:(BBQCookie *)cookie {
+    
+    NSInteger cookieTypeToCollect = 0;
+    if ([cookie.powerup isAMultiCookie]) {
+        BBQCookie *cookieType = [self.chain.cookiesInChain lastObject];
+        cookieTypeToCollect = cookieType.cookieType;
+    }
+    
     [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
-    [cookie.powerup performPowerupWithLevel:self.level cookie:cookie];
+    [cookie.powerup performPowerupWithLevel:self.level cookie:cookie cookieTypeToCollect:cookieTypeToCollect];
     [cookie.powerup removeDuplicateCookiesFromChainsCookies:self.chain.cookiesInChain];
     [cookie.powerup scorePowerup];
     [cookie.powerup addCookieOrders:self.level.cookieOrders];
@@ -163,18 +170,22 @@
 - (void)checkForPowerups:(BBQCookie *)cookie {
     
     NSString *direction = [self directionOfPreviousCookieInChain:cookie];
-    
+
     //The 6th cookie in a chain will blast out a row or column
     if ([self.chain.cookiesInChain indexOfObject:cookie] == 5 && !cookie.powerup) {
-        BBQPowerup *powerup = [[BBQPowerup alloc] initWithType:6 direction:direction];
-        cookie.powerup = powerup;
+        cookie.powerup = [[BBQPowerup alloc] initWithType:6 direction:direction];
     }
     
     //The 9th cookie will turn into a pivot pad
     if ([self.chain.cookiesInChain indexOfObject:cookie] == 8 && !cookie.powerup) {
-        BBQPowerup *powerup = [[BBQPowerup alloc] initWithType:9 direction:direction];
-        cookie.powerup = powerup;
+        cookie.powerup = [[BBQPowerup alloc] initWithType:9 direction:direction];
     }
+    
+    //The 12th cookie will turn into a multi cookie, which will collect all like cookies on the board
+    if ([self.chain.cookiesInChain indexOfObject:cookie] == 11 && !cookie.powerup) {
+        cookie.powerup = [[BBQPowerup alloc] initWithType:12 direction:direction];
+    }
+
 }
 
 

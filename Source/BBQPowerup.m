@@ -34,7 +34,7 @@
     return self;
 }
 
-- (void)performPowerupWithLevel:(BBQLevel *)level cookie:(BBQCookie *)rootCookie {
+- (void)performPowerupWithLevel:(BBQLevel *)level cookie:(BBQCookie *)rootCookie cookieTypeToCollect:(NSInteger)cookieTypeToCollect {
     
     _level = level;
     self.arraysOfDisappearingCookies = [NSMutableArray array];
@@ -50,6 +50,10 @@
             break;
             
         case 9:
+            break;
+            
+        case 12:
+            [self removeAllCookiesOfCookieType:cookieTypeToCollect rootCookie:rootCookie];
             break;
             
 //        case 4:
@@ -89,6 +93,23 @@
     
 }
 
+- (BOOL)canOnlyJoinWithCookieNextToIt {
+    if (self.type == 9 || self.type == 12 || self.type == 15) {
+        return YES;
+    }
+    else return NO;
+}
+
+- (BOOL)isAPivotPad {
+    if (self.type == 9) return YES;
+    else return NO;
+}
+
+- (BOOL)isAMultiCookie {
+    if (self.type == 12) return YES;
+    else return NO;
+}
+
 - (void)scorePowerup {
     for (NSArray *array in self.arraysOfDisappearingCookies) {
         self.totalScore = self.totalScore + ([array count] * self.scorePerCookie);
@@ -120,6 +141,7 @@
             }
         }
         cookieOrder.quantityLeft = cookieOrder.quantityLeft - x;
+        cookieOrder.quantityLeft = MAX(0, cookieOrder.quantityLeft);
     }
 }
 
@@ -187,6 +209,20 @@
     [self.arraysOfDisappearingCookies addObject:left];
     for (NSInteger i = rootCookie.column - 1; i >= 0; i--) {
         [self destroyCookieAtColumn:i row:rootCookie.row array:left];
+    }
+}
+
+//Each cookie is in a seperate array, as they all are destroyed at the same time
+- (void)removeAllCookiesOfCookieType:(NSInteger)cookieType rootCookie:(BBQCookie *)rootCookie {
+    for (NSInteger column = 0; column < NumColumns; column ++) {
+        for (NSInteger row = 0; row < NumRows; row++) {
+            BBQCookie *cookie = [_level cookieAtColumn:column row:row];
+            if (cookie.cookieType == cookieType) {
+                NSMutableArray *array = [NSMutableArray array];
+                [self.arraysOfDisappearingCookies addObject:array];
+                [self destroyCookieAtColumn:column row:row array:array];
+            }
+        }
     }
 }
 

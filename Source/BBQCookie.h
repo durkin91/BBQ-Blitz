@@ -15,7 +15,7 @@
 @class BBQCombo;
 
 static const NSUInteger NumCookieTypes = 6;
-static const NSUInteger NumStartingCookies = 6;
+static const NSUInteger NumStartingCookies = 3;
 
 @interface BBQCookie : NSObject
 

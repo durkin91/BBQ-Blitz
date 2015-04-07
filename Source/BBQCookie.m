@@ -58,6 +58,10 @@
     }
     
     else if (self.powerup && self.powerup.type == 9) {
+        spriteName = @"PivotPad";
+    }
+    
+    else if (self.powerup && self.powerup.type == 12) {
         spriteName = @"MultiCookie";
     }
     
@@ -112,10 +116,12 @@
 }
 
 - (BOOL)canBeChainedToCookie:(BBQCookie *)potentialCookie {
-    if (self.powerup.type == 9 && self.powerup.isCurrentlyTemporary == NO) {
+    if ([self.powerup canOnlyJoinWithCookieNextToIt] &&
+        self.powerup.isCurrentlyTemporary == NO &&
+        (potentialCookie.column == self.column + 1 || potentialCookie.column == self.column - 1 || potentialCookie.row == self.row + 1 || potentialCookie.row == self.row - 1)) {
         return YES;
     }
-    else if (potentialCookie.powerup.type == 9 && potentialCookie.powerup.isCurrentlyTemporary == NO) {
+    else if ([potentialCookie.powerup isAPivotPad] && potentialCookie.powerup.isCurrentlyTemporary == NO) {
         return YES;
     }
     else if (self.cookieType == potentialCookie.cookieType) {

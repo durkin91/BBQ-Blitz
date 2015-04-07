@@ -131,6 +131,11 @@
 - (NSArray *)allValidCookiesThatCanBeChainedToCookie:(BBQCookie *)cookie direction:(NSString *)direction existingChain:(BBQChain *)existingChain {
     NSMutableArray *array = [NSMutableArray array];
     
+    //If it can only be joined with one cookie (e.g. a multicookie) then return an empty array
+    if ([existingChain isATwoCookieChain]) {
+        return array;
+    }
+    
     if ([direction isEqualToString:UP]) {
         //look above cookie
         for (NSInteger i = cookie.row + 1; i < NumRows; i++) {

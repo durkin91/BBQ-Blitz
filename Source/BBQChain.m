@@ -31,7 +31,16 @@
 }
 
 - (BOOL)isACompleteChain {
-    if ([self.cookiesInChain count] >= 3) {
+    if ([self.cookiesInChain count] >= 3 || [self isATwoCookieChain]) {
+        return YES;
+    }
+    else return NO;
+}
+
+- (BOOL)isATwoCookieChain {
+    BBQCookie *firstCookie = [self.cookiesInChain firstObject];
+    if ([self.cookiesInChain count] == 2 &&
+        (firstCookie.powerup.type == 12 || firstCookie.powerup.type == 15)) {
         return YES;
     }
     else return NO;
