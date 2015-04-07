@@ -56,6 +56,10 @@
             [self removeAllCookiesOfCookieType:cookieTypeToCollect rootCookie:rootCookie];
             break;
             
+        case 15:
+            [self destroyAllCookies:rootCookie];
+            break;
+            
 //        case 4:
 //            [self destroyOneCookieHorizontally:rootCookie];
 //            [self destroyOneCookieVertically:rootCookie];
@@ -218,6 +222,19 @@
         for (NSInteger row = 0; row < NumRows; row++) {
             BBQCookie *cookie = [_level cookieAtColumn:column row:row];
             if (cookie.cookieType == cookieType) {
+                NSMutableArray *array = [NSMutableArray array];
+                [self.arraysOfDisappearingCookies addObject:array];
+                [self destroyCookieAtColumn:column row:row array:array];
+            }
+        }
+    }
+}
+
+- (void)destroyAllCookies:(BBQCookie *)rootCookie {
+    for (NSInteger column = 0; column < NumColumns; column ++) {
+        for (NSInteger row = 0; row < NumRows; row++) {
+            BBQCookie *cookie = [_level cookieAtColumn:column row:row];
+            if (cookie) {
                 NSMutableArray *array = [NSMutableArray array];
                 [self.arraysOfDisappearingCookies addObject:array];
                 [self destroyCookieAtColumn:column row:row array:array];

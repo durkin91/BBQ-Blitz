@@ -65,6 +65,10 @@
         spriteName = @"MultiCookie";
     }
     
+    else if (self.powerup && self.powerup.type == 15) {
+        spriteName = @"RobbersSack";
+    }
+    
     return spriteName;
 }
 

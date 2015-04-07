@@ -185,6 +185,11 @@
     if ([self.chain.cookiesInChain indexOfObject:cookie] == 11 && !cookie.powerup) {
         cookie.powerup = [[BBQPowerup alloc] initWithType:12 direction:direction];
     }
+    
+    //The 15th cookie will turn into a robbers sack that collects all jewels
+    if ([self.chain.cookiesInChain indexOfObject:cookie] == 14 && !cookie.powerup) {
+        cookie.powerup = [[BBQPowerup alloc] initWithType:15 direction:direction];
+    }
 
 }
 
