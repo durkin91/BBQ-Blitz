@@ -32,7 +32,6 @@
 - (void)startChainWithCookie:(BBQCookie *)cookie {
     self.chain = [[BBQChain alloc] init];
     [self.chain addCookie:cookie];
-    [self.chainIncludingLinkingCookies addObject:cookie];
 }
 
 - (NSArray *)tryAddingCookieToChain:(BBQCookie *)cookie inDirection:(NSString *)direction {
@@ -69,7 +68,9 @@
     }
     for (BBQCookie *cookieToRemove in cookiesToRemove) {
         [self.chain.cookiesInChain removeObject:cookieToRemove];
-        cookieToRemove.powerup = nil;
+        if (cookieToRemove.powerup.isCurrentlyTemporary == YES) {
+            cookieToRemove.powerup = nil;
+        }
     }
     return cookiesToRemove;
 }
@@ -161,10 +162,17 @@
 
 - (void)checkForPowerups:(BBQCookie *)cookie {
     
+    NSString *direction = [self directionOfPreviousCookieInChain:cookie];
+    
     //The 6th cookie in a chain will blast out a row or column
-    if ([self.chain.cookiesInChain indexOfObject:cookie] == 5) {
-        NSString *direction = [self directionOfPreviousCookieInChain:cookie];
+    if ([self.chain.cookiesInChain indexOfObject:cookie] == 5 && !cookie.powerup) {
         BBQPowerup *powerup = [[BBQPowerup alloc] initWithType:6 direction:direction];
+        cookie.powerup = powerup;
+    }
+    
+    //The 9th cookie will turn into a pivot pad
+    if ([self.chain.cookiesInChain indexOfObject:cookie] == 8 && !cookie.powerup) {
+        BBQPowerup *powerup = [[BBQPowerup alloc] initWithType:9 direction:direction];
         cookie.powerup = powerup;
     }
 }
@@ -257,7 +265,6 @@
 
 - (void)resetEverythingForNextTurn {
     self.chain = nil;
-    self.chainIncludingLinkingCookies = nil;
 }
 
 #pragma mark - General Helper methods

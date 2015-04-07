@@ -16,7 +16,6 @@
 
 static const NSUInteger NumCookieTypes = 6;
 static const NSUInteger NumStartingCookies = 6;
-static const NSUInteger NumCookiesToUpgrade = 40;
 
 @interface BBQCookie : NSObject
 
@@ -35,5 +34,6 @@ static const NSUInteger NumCookiesToUpgrade = 40;
 - (NSString *)spriteName;
 - (NSString *)highlightedSpriteName;
 - (CCColor *)lineColor;
+- (BOOL)canBeChainedToCookie:(BBQCookie *)potentialCookie;
 
 @end

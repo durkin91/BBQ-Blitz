@@ -57,6 +57,10 @@
         spriteName = [NSString stringWithFormat:@"%@%@", [self spriteNameBase], self.powerup.direction];
     }
     
+    else if (self.powerup && self.powerup.type == 9) {
+        spriteName = @"MultiCookie";
+    }
+    
     return spriteName;
 }
 
@@ -68,6 +72,12 @@
 
 - (CCColor *)lineColor {
     CCColor *color;
+    
+    //Take care of pivot pad color
+    if (self.powerup.type == 9) {
+        color = [CCColor blackColor];
+        return color;
+    }
     
     switch (_cookieType) {
         case 1:
@@ -99,6 +109,21 @@
     }
     
     return color;
+}
+
+- (BOOL)canBeChainedToCookie:(BBQCookie *)potentialCookie {
+    if (self.powerup.type == 9 && self.powerup.isCurrentlyTemporary == NO) {
+        return YES;
+    }
+    else if (potentialCookie.powerup.type == 9 && potentialCookie.powerup.isCurrentlyTemporary == NO) {
+        return YES;
+    }
+    else if (self.cookieType == potentialCookie.cookieType) {
+        return YES;
+    }
+    else {
+        return NO;
+    }
 }
 
 

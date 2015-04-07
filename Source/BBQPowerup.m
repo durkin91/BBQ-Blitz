@@ -19,7 +19,6 @@
     if (self) {
         self.type = type;
         self.isCurrentlyTemporary = YES;
-        self.hasBeenActivated = NO;
         self.isReadyToDetonate = NO;
         self.scorePerCookie = 10;
         
@@ -29,6 +28,7 @@
         else if ([direction isEqualToString:UP] || [direction isEqualToString:DOWN]) {
             self.direction = VERTICAL;
         }
+        
     }
     
     return self;
@@ -47,6 +47,9 @@
             else if ([self.direction isEqualToString:VERTICAL]) {
                 [self destroyEntireColumnOfCookies:rootCookie];
             }
+            break;
+            
+        case 9:
             break;
             
 //        case 4:
@@ -83,8 +86,6 @@
         default:
             break;
     }
-    
-    self.hasBeenActivated = YES;
     
 }
 

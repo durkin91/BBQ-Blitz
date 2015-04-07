@@ -29,7 +29,6 @@
 @property (nonatomic) NSInteger currentScore;
 @property (nonatomic) NSInteger movesLeft;
 @property (strong, nonatomic) BBQChain *chain;
-@property (strong, nonatomic) NSMutableArray *chainIncludingLinkingCookies;
 
 
 - (NSSet *)setupGameLogicWithLevel:(NSInteger)level;

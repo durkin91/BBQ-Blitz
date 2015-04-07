@@ -16,8 +16,13 @@
 - (void)addCookie:(BBQCookie *)cookie {
     if (_cookiesInChain == nil) {
         _cookiesInChain = [NSMutableArray array];
+    }
+    
+    //Only set the chain type if its not a pivot pad
+    if (cookie.powerup.type != 9 && !_cookieType) {
         _cookieType = cookie.cookieType;
     }
+    
     [_cookiesInChain addObject:cookie];
 }
 

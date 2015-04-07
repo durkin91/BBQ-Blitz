@@ -23,7 +23,6 @@
 @property (strong, nonatomic) NSMutableArray *arraysOfDisappearingCookies;
 @property (strong, nonatomic) NSString *direction;
 @property (assign, nonatomic) BOOL isCurrentlyTemporary;
-@property (assign, nonatomic) BOOL hasBeenActivated;
 @property (assign, nonatomic) BOOL isReadyToDetonate;
 
 
