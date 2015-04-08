@@ -41,6 +41,7 @@ static const NSInteger NumRows = 9;
 
 - (NSArray *)allValidCookiesThatCanBeChainedToCookie:(BBQCookie *)cookie direction:(NSString *)direction existingChain:(BBQChain *)existingChain;
 - (NSDictionary *)rootCookieLimits:(BBQCookie *)cookie;
+- (BOOL)cookieFormsACrissCross:(BBQCookie *)cookie chain:(BBQChain *)chain;
 
 
 @end

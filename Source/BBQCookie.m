@@ -69,6 +69,10 @@
         spriteName = @"RobbersSack";
     }
     
+    else if (self.powerup && self.powerup.type == 20) {
+        spriteName = [NSString stringWithFormat:@"%@CrissCross", [self spriteNameBase]];
+    }
+    
     return spriteName;
 }
 

@@ -243,6 +243,81 @@
     return limits;
 }
 
+- (BOOL)cookieFormsACrissCross:(BBQCookie *)cookie chain:(BBQChain *)chain {
+    //Find the previous cookie in the chain
+    NSInteger indexOfCookie = [chain.cookiesInChain indexOfObject:cookie];
+    BBQCookie *previousCookie;
+    if (indexOfCookie > 0) {
+        previousCookie = chain.cookiesInChain[indexOfCookie - 1];
+    }
+    
+    //If the cookies are vertical, check on the left for a cookie
+    if (cookie.column == previousCookie.column) {
+        
+        //Find out the top and bottom cookie
+        BBQCookie *bottomCookie;
+        BBQCookie *topCookie;
+        if (cookie.row > previousCookie.row) {
+            bottomCookie = previousCookie;
+            topCookie = cookie;
+        }
+        else {
+            bottomCookie = cookie;
+            topCookie = previousCookie;
+        }
+        
+        for (NSInteger column = bottomCookie.column - 1; column >= 0; column --) {
+            for (NSInteger row = bottomCookie.row + 1; row < topCookie.row; row ++) {
+                BBQCookie *testCookie = _cookies[column][row];
+                if ([chain.cookiesInChain containsObject:testCookie]) {
+                    
+                    //Check along that row for a matching cookie in the chain
+                    for (NSInteger i = bottomCookie.column + 1; i < NumColumns; i++) {
+                        BBQCookie *testCookieTwo = _cookies[i][row];
+                        if ([chain.cookiesInChain containsObject:testCookieTwo]) {
+                            return YES;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    //If the cookies are vertical, check on the left for a cookie
+    else if (cookie.row == previousCookie.row) {
+        
+        //Find out the left and right cookie (named bottom and top)
+        BBQCookie *bottomCookie;
+        BBQCookie *topCookie;
+        if (cookie.column > previousCookie.column) {
+            bottomCookie = previousCookie;
+            topCookie = cookie;
+        }
+        else {
+            bottomCookie = cookie;
+            topCookie = previousCookie;
+        }
+        
+        for (NSInteger row = bottomCookie.row - 1; row >= 0; row --) {
+            for (NSInteger column = bottomCookie.column + 1; column < topCookie.column; column ++) {
+                BBQCookie *testCookie = _cookies[column][row];
+                if ([chain.cookiesInChain containsObject:testCookie]) {
+                    
+                    //Check along that row for a matching cookie in the chain
+                    for (NSInteger i = bottomCookie.row + 1; i < NumRows; i++) {
+                        BBQCookie *testCookieTwo = _cookies[column][i];
+                        if ([chain.cookiesInChain containsObject:testCookieTwo]) {
+                            return YES;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    return NO;
+}
+
 - (NSSet *)createCookiesInBlankTiles {
     NSMutableSet *set = [NSMutableSet set];
     

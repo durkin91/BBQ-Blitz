@@ -177,18 +177,22 @@
     }
     
     //The 9th cookie will turn into a pivot pad
-    if ([self.chain.cookiesInChain indexOfObject:cookie] == 8 && !cookie.powerup) {
+    else if ([self.chain.cookiesInChain indexOfObject:cookie] == 8 && !cookie.powerup) {
         cookie.powerup = [[BBQPowerup alloc] initWithType:9 direction:direction];
     }
     
     //The 12th cookie will turn into a multi cookie, which will collect all like cookies on the board
-    if ([self.chain.cookiesInChain indexOfObject:cookie] == 11 && !cookie.powerup) {
+    else if ([self.chain.cookiesInChain indexOfObject:cookie] == 11 && !cookie.powerup) {
         cookie.powerup = [[BBQPowerup alloc] initWithType:12 direction:direction];
     }
     
     //The 15th cookie will turn into a robbers sack that collects all jewels
-    if ([self.chain.cookiesInChain indexOfObject:cookie] == 14 && !cookie.powerup) {
+    else if ([self.chain.cookiesInChain indexOfObject:cookie] == 14 && !cookie.powerup) {
         cookie.powerup = [[BBQPowerup alloc] initWithType:15 direction:direction];
+    }
+    
+    else if ([self.chain.cookiesInChain indexOfObject:cookie] > 3 && [self.level cookieFormsACrissCross:cookie chain:self.chain]) {
+        cookie.powerup = [[BBQPowerup alloc] initWithType:20 direction:direction];
     }
 
 }
