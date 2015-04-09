@@ -132,7 +132,7 @@
     NSMutableArray *array = [NSMutableArray array];
     
     //If it can only be joined with one cookie (e.g. a multicookie) then return an empty array
-    if ([existingChain isATwoCookieChain]) {
+    if ([existingChain isATwoCookieChain] || existingChain.isClosedChain) {
         return array;
     }
     
@@ -179,6 +179,10 @@
     if (!potentialCookie) {
         return;
     }
+    else if ([potentialCookie isEqual:[existingChain.cookiesInChain firstObject]] && [existingChain.cookiesInChain count] >= 4 && [rootCookie canBeChainedToCookie:potentialCookie]) {
+        [array addObject:potentialCookie];
+    }
+    
     else if (potentialCookie && [existingChain.cookiesInChain containsObject:potentialCookie]) {
         return;
     }

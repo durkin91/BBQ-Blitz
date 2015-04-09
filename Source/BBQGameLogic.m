@@ -44,7 +44,12 @@
         array = [NSMutableArray array];
         for (NSInteger i = 0; i <= [potentialCookies indexOfObject:cookie]; i++) {
             BBQCookie *cookieToActivate = potentialCookies[i];
-            [self.chain addCookie:cookieToActivate];
+            if ([[self.chain.cookiesInChain firstObject] isEqual:cookieToActivate] == NO) {
+                [self.chain addCookie:cookieToActivate];
+            }
+            else {
+                self.chain.isClosedChain = YES;
+            }
             [array addObject:cookieToActivate];
             [self checkForPowerups:cookieToActivate];
         }
@@ -54,13 +59,24 @@
 }
 
 - (BOOL)isCookieABackTrack:(BBQCookie *)cookie {
+    BBQCookie *lastCookieInChain = [self.chain.cookiesInChain lastObject];
+    
+    //Check if the player is trying to make a box powerup
+    if ([self.chain.cookiesInChain count] >= 4 &&
+        (cookie.column == lastCookieInChain.column || cookie.row == lastCookieInChain.row) &&
+        [[self.chain.cookiesInChain firstObject] isEqual:cookie]) {
+        return NO;
+    }
+    
     if ([self.chain containsCookie:cookie]) {
         return YES;
     }
+    
     else return NO;
 }
 
 - (NSArray *)backtrackedCookiesForCookie:(BBQCookie *)cookie {
+    self.chain.isClosedChain = NO;
     NSMutableArray *cookiesToRemove = [NSMutableArray array];
     for (NSInteger i = [self.chain.cookiesInChain indexOfObject:cookie] + 1; i < [self.chain.cookiesInChain count]; i++) {
         BBQCookie *cookieToRemove = self.chain.cookiesInChain[i];
@@ -170,9 +186,21 @@
     if ([self.chain.cookiesInChain count] >= 2 && ([firstCookie.powerup isAMultiCookie] || [firstCookie.powerup isARobbersSack])) {
         return  YES;
     }
+    
+    else if (self.chain.isClosedChain) {
+        return YES;
+    }
+    
     else {
         return NO;
     }
+}
+
+- (BOOL)isFirstCookieInChain:(BBQCookie *)cookie {
+    if ([[self.chain.cookiesInChain firstObject] isEqual:cookie]) {
+        return YES;
+    }
+    else return NO;
 }
 
 #pragma mark - Powerup Methods

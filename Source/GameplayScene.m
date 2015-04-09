@@ -437,7 +437,14 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)drawSegmentToCookie:(BBQCookie *)cookie {
     CGPoint cookiePosition = [GameplayScene pointForColumn:cookie.column row:cookie.row];
-    BBQCookie *previousCookie = [self.gameLogic previousCookieToCookieInChain:cookie];
+    
+    BBQCookie *previousCookie;
+    if ([self.gameLogic isFirstCookieInChain:cookie] == YES) {
+        previousCookie = [self.gameLogic.chain.cookiesInChain lastObject];
+    }
+    else {
+        previousCookie = [self.gameLogic previousCookieToCookieInChain:cookie];
+    }
     CGPoint previousCookiePosition = [GameplayScene pointForColumn:previousCookie.column row:previousCookie.row];
     [_drawNode drawSegmentFrom:previousCookiePosition to:cookiePosition radius:2.0 color:[cookie lineColor]];
 }
@@ -448,6 +455,9 @@ static const CGFloat TileHeight = 36.0;
     for (NSInteger i = 1; i < [cookiesInChain count]; i++) {
         BBQCookie *cookie = cookiesInChain[i];
         [self drawSegmentToCookie:cookie];
+    }
+    if (self.gameLogic.chain.isClosedChain) {
+        
     }
 }
 

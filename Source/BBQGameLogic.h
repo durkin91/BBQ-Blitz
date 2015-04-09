@@ -50,5 +50,6 @@
 - (void)addPowerupScoreToCurrentScore:(BBQPowerup *)powerup;
 - (void)activatePowerupForCookie:(BBQCookie *)cookie;
 - (BOOL)doesNotRequireInProgressLine;
+- (BOOL)isFirstCookieInChain:(BBQCookie *)cookie;
 
 @end
