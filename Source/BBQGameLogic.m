@@ -151,6 +151,10 @@
     if (i > 0) {
         previousCookie = self.chain.cookiesInChain[i - 1];
     }
+    
+    else if (self.chain.isClosedChain && i == 0) {
+        previousCookie = [self.chain.cookiesInChain lastObject];
+    }
     return previousCookie;
 }
 
@@ -229,8 +233,14 @@
         cookie.powerup = [[BBQPowerup alloc] initWithType:15 direction:direction];
     }
     
+    //Create a criss cross powerup
     else if ([self.chain.cookiesInChain indexOfObject:cookie] > 3 && [self.level cookieFormsACrissCross:cookie chain:self.chain]) {
         cookie.powerup = [[BBQPowerup alloc] initWithType:20 direction:direction];
+    }
+    
+    //Create a box powerup
+    else if (self.chain.isClosedChain && [self isFirstCookieInChain:cookie]) {
+        cookie.powerup = [[BBQPowerup alloc] initWithType:30 direction:direction];
     }
 
 }

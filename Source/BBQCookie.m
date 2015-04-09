@@ -73,6 +73,10 @@
         spriteName = [NSString stringWithFormat:@"%@CrissCross", [self spriteNameBase]];
     }
     
+    else if (self.powerup && self.powerup.type == 30) {
+        spriteName = [NSString stringWithFormat:@"%@Box", [self spriteNameBase]];
+    }
+    
     return spriteName;
 }
 
