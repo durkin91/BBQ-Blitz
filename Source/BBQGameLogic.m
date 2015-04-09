@@ -165,6 +165,16 @@
     return direction;
 }
 
+- (BOOL)doesNotRequireInProgressLine {
+    BBQCookie *firstCookie = [self.chain.cookiesInChain firstObject];
+    if ([self.chain.cookiesInChain count] >= 2 && ([firstCookie.powerup isAMultiCookie] || [firstCookie.powerup isARobbersSack])) {
+        return  YES;
+    }
+    else {
+        return NO;
+    }
+}
+
 #pragma mark - Powerup Methods
 
 - (void)checkForPowerups:(BBQCookie *)cookie {

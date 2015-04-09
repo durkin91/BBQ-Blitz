@@ -85,12 +85,6 @@
 - (CCColor *)lineColor {
     CCColor *color;
     
-    //Take care of pivot pad color
-    if (self.powerup.type == 9) {
-        color = [CCColor blackColor];
-        return color;
-    }
-    
     switch (_cookieType) {
         case 1:
             color = [CCColor colorWithRed:255.0/255.0 green:166.0/255.0 blue:0];

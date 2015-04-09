@@ -34,6 +34,7 @@
 - (BOOL)canOnlyJoinWithCookieNextToIt;
 - (BOOL)isAPivotPad;
 - (BOOL)isAMultiCookie;
+- (BOOL)isARobbersSack;
 
 
 @end

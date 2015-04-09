@@ -454,6 +454,8 @@ static const CGFloat TileHeight = 36.0;
 - (void)drawInProgressLineForColumn:(NSInteger)column row:(NSInteger)row touchLocation:(CGPoint)location {
     [_inProgressDrawNode clear];
     
+    if ([self.gameLogic doesNotRequireInProgressLine]) return;
+    
     //Take care of drawing the in progress line
     CGPoint rootPoint = [GameplayScene pointForColumn:self.rootCookie.column row:self.rootCookie.row];
     float distanceAboveOrBelow = location.y - rootPoint.y;

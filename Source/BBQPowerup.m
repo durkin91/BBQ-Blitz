@@ -88,6 +88,11 @@
     else return NO;
 }
 
+- (BOOL)isARobbersSack {
+    if (self.type == 15) return YES;
+    else return NO;
+}
+
 - (void)scorePowerup {
     for (NSArray *array in self.arraysOfDisappearingCookies) {
         self.totalScore = self.totalScore + ([array count] * self.scorePerCookie);
