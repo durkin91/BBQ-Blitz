@@ -60,7 +60,64 @@
              ([secondCookie.powerup isATypeSixPowerup] || [secondCookie.powerup isABox] || [secondCookie.powerup isACrissCross])) {
         return YES;
     }
+    
+    else if ([self.cookiesInChain count] == 2 &&
+             ([firstCookie.powerup isATwoSixesCombo] ||
+              [firstCookie.powerup isATwoCrissCrossCombo] ||
+              [firstCookie.powerup isATwoBoxCombo] ||
+              [firstCookie.powerup isaTypeSixWithBoxCombo] ||
+              [firstCookie.powerup isATypeSixWithCrissCrossCombo] ||
+              [firstCookie.powerup isABoxAndCrissCrossCombo] ||
+             [secondCookie.powerup isATwoSixesCombo] ||
+             [secondCookie.powerup isATwoCrissCrossCombo] ||
+             [secondCookie.powerup isATwoBoxCombo] ||
+             [secondCookie.powerup isaTypeSixWithBoxCombo] ||
+             [secondCookie.powerup isATypeSixWithCrissCrossCombo] ||
+             [secondCookie.powerup isABoxAndCrissCrossCombo])) {
+                 
+                 return YES;
+    }
     else return NO;
+}
+
+- (void)upgradePowerupsIfNecessary {
+    if ([self.cookiesInChain count] == 2) {
+        BBQCookie *firstCookie = [self.cookiesInChain firstObject];
+        BBQCookie *secondCookie = [self.cookiesInChain lastObject];
+        
+        if (firstCookie.powerup.isCurrentlyTemporary == NO && secondCookie.powerup.isCurrentlyTemporary == NO) {
+            
+            if ([firstCookie.powerup isATypeSixPowerup] && [secondCookie.powerup isATypeSixPowerup]) {
+                secondCookie.powerup.type = 100;
+                firstCookie.powerup = nil;
+            }
+            
+            else if ([firstCookie.powerup isABox] && [secondCookie.powerup isABox]) {
+                secondCookie.powerup.type = 150;
+                firstCookie.powerup = nil;
+            }
+            
+            else if ([firstCookie.powerup isACrissCross] && [secondCookie.powerup isACrissCross]) {
+                secondCookie.powerup.type = 150;
+                firstCookie.powerup = nil;
+            }
+            
+            else if (([firstCookie.powerup isATypeSixPowerup] && [secondCookie.powerup isACrissCross]) || ([firstCookie.powerup isACrissCross] && [secondCookie.powerup isATypeSixPowerup])) {
+                secondCookie.powerup.type = 250;
+                firstCookie.powerup = nil;
+            }
+            
+            else if (([firstCookie.powerup isATypeSixPowerup] && [secondCookie.powerup isABox]) || ([firstCookie.powerup isABox] && [secondCookie.powerup isATypeSixPowerup])) {
+                secondCookie.powerup.type = 300;
+                firstCookie.powerup = nil;
+            }
+            
+            else if (([firstCookie.powerup isABox] && [secondCookie.powerup isACrissCross]) || ([firstCookie.powerup isACrissCross] && [secondCookie.powerup isABox])) {
+                secondCookie.powerup.type = 350;
+                firstCookie.powerup = nil;
+            }
+        }
+    }
 }
 
 - (void)addCookieOrders:(NSArray *)cookieOrders {

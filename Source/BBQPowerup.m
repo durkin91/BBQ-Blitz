@@ -70,6 +70,36 @@
             [self removeAllCookiesInLayersAroundBlast:rootCookie numberOfLayers:1];
             break;
             
+        //Combine 2 type six powerups
+        case 100:
+            [self destroyTwoTypeSixCombo:rootCookie];
+            break;
+        
+        //Combine 2 box powerups
+        case 150:
+            [self destroyTwoBoxCombo:rootCookie];
+            break;
+        
+        //Combine 2 criss cross powerups
+        case 200:
+            [self destroyTypeSixAndCrissCrossCombo:rootCookie];
+            break;
+            
+        //Combine type 6 with criss cross
+        case 250:
+            [self destroyTypeSixAndCrissCrossCombo:rootCookie];
+            break;
+            
+        //Combine type 6 and box
+        case 300:
+            [self destroyType6WithBoxCombo:rootCookie];
+            break;
+            
+        //combine box and criss cross
+        case 350:
+            [self destroyCrissCrossWithBoxCombo:rootCookie];
+            break;
+            
         default:
             break;
     }
@@ -114,6 +144,36 @@
 
 - (BOOL)isABox {
     if (self.type == 30) return YES;
+    else return NO;
+}
+
+- (BOOL)isATwoSixesCombo {
+    if (self.type == 100) return YES;
+    else return NO;
+}
+
+- (BOOL)isATwoBoxCombo {
+    if (self.type == 150) return YES;
+    else return NO;
+}
+
+- (BOOL)isATwoCrissCrossCombo {
+    if (self.type == 200) return YES;
+    else return NO;
+}
+
+- (BOOL)isATypeSixWithCrissCrossCombo {
+    if (self.type == 250) return YES;
+    else return NO;
+}
+
+- (BOOL)isaTypeSixWithBoxCombo {
+    if (self.type == 300) return YES;
+    else return NO;
+}
+
+- (BOOL)isABoxAndCrissCrossCombo {
+    if (self.type == 350) return YES;
     else return NO;
 }
 
@@ -356,6 +416,39 @@
             isFinished = YES;
         }
     }
+}
+
+#pragma mark - combined powerups
+
+//When a type 6 is combined with a type 6
+- (void)destroyTwoTypeSixCombo:(BBQCookie *)rootCookie {
+    [self destroyEntireRowOfCookies:rootCookie];
+    [self destroyEntireColumnOfCookies:rootCookie];
+}
+
+//When 2 boxes are combined
+- (void)destroyTwoBoxCombo:(BBQCookie *)rootCookie {
+    [self removeAllCookiesInLayersAroundBlast:rootCookie numberOfLayers:3];
+}
+
+//when a type six is combined with a box
+- (void)destroyType6WithBoxCombo:(BBQCookie *)rootCookie {
+    [self destroyEntireColumnOfCookies:rootCookie];
+    [self destroyEntireRowOfCookies:rootCookie];
+    [self removeAllCookiesInLayersAroundBlast:rootCookie numberOfLayers:2];
+}
+
+//When a type 6 and a criss cross are combined, or two criss crosses
+- (void)destroyTypeSixAndCrissCrossCombo:(BBQCookie *)rootCookie {
+    [self destroyCrissCrossCookies:rootCookie];
+    [self destroyEntireColumnOfCookies:rootCookie];
+    [self destroyEntireRowOfCookies:rootCookie];
+}
+
+//When a criss cross and a box are combined
+- (void)destroyCrissCrossWithBoxCombo:(BBQCookie *)rootCookie {
+    [self destroyCrissCrossCookies:rootCookie];
+    [self removeAllCookiesInLayersAroundBlast:rootCookie numberOfLayers:2];
 }
 
 //- (void)destroyRowAndColumnAndAroundRootCookie:(BBQCookie *)rootCookie {

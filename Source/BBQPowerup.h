@@ -39,6 +39,12 @@
 - (BOOL)isATypeSixPowerup;
 - (BOOL)isACrissCross;
 - (BOOL)isABox;
+- (BOOL)isATwoSixesCombo;
+- (BOOL)isATwoBoxCombo;
+- (BOOL)isATwoCrissCrossCombo;
+- (BOOL)isATypeSixWithCrissCrossCombo;
+- (BOOL)isaTypeSixWithBoxCombo;
+- (BOOL)isABoxAndCrissCrossCombo;
 
 
 @end

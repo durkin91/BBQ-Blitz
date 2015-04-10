@@ -33,4 +33,5 @@ typedef NS_ENUM(NSUInteger, ChainType) {
 - (BOOL)isACompleteChain;
 - (void)addCookieOrders:(NSArray *)cookieOrders;
 - (BOOL)isATwoCookieChain;
+- (void)upgradePowerupsIfNecessary;
 @end

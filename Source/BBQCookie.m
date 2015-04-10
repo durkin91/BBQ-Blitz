@@ -78,6 +78,10 @@
         spriteName = [NSString stringWithFormat:@"%@Box", [self spriteNameBase]];
     }
     
+    else {
+        spriteName = [self spriteNameBase];
+    }
+    
     return spriteName;
 }
 

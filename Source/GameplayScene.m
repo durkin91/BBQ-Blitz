@@ -431,6 +431,8 @@ static const CGFloat TileHeight = 36.0;
         [self activateCookies:cookiesToActivate];
         self.rootCookie = cookie;
     }
+    
+    [self.gameLogic.chain upgradePowerupsIfNecessary];
 }
 
 #pragma mark - Line Drawing methods
