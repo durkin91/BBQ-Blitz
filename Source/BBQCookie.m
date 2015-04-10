@@ -122,20 +122,36 @@
 }
 
 - (BOOL)canBeChainedToCookie:(BBQCookie *)potentialCookie {
-    if ([self.powerup canOnlyJoinWithCookieNextToIt] &&
+    BOOL answer;
+    
+    //Robbers sacks or multi cookies can't join to a pivot pad
+    if ((self.powerup.isAMultiCookie || self.powerup.isARobbersSack || self.powerup.isAPivotPad) && self.powerup.isCurrentlyTemporary == NO &&
+        (potentialCookie.powerup.isAPivotPad || potentialCookie.powerup.isAMultiCookie || potentialCookie.powerup.isARobbersSack)) {
+        answer = NO;
+    }
+    
+    //Multi cookies, robbers sacks and pivot pads can only join with the cookie next to it
+    else if ([self.powerup canOnlyJoinWithCookieNextToIt] &&
         self.powerup.isCurrentlyTemporary == NO &&
         (potentialCookie.column == self.column + 1 || potentialCookie.column == self.column - 1 || potentialCookie.row == self.row + 1 || potentialCookie.row == self.row - 1)) {
-        return YES;
+        answer = YES;
     }
+    
+    //Pivot pads can join to anything (but not robbers sack and multi cookie, which has already been taken care of
     else if ([potentialCookie.powerup isAPivotPad] && potentialCookie.powerup.isCurrentlyTemporary == NO) {
-        return YES;
+        answer = YES;
     }
+    
+    //Same cookie types can join together
     else if (self.cookieType == potentialCookie.cookieType) {
-        return YES;
+        answer = YES;
     }
+    
     else {
-        return NO;
+        answer = NO;
     }
+    
+    return answer;
 }
 
 
