@@ -140,7 +140,8 @@
         //look above cookie
         for (NSInteger i = cookie.row + 1; i < NumRows; i++) {
             BBQCookie *potentialCookie = _cookies[cookie.column][i];
-            [self checkIfCookieIsValid:potentialCookie rootCookie:cookie existingChain:existingChain array:array];
+            BOOL isFinished = [self checkIfCookieIsValid:potentialCookie rootCookie:cookie existingChain:existingChain array:array];
+            if (isFinished) break;
         }
     }
     
@@ -148,7 +149,8 @@
         //look below cookie
         for (NSInteger i = cookie.row - 1; i >= 0; i--) {
             BBQCookie *potentialCookie = _cookies[cookie.column][i];
-            [self checkIfCookieIsValid:potentialCookie rootCookie:cookie existingChain:existingChain array:array];
+            BOOL isFinished = [self checkIfCookieIsValid:potentialCookie rootCookie:cookie existingChain:existingChain array:array];
+            if (isFinished) break;
         }
 
     }
@@ -157,7 +159,8 @@
         //look to left of cookie
         for (NSInteger i = cookie.column - 1; i >= 0; i--) {
             BBQCookie *potentialCookie = _cookies[i][cookie.row];
-            [self checkIfCookieIsValid:potentialCookie rootCookie:cookie existingChain:existingChain array:array];
+            BOOL isFinished = [self checkIfCookieIsValid:potentialCookie rootCookie:cookie existingChain:existingChain array:array];
+            if (isFinished) break;
         }
 
     }
@@ -166,7 +169,8 @@
         //look to right of cookie
         for (NSInteger i = cookie.column + 1; i < NumColumns; i++) {
             BBQCookie *potentialCookie = _cookies[i][cookie.row];
-            [self checkIfCookieIsValid:potentialCookie rootCookie:cookie existingChain:existingChain array:array];
+            BOOL isFinished = [self checkIfCookieIsValid:potentialCookie rootCookie:cookie existingChain:existingChain array:array];
+            if (isFinished) break;
         }
 
     }
@@ -175,25 +179,39 @@
 
 }
 
-- (void)checkIfCookieIsValid:(BBQCookie *)potentialCookie rootCookie:(BBQCookie *)rootCookie existingChain:(BBQChain *)existingChain array:(NSMutableArray *)array {
+//Returns whether you need to break the for loop and stop looking for cookies
+- (BOOL)checkIfCookieIsValid:(BBQCookie *)potentialCookie rootCookie:(BBQCookie *)rootCookie existingChain:(BBQChain *)existingChain array:(NSMutableArray *)array {
+    
     if (!potentialCookie) {
-        return;
+        return NO;
     }
+    
+    
+    
     else if ([potentialCookie isEqual:[existingChain.cookiesInChain firstObject]] && [existingChain.cookiesInChain count] >= 4 && [rootCookie canBeChainedToCookie:potentialCookie isFirstCookieInChain:NO]) {
         [array addObject:potentialCookie];
+        return YES;
     }
     
     else if (potentialCookie && [existingChain.cookiesInChain containsObject:potentialCookie]) {
-        return;
+        return NO;
     }
     
     else if ([[existingChain.cookiesInChain firstObject] isEqual:rootCookie] && [existingChain.cookiesInChain count] == 1 && [rootCookie canBeChainedToCookie:potentialCookie isFirstCookieInChain:YES]) {
         [array addObject:potentialCookie];
+        
+        if ([rootCookie.powerup isAMultiCookie] || [rootCookie.powerup isARobbersSack] || [potentialCookie.powerup isAMultiCookie] || [potentialCookie.powerup isARobbersSack]) {
+            return YES;
+        }
+        else return NO;
     }
     
     else if ([rootCookie canBeChainedToCookie:potentialCookie isFirstCookieInChain:NO]) {
         [array addObject:potentialCookie];
+        return NO;
     }
+    
+    else return NO;
 }
 
 - (NSDictionary *)rootCookieLimits:(BBQCookie *)cookie {

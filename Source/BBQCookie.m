@@ -131,6 +131,12 @@
         answer = NO;
     }
     
+    else if ([self.powerup canOnlyJoinWithCookieNextToIt] &&
+             isFirstCookieInChain &&
+             (potentialCookie.column != self.column + 1 || potentialCookie.column != self.column - 1 || potentialCookie.row != self.row + 1 || potentialCookie.column != self.row - 1)) {
+        return NO;
+    }
+    
     //If the cookie is the first cookie in the chain, and it tries to join with a multicookie or robbers sack then it can
     else if (([potentialCookie.powerup isAMultiCookie] || [potentialCookie.powerup isARobbersSack]) &&
              (potentialCookie.column == self.column + 1 || potentialCookie.column == self.column - 1 || potentialCookie.row == self.row + 1 || potentialCookie.row == self.row - 1) &&
