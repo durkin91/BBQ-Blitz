@@ -186,8 +186,8 @@
 }
 
 - (BOOL)doesNotRequireInProgressLine {
-    BBQCookie *firstCookie = [self.chain.cookiesInChain firstObject];
-    if ([self.chain.cookiesInChain count] >= 2 && ([firstCookie.powerup isAMultiCookie] || [firstCookie.powerup isARobbersSack])) {
+    //BBQCookie *firstCookie = [self.chain.cookiesInChain firstObject];
+    if ([self.chain isATwoCookieChain]) {
         return  YES;
     }
     

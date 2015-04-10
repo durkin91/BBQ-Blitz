@@ -39,8 +39,18 @@
 
 - (BOOL)isATwoCookieChain {
     BBQCookie *firstCookie = [self.cookiesInChain firstObject];
+    BBQCookie *secondCookie;
+    if ([self.cookiesInChain count] >= 2) {
+        secondCookie = [self.cookiesInChain objectAtIndex:1];
+    }
+    
     if ([self.cookiesInChain count] == 2 &&
-        (firstCookie.powerup.type == 12 || firstCookie.powerup.type == 15)) {
+        ([firstCookie.powerup isAMultiCookie] || [firstCookie.powerup isARobbersSack])) {
+        return YES;
+    }
+    
+    else if ([self.cookiesInChain count] == 2 &&
+             ([secondCookie.powerup isAMultiCookie] || [secondCookie.powerup isARobbersSack])) {
         return YES;
     }
     else return NO;

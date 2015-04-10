@@ -34,6 +34,6 @@ static const NSUInteger NumStartingCookies = 3;
 - (NSString *)spriteName;
 - (NSString *)highlightedSpriteName;
 - (CCColor *)lineColor;
-- (BOOL)canBeChainedToCookie:(BBQCookie *)potentialCookie;
+- (BOOL)canBeChainedToCookie:(BBQCookie *)potentialCookie isFirstCookieInChain:(BOOL)isFirstCookieInChain ;
 
 @end

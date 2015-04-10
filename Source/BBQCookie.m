@@ -7,6 +7,7 @@
 //
 
 #import "BBQCookie.h"
+#import "BBQChain.h"
 
 @implementation BBQCookie
 
@@ -121,13 +122,22 @@
     return color;
 }
 
-- (BOOL)canBeChainedToCookie:(BBQCookie *)potentialCookie {
-    BOOL answer;
+- (BOOL)canBeChainedToCookie:(BBQCookie *)potentialCookie isFirstCookieInChain:(BOOL)isFirstCookieInChain {
+    BOOL answer = NO;
     
     //Robbers sacks or multi cookies can't join to a pivot pad
     if ((self.powerup.isAMultiCookie || self.powerup.isARobbersSack || self.powerup.isAPivotPad) && self.powerup.isCurrentlyTemporary == NO &&
         (potentialCookie.powerup.isAPivotPad || potentialCookie.powerup.isAMultiCookie || potentialCookie.powerup.isARobbersSack)) {
         answer = NO;
+    }
+    
+    //If the cookie is the first cookie in the chain, and it tries to join with a multicookie or robbers sack then it can
+    else if (([potentialCookie.powerup isAMultiCookie] || [potentialCookie.powerup isARobbersSack]) &&
+             (potentialCookie.column == self.column + 1 || potentialCookie.column == self.column - 1 || potentialCookie.row == self.row + 1 || potentialCookie.row == self.row - 1) &&
+             isFirstCookieInChain) {
+        
+        answer = YES;
+        
     }
     
     //Multi cookies, robbers sacks and pivot pads can only join with the cookie next to it

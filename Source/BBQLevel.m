@@ -79,7 +79,7 @@
     //UP
     for (NSInteger i = cookie.row + 1; i < NumRows; i++) {
         testCookie = _cookies[cookie.column][i];
-        if ([cookie canBeChainedToCookie:testCookie]) {
+        if ([cookie canBeChainedToCookie:testCookie isFirstCookieInChain:YES]) {
             [array addObject:testCookie];
             break;
         }
@@ -91,7 +91,7 @@
     //RIGHT
     for (NSInteger i = cookie.column + 1; i < NumColumns; i++) {
         testCookie = _cookies[i][cookie.row];
-        if ([cookie canBeChainedToCookie:testCookie]) {
+        if ([cookie canBeChainedToCookie:testCookie isFirstCookieInChain:YES]) {
             [array addObject:testCookie];
             break;
         }
@@ -103,7 +103,7 @@
     //DOWN
     for (NSInteger i = cookie.row - 1; i >= 0; i --) {
         testCookie = _cookies[cookie.column][i];
-        if ([cookie canBeChainedToCookie:testCookie]) {
+        if ([cookie canBeChainedToCookie:testCookie isFirstCookieInChain:YES]) {
             [array addObject:testCookie];
             break;
         }
@@ -116,7 +116,7 @@
     //LEFT
     for (NSInteger i = cookie.column - 1; i >= 0; i++ ) {
         testCookie = _cookies[i][cookie.row];
-        if ([cookie canBeChainedToCookie:testCookie]) {
+        if ([cookie canBeChainedToCookie:testCookie isFirstCookieInChain:YES]) {
             [array addObject:testCookie];
             break;
         }
@@ -179,14 +179,19 @@
     if (!potentialCookie) {
         return;
     }
-    else if ([potentialCookie isEqual:[existingChain.cookiesInChain firstObject]] && [existingChain.cookiesInChain count] >= 4 && [rootCookie canBeChainedToCookie:potentialCookie]) {
+    else if ([potentialCookie isEqual:[existingChain.cookiesInChain firstObject]] && [existingChain.cookiesInChain count] >= 4 && [rootCookie canBeChainedToCookie:potentialCookie isFirstCookieInChain:NO]) {
         [array addObject:potentialCookie];
     }
     
     else if (potentialCookie && [existingChain.cookiesInChain containsObject:potentialCookie]) {
         return;
     }
-    else if ([rootCookie canBeChainedToCookie:potentialCookie]) {
+    
+    else if ([[existingChain.cookiesInChain firstObject] isEqual:rootCookie] && [existingChain.cookiesInChain count] == 1 && [rootCookie canBeChainedToCookie:potentialCookie isFirstCookieInChain:YES]) {
+        [array addObject:potentialCookie];
+    }
+    
+    else if ([rootCookie canBeChainedToCookie:potentialCookie isFirstCookieInChain:NO]) {
         [array addObject:potentialCookie];
     }
 }
