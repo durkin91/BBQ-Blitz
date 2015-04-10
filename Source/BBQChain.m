@@ -53,6 +53,13 @@
              ([secondCookie.powerup isAMultiCookie] || [secondCookie.powerup isARobbersSack])) {
         return YES;
     }
+    
+    //If both cookies are either a type 6, box or criss cross powerup
+    else if ([self.cookiesInChain count] == 2 &&
+             ([firstCookie.powerup isATypeSixPowerup] || [firstCookie.powerup isACrissCross] || [firstCookie.powerup isABox]) &&
+             ([secondCookie.powerup isATypeSixPowerup] || [secondCookie.powerup isABox] || [secondCookie.powerup isACrissCross])) {
+        return YES;
+    }
     else return NO;
 }
 

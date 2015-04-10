@@ -134,7 +134,7 @@
     else if ([self.powerup canOnlyJoinWithCookieNextToIt] &&
              isFirstCookieInChain &&
              (potentialCookie.column != self.column + 1 || potentialCookie.column != self.column - 1 || potentialCookie.row != self.row + 1 || potentialCookie.column != self.row - 1)) {
-        return NO;
+        answer = NO;
     }
     
     //If the cookie is the first cookie in the chain, and it tries to join with a multicookie or robbers sack then it can
@@ -144,6 +144,14 @@
         
         answer = YES;
         
+    }
+    
+    //IF the cookie is the first cookie in the chain, and the potential cookie is next to it, and they are both a type 6, box or criss cross then they can be joined.
+    else if (isFirstCookieInChain &&
+             (potentialCookie.column == self.column + 1 || potentialCookie.column == self.column - 1 || potentialCookie.row == self.row + 1 || potentialCookie.row == self.row - 1) &&
+             ([self.powerup isATypeSixPowerup] || [self.powerup isACrissCross] || [self.powerup isABox]) &&
+             ([potentialCookie.powerup isATypeSixPowerup] || [potentialCookie.powerup isACrissCross] || [potentialCookie.powerup isABox])) {
+        answer = YES;
     }
     
     //Multi cookies, robbers sacks and pivot pads can only join with the cookie next to it

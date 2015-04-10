@@ -32,9 +32,13 @@
 - (void)scorePowerup;
 - (void)addCookieOrders:(NSArray *)cookieOrders;
 - (BOOL)canOnlyJoinWithCookieNextToIt;
+
 - (BOOL)isAPivotPad;
 - (BOOL)isAMultiCookie;
 - (BOOL)isARobbersSack;
+- (BOOL)isATypeSixPowerup;
+- (BOOL)isACrissCross;
+- (BOOL)isABox;
 
 
 @end

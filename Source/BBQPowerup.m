@@ -98,6 +98,25 @@
     else return NO;
 }
 
+- (BOOL)isATypeSixPowerup {
+    if (self.type == 6) {
+        return YES;
+    }
+    else return NO;
+}
+
+- (BOOL)isACrissCross {
+    if (self.type == 20) {
+        return YES;
+    }
+    else return NO;
+}
+
+- (BOOL)isABox {
+    if (self.type == 30) return YES;
+    else return NO;
+}
+
 - (void)scorePowerup {
     for (NSArray *array in self.arraysOfDisappearingCookies) {
         self.totalScore = self.totalScore + ([array count] * self.scorePerCookie);

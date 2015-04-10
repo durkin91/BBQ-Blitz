@@ -186,8 +186,6 @@
         return NO;
     }
     
-    
-    
     else if ([potentialCookie isEqual:[existingChain.cookiesInChain firstObject]] && [existingChain.cookiesInChain count] >= 4 && [rootCookie canBeChainedToCookie:potentialCookie isFirstCookieInChain:NO]) {
         [array addObject:potentialCookie];
         return YES;
@@ -203,6 +201,11 @@
         if ([rootCookie.powerup isAMultiCookie] || [rootCookie.powerup isARobbersSack] || [potentialCookie.powerup isAMultiCookie] || [potentialCookie.powerup isARobbersSack]) {
             return YES;
         }
+        
+        else if (([rootCookie.powerup isATypeSixPowerup] || [rootCookie.powerup isACrissCross] || [rootCookie.powerup isABox]) && ([potentialCookie.powerup isATypeSixPowerup] || [potentialCookie.powerup isACrissCross] || [potentialCookie.powerup isABox])) {
+            return YES;
+        }
+        
         else return NO;
     }
     
