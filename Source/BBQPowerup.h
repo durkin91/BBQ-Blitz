@@ -27,7 +27,7 @@
 
 
 - (instancetype)initWithType:(NSInteger)type direction:(NSString *)swipeDirection;
-- (void)performPowerupWithLevel:(BBQLevel *)level cookie:(BBQCookie *)rootCookie cookieTypeToCollect:(NSInteger)cookieTypeToCollect;
+- (void)performPowerupWithLevel:(BBQLevel *)level cookie:(BBQCookie *)rootCookie cookieTypeToCollect:(BBQCookie *)cookieTypeToCollect;
 - (void)removeDuplicateCookiesFromChainsCookies:(NSArray *)cookiesInChain;
 - (void)scorePowerup;
 - (void)addCookieOrders:(NSArray *)cookieOrders;

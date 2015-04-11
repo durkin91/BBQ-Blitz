@@ -34,7 +34,7 @@
     return self;
 }
 
-- (void)performPowerupWithLevel:(BBQLevel *)level cookie:(BBQCookie *)rootCookie cookieTypeToCollect:(NSInteger)cookieTypeToCollect {
+- (void)performPowerupWithLevel:(BBQLevel *)level cookie:(BBQCookie *)rootCookie cookieTypeToCollect:(BBQCookie *)cookieTypeToCollect {
     
     _level = level;
     self.arraysOfDisappearingCookies = [NSMutableArray array];
@@ -279,15 +279,35 @@
     }
 }
 
-//Each cookie is in a seperate array, as they all are destroyed at the same time
-- (void)removeAllCookiesOfCookieType:(NSInteger)cookieType rootCookie:(BBQCookie *)rootCookie {
-    for (NSInteger column = 0; column < NumColumns; column ++) {
-        for (NSInteger row = 0; row < NumRows; row++) {
-            BBQCookie *cookie = [_level cookieAtColumn:column row:row];
-            if (cookie.cookieType == cookieType) {
-                NSMutableArray *array = [NSMutableArray array];
-                [self.arraysOfDisappearingCookies addObject:array];
-                [self destroyCookieAtColumn:column row:row array:array];
+
+- (void)removeAllCookiesOfCookieType:(BBQCookie *)cookieType rootCookie:(BBQCookie *)rootCookie {
+    
+    //If the cookieType has no powerup upgrade required, then all cookies are in a seperate array so they are collected at the same time.
+    if ([cookieType.powerup isATypeSixPowerup] || [cookieType.powerup isACrissCross] || [cookieType.powerup isABox]) {
+        NSMutableArray *array = [NSMutableArray array];
+        [self.arraysOfDisappearingCookies addObject:array];
+        
+        for (NSInteger column = 0; column < NumColumns; column ++) {
+            for (NSInteger row = 0; row < NumRows; row++) {
+                BBQCookie *cookie = [_level cookieAtColumn:column row:row];
+                if (cookie.cookieType == cookieType.cookieType) {
+                    [array addObject:cookie];
+                }
+            }
+        }
+        
+        [self upgradeMultiCookiePowerupCookiesToCookieType:cookieType];
+    }
+            
+    else {
+        for (NSInteger column = 0; column < NumColumns; column ++) {
+            for (NSInteger row = 0; row < NumRows; row++) {
+                BBQCookie *cookie = [_level cookieAtColumn:column row:row];
+                if (cookie.cookieType == cookieType.cookieType) {
+                    NSMutableArray *array = [NSMutableArray array];
+                    [self.arraysOfDisappearingCookies addObject:array];
+                    [self destroyCookieAtColumn:column row:row array:array];
+                }
             }
         }
     }
@@ -417,6 +437,45 @@
         }
     }
 }
+
+- (void)upgradeMultiCookiePowerupCookiesToCookieType:(BBQCookie *)cookieType {
+    NSMutableArray *oldArray = [self.arraysOfDisappearingCookies firstObject];
+    
+    if ([cookieType.powerup isATypeSixPowerup] || [cookieType.powerup isABox] || [cookieType.powerup isACrissCross]) {
+        
+        //upgrade the cookie type
+        for (BBQCookie *cookie in oldArray) {
+            NSInteger random = arc4random_uniform(2) + 1;
+            NSString *direction;
+            if (random == 1) {
+                direction = RIGHT;
+            }
+            else {
+                direction = UP;
+            }
+            cookie.powerup = [[BBQPowerup alloc] initWithType:cookieType.powerup.type direction:direction];
+        }
+        
+        //seperate the cookies into arrays of 3 to detonate at a time
+        NSMutableArray *allArrays = [NSMutableArray array];
+        while ([oldArray count] > 0) {
+            NSMutableArray *newArray = [NSMutableArray array];
+            while ([newArray count] <= 3) {
+                NSInteger randomIndex = arc4random_uniform([oldArray count]);
+                BBQCookie *cookie = oldArray[randomIndex];
+                [newArray addObject:cookie];
+                [oldArray removeObject:cookie];
+            }
+            if ([newArray count] > 0) {
+                [allArrays addObject:newArray];
+            }
+        }
+        self.arraysOfDisappearingCookies = allArrays;
+    }
+
+}
+
+
 
 #pragma mark - combined powerups
 

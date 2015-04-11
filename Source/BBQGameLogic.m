@@ -111,10 +111,9 @@
 
 - (void)activatePowerupForCookie:(BBQCookie *)cookie {
     
-    NSInteger cookieTypeToCollect = 0;
+    BBQCookie *cookieTypeToCollect;
     if ([cookie.powerup isAMultiCookie]) {
-        BBQCookie *cookieType = [self.chain.cookiesInChain lastObject];
-        cookieTypeToCollect = cookieType.cookieType;
+        cookieTypeToCollect = [self.chain.cookiesInChain lastObject];
     }
     
     [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
