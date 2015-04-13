@@ -454,13 +454,15 @@
                 direction = UP;
             }
             cookie.powerup = [[BBQPowerup alloc] initWithType:cookieType.powerup.type direction:direction];
+            cookie.powerup.isCurrentlyTemporary = NO;
+            cookie.powerup.isCurrentlyTemporary = YES;
         }
         
         //seperate the cookies into arrays of 3 to detonate at a time
         NSMutableArray *allArrays = [NSMutableArray array];
         while ([oldArray count] > 0) {
             NSMutableArray *newArray = [NSMutableArray array];
-            while ([newArray count] <= 3) {
+            while ([newArray count] <= 3 && [oldArray count] > 0) {
                 NSInteger randomIndex = arc4random_uniform([oldArray count]);
                 BBQCookie *cookie = oldArray[randomIndex];
                 [newArray addObject:cookie];

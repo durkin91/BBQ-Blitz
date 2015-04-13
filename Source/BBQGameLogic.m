@@ -114,6 +114,9 @@
     BBQCookie *cookieTypeToCollect;
     if ([cookie.powerup isAMultiCookie]) {
         cookieTypeToCollect = [self.chain.cookiesInChain lastObject];
+        if ([cookieTypeToCollect.powerup isAMultiCookie] == YES) {
+            cookieTypeToCollect = [self.chain.cookiesInChain firstObject];
+        }
     }
     
     [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
@@ -242,6 +245,19 @@
         cookie.powerup = [[BBQPowerup alloc] initWithType:30 direction:direction];
     }
 
+}
+
+- (BOOL)isAnUpgradedMultiCookiePowerup:(BBQCookie *)cookie {
+    BBQCookie *cookieTypeToCollect = [self.chain.cookiesInChain lastObject];
+    if ([cookieTypeToCollect.powerup isAMultiCookie] == YES) {
+        cookieTypeToCollect = [self.chain.cookiesInChain firstObject];
+    }
+    
+    if ([cookie.powerup isAMultiCookie] && ([cookieTypeToCollect.powerup isATypeSixPowerup] || [cookieTypeToCollect.powerup isACrissCross] || [cookieTypeToCollect.powerup isABox])) {
+        return YES;
+    }
+    
+    else return NO;
 }
 
 

@@ -51,5 +51,6 @@
 - (void)activatePowerupForCookie:(BBQCookie *)cookie;
 - (BOOL)doesNotRequireInProgressLine;
 - (BOOL)isFirstCookieInChain:(BBQCookie *)cookie;
+- (BOOL)isAnUpgradedMultiCookiePowerup:(BBQCookie *)cookie;
 
 @end

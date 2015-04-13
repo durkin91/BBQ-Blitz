@@ -150,6 +150,32 @@
     
 }
 
+- (BOOL)isAMultiCookieUpgradedPowerupChain {
+    if ([self.cookiesInChain count] == 2) {
+        BBQCookie *firstCookie = self.cookiesInChain[0];
+        BBQCookie *secondCookie = self.cookiesInChain[1];
+        
+        if (([firstCookie.powerup isAMultiCookie] || [secondCookie.powerup isAMultiCookie]) &&
+            ([secondCookie.powerup isATypeSixPowerup] || [secondCookie.powerup isABox] || [secondCookie.powerup isACrissCross] || [firstCookie.powerup isATypeSixPowerup] || [firstCookie.powerup isABox] || [firstCookie.powerup isACrissCross])) {
+            return YES;
+            
+        }
+    }
+    
+    return NO;
+}
+
+- (BBQCookie *)returnMultiCookieInMultiCookiePowerup {
+    BBQCookie *multicookie;
+    for (BBQCookie *cookie in self.cookiesInChain) {
+        if ([cookie.powerup isAMultiCookie]) {
+            multicookie = cookie;
+            break;
+        }
+    }
+    return multicookie;
+}
+
 -(NSString *)description {
     return [NSString stringWithFormat:@"Cookies involved: %@", self.cookiesInChain];
 }
