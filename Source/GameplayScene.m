@@ -581,7 +581,7 @@ static const CGFloat TileHeight = 36.0;
     [BBQAnimations animateScoreLabel:scoreLabel];
 }
 
-- (void)animateNewCookies:(NSArray *)columns completion:(dispatch_block_t)completion {
+- (NSTimeInterval)animateNewCookies:(NSArray *)columns completion:(dispatch_block_t)completion {
     __block NSTimeInterval longestDuration = 0;
     
     for (NSArray *array in columns) {
@@ -608,9 +608,11 @@ static const CGFloat TileHeight = 36.0;
     [self runAction:[CCActionSequence actions:
         [CCActionDelay actionWithDuration:longestDuration],
         [CCActionCallBlock actionWithBlock:completion], nil]];
+    
+    return longestDuration;
 }
 
-- (void)animateFallingCookies:(NSArray *)columns completion:(dispatch_block_t)completion {
+- (NSTimeInterval)animateFallingCookies:(NSArray *)columns completion:(dispatch_block_t)completion {
     
     __block NSTimeInterval longestDuration = 0;
     
@@ -630,6 +632,8 @@ static const CGFloat TileHeight = 36.0;
     
     CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil];
     [self runAction:sequence];
+    
+    return longestDuration;
     
 }
 
@@ -672,11 +676,13 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)changeMultiCookieUpgradedPowerupSprites:(BBQCookie *)multicookie completion:(dispatch_block_t)completion {
     
+    __block NSTimeInterval spinDuration = 0.5;
+    
     for (NSArray *array in multicookie.powerup.arraysOfDisappearingCookies) {
         
         [array enumerateObjectsUsingBlock:^(BBQCookie *powerupCookie, NSUInteger idx, BOOL *stop) {
             //Spin action
-            CCActionRotateBy *firstRotation = [CCActionRotateBy actionWithDuration:0.5 angle:360.0];
+            CCActionRotateBy *firstRotation = [CCActionRotateBy actionWithDuration:spinDuration angle:360.0];
             CCActionCallBlock *changeTexture = [CCActionCallBlock actionWithBlock:^{
                 [self removeHighlightFromCookie:powerupCookie];
             }];
@@ -685,29 +691,46 @@ static const CGFloat TileHeight = 36.0;
         }];
     }
     
+    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:spinDuration + 0.1], [CCActionCallBlock actionWithBlock:completion], nil];
+    [self runAction:sequence];
 }
 
 - (void)animateUpgradedMultiCookiePowerup:(BBQCookie *)multiCookie completion:(dispatch_block_t)completion {
+    __block NSTimeInterval animationDuration = 0;
+    
     NSArray *array = multiCookie.powerup.arraysOfDisappearingCookies[0];
-    [self animateArrayOfUpgradedMultiCookiePowerups:array completion:^{
+    animationDuration = animationDuration + [self animateArrayOfUpgradedMultiCookiePowerups:array completion:^{
         
         NSArray *columns = [self.gameLogic.level fillHoles];
-        [self animateFallingCookies:columns completion:^{
+        NSLog(@"Columns for fill holes methd: %@", columns);
+        animationDuration = animationDuration + [self animateFallingCookies:columns completion:^{
             
             NSArray *columns = [self.gameLogic.level topUpCookies];
-            [self animateNewCookies:columns completion:^{
+            animationDuration = animationDuration + [self animateNewCookies:columns completion:^{
                 
                 [multiCookie.powerup.arraysOfDisappearingCookies removeObject:array];
                 
             }];
         }];
     }];
+    
+    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:animationDuration], [CCActionCallBlock actionWithBlock:completion], nil];
+    [self runAction:sequence];
 }
 
-- (void)animateArrayOfUpgradedMultiCookiePowerups:(NSArray *)array completion:(dispatch_block_t)completion {
+- (NSTimeInterval)animateArrayOfUpgradedMultiCookiePowerups:(NSArray *)array completion:(dispatch_block_t)completion {
+    NSTimeInterval longestDuration = 0;
+    
     for (BBQCookie *cookie in array) {
-        [self animatePowerupForCookie:cookie powerupDuration:0];
+        NSTimeInterval potentialPowerupDuration = 0;
+        [self animatePowerupForCookie:cookie powerupDuration:potentialPowerupDuration];
+        longestDuration = MAX(potentialPowerupDuration, longestDuration);
     }
+    
+    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil];
+    [self runAction:sequence];
+    
+    return longestDuration;
 }
 
 
@@ -731,7 +754,7 @@ static const CGFloat TileHeight = 36.0;
             
             [self animateUpgradedMultiCookiePowerup:multicookie completion:^{
                 
-                [self completionBlockForMultiCookiePowerupUpgrade:multicookie];
+                //[self completionBlockForMultiCookiePowerupUpgrade:multicookie];
             }];
         }];
     }
