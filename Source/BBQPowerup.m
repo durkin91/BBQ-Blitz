@@ -448,7 +448,7 @@
             NSInteger random = arc4random_uniform(2) + 1;
             NSString *direction;
             if (random == 1) {
-                direction = RIGHT;
+                direction = UP;
             }
             else {
                 direction = UP;

@@ -36,4 +36,5 @@ typedef NS_ENUM(NSUInteger, ChainType) {
 - (void)upgradePowerupsIfNecessary;
 - (BOOL)isAMultiCookieUpgradedPowerupChain;
 - (BBQCookie *)returnMultiCookieInMultiCookiePowerup;
+- (void)removeUndetonatedPowerupFromArraysOfPowerupsToDetonate:(BBQCookie *)cookie;
 @end

@@ -637,7 +637,7 @@ static const CGFloat TileHeight = 36.0;
     
 }
 
-- (void)animatePowerupForCookie:(BBQCookie *)cookie powerupDuration:(NSTimeInterval)powerupDuration {
+- (NSTimeInterval)animatePowerupForCookie:(BBQCookie *)cookie detonatePowerupsWithinArray:(BOOL)detonatePowerupsWithinArray {
     
     [self.gameLogic activatePowerupForCookie:cookie];
     
@@ -647,7 +647,7 @@ static const CGFloat TileHeight = 36.0;
     //Take care of root cookie
     CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:scaleActionDuration scale:0.1];
     [cookie.sprite runAction:[CCActionSequence actions:scaleAction, [CCActionRemove action], nil]];
-    cookie.sprite = nil;
+    //cookie.sprite = nil;
     longestDuration = scaleActionDuration;
     
     for (NSArray *array in cookie.powerup.arraysOfDisappearingCookies) {
@@ -658,7 +658,7 @@ static const CGFloat TileHeight = 36.0;
             NSTimeInterval delay = 0.05*idx;
             
             CCActionCallBlock *action = [CCActionCallBlock actionWithBlock:^{
-                [self animateCookieRemoval:powerupCookie powerupDuration:longestDuration scaleActionDuration:scaleActionDuration];
+                [self animateCookieRemoval:powerupCookie powerupDuration:longestDuration scaleActionDuration:scaleActionDuration detonatePowerupsWithinArray:detonatePowerupsWithinArray];
             }];
             
             longestDuration = MAX(longestDuration, scaleActionDuration + delay);
@@ -671,7 +671,7 @@ static const CGFloat TileHeight = 36.0;
     [self.gameLogic addPowerupScoreToCurrentScore:cookie.powerup];
     [self runAction:[self updateScoreAndMoves]];
     
-    powerupDuration = powerupDuration + longestDuration;
+    return longestDuration;
 }
 
 - (void)changeMultiCookieUpgradedPowerupSprites:(BBQCookie *)multicookie completion:(dispatch_block_t)completion {
@@ -696,17 +696,19 @@ static const CGFloat TileHeight = 36.0;
 }
 
 - (void)animateUpgradedMultiCookiePowerup:(BBQCookie *)multiCookie completion:(dispatch_block_t)completion {
-    __block NSTimeInterval animationDuration = 0;
+    
+    __block NSTimeInterval detonationDuration = 0;
+    __block NSTimeInterval fillHolesDuration = 0;
+    __block NSTimeInterval topUpCookiesDuration = 0;
     
     NSArray *array = multiCookie.powerup.arraysOfDisappearingCookies[0];
-    animationDuration = animationDuration + [self animateArrayOfUpgradedMultiCookiePowerups:array completion:^{
+    detonationDuration = [self animateArrayOfUpgradedMultiCookiePowerups:array completion:^{
         
         NSArray *columns = [self.gameLogic.level fillHoles];
-        NSLog(@"Columns for fill holes methd: %@", columns);
-        animationDuration = animationDuration + [self animateFallingCookies:columns completion:^{
+        fillHolesDuration = [self animateFallingCookies:columns completion:^{
             
             NSArray *columns = [self.gameLogic.level topUpCookies];
-            animationDuration = animationDuration + [self animateNewCookies:columns completion:^{
+            topUpCookiesDuration = [self animateNewCookies:columns completion:^{
                 
                 [multiCookie.powerup.arraysOfDisappearingCookies removeObject:array];
                 
@@ -714,7 +716,7 @@ static const CGFloat TileHeight = 36.0;
         }];
     }];
     
-    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:animationDuration], [CCActionCallBlock actionWithBlock:completion], nil];
+    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:10.0], [CCActionCallBlock actionWithBlock:completion], nil];
     [self runAction:sequence];
 }
 
@@ -722,9 +724,8 @@ static const CGFloat TileHeight = 36.0;
     NSTimeInterval longestDuration = 0;
     
     for (BBQCookie *cookie in array) {
-        NSTimeInterval potentialPowerupDuration = 0;
-        [self animatePowerupForCookie:cookie powerupDuration:potentialPowerupDuration];
-        longestDuration = MAX(potentialPowerupDuration, longestDuration);
+        NSTimeInterval powerupDuration = [self animatePowerupForCookie:cookie detonatePowerupsWithinArray:NO];
+        longestDuration = MAX(powerupDuration, longestDuration);
     }
     
     CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil];
@@ -754,7 +755,7 @@ static const CGFloat TileHeight = 36.0;
             
             [self animateUpgradedMultiCookiePowerup:multicookie completion:^{
                 
-                //[self completionBlockForMultiCookiePowerupUpgrade:multicookie];
+                [self completionBlockForMultiCookiePowerupUpgrade:multicookie];
             }];
         }];
     }
@@ -765,7 +766,7 @@ static const CGFloat TileHeight = 36.0;
             
             if ([self.gameLogic doesCookieNeedRemoving:cookie]) {
                 
-                [self animateCookieRemoval:cookie powerupDuration:powerupDuration scaleActionDuration:duration];
+                [self animateCookieRemoval:cookie powerupDuration:powerupDuration scaleActionDuration:duration detonatePowerupsWithinArray:YES];
             }
             
             else {
@@ -788,9 +789,13 @@ static const CGFloat TileHeight = 36.0;
     }
 }
 
-- (void)animateCookieRemoval:(BBQCookie *)cookie powerupDuration:(NSTimeInterval)powerupDuration scaleActionDuration:(NSTimeInterval)duration {
-    if (cookie.powerup.isReadyToDetonate) {
-        [self animatePowerupForCookie:cookie powerupDuration:powerupDuration];
+- (void)animateCookieRemoval:(BBQCookie *)cookie powerupDuration:(NSTimeInterval)powerupDuration scaleActionDuration:(NSTimeInterval)duration detonatePowerupsWithinArray:(BOOL)detonatePowerupsWithinArray {
+    if (cookie.powerup.isReadyToDetonate && detonatePowerupsWithinArray == YES) {
+        [self animatePowerupForCookie:cookie detonatePowerupsWithinArray:detonatePowerupsWithinArray];
+    }
+    
+    else if (cookie.powerup.isReadyToDetonate && detonatePowerupsWithinArray == NO) {
+        [self.gameLogic.chain removeUndetonatedPowerupFromArraysOfPowerupsToDetonate:cookie];
     }
     
     if (cookie.cookieOrder && cookie.sprite != nil) {

@@ -176,6 +176,16 @@
     return multicookie;
 }
 
+- (void)removeUndetonatedPowerupFromArraysOfPowerupsToDetonate:(BBQCookie *)cookie {
+    if ([self isAMultiCookieUpgradedPowerupChain]) {
+        BBQCookie *multicookie = [self returnMultiCookieInMultiCookiePowerup];
+        
+        for (NSInteger index = 0; index < [multicookie.powerup.arraysOfDisappearingCookies count]; index ++) {
+            [multicookie.powerup.arraysOfDisappearingCookies[index] removeObject:cookie];
+        }
+    }
+}
+
 -(NSString *)description {
     return [NSString stringWithFormat:@"Cookies involved: %@", self.cookiesInChain];
 }
