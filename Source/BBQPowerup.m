@@ -458,23 +458,26 @@
             cookie.powerup.isCurrentlyTemporary = YES;
         }
         
-        //seperate the cookies into arrays of 3 to detonate at a time
-        NSMutableArray *allArrays = [NSMutableArray array];
-        while ([oldArray count] > 0) {
-            NSMutableArray *newArray = [NSMutableArray array];
-            while ([newArray count] <= 3 && [oldArray count] > 0) {
-                NSInteger randomIndex = arc4random_uniform([oldArray count]);
-                BBQCookie *cookie = oldArray[randomIndex];
-                [newArray addObject:cookie];
-                [oldArray removeObject:cookie];
-            }
-            if ([newArray count] > 0) {
-                [allArrays addObject:newArray];
-            }
-        }
-        self.arraysOfDisappearingCookies = allArrays;
+        self.arraysOfDisappearingCookies = [BBQPowerup returnArrayOfCookiesRandomlyAssignedToArrays:oldArray];
     }
 
+}
+
++ (NSMutableArray *)returnArrayOfCookiesRandomlyAssignedToArrays:(NSMutableArray *)oldArray {
+    NSMutableArray *allArrays = [NSMutableArray array];
+    while ([oldArray count] > 0) {
+        NSMutableArray *newArray = [NSMutableArray array];
+        while ([newArray count] < 3 && [oldArray count] > 0) {
+            NSInteger randomIndex = arc4random_uniform([oldArray count]);
+            BBQCookie *cookie = oldArray[randomIndex];
+            [newArray addObject:cookie];
+            [oldArray removeObject:cookie];
+        }
+        if ([newArray count] > 0) {
+            [allArrays addObject:newArray];
+        }
+    }
+    return allArrays;
 }
 
 

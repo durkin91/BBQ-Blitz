@@ -32,6 +32,7 @@
 - (void)scorePowerup;
 - (void)addCookieOrders:(NSArray *)cookieOrders;
 - (BOOL)canOnlyJoinWithCookieNextToIt;
++ (NSMutableArray *)returnArrayOfCookiesRandomlyAssignedToArrays:(NSMutableArray *)oldArray;
 
 - (BOOL)isAPivotPad;
 - (BOOL)isAMultiCookie;

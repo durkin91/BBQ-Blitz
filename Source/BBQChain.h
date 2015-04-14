@@ -10,6 +10,7 @@
 #import "BBQCookieOrder.h"
 
 @class BBQCookie;
+@class BBQPowerup;
 
 typedef NS_ENUM(NSUInteger, ChainType) {
     ChainTypeHorizontal,

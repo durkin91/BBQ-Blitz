@@ -183,6 +183,41 @@
         for (NSInteger index = 0; index < [multicookie.powerup.arraysOfDisappearingCookies count]; index ++) {
             [multicookie.powerup.arraysOfDisappearingCookies[index] removeObject:cookie];
         }
+        
+        //Now redistribute the other cookies evenly in the leftover arrays
+        NSMutableArray *allCookies = [NSMutableArray array];
+        for (NSInteger i = 1; i < [multicookie.powerup.arraysOfDisappearingCookies count]; i++) {
+            NSMutableArray *array = multicookie.powerup.arraysOfDisappearingCookies[i];
+            for (BBQCookie *cookie in array) {
+                [allCookies addObject:cookie];
+            }
+        }
+        
+        NSMutableArray *finalArrays = [BBQPowerup returnArrayOfCookiesRandomlyAssignedToArrays:allCookies];
+        [finalArrays insertObject:[multicookie.powerup.arraysOfDisappearingCookies firstObject] atIndex:0];
+        
+        multicookie.powerup.arraysOfDisappearingCookies = finalArrays;
+        
+        
+        
+        
+//        for (NSInteger index = 1; index < [multicookie.powerup.arraysOfDisappearingCookies count]; index ++) {
+//            NSMutableArray *array = multicookie.powerup.arraysOfDisappearingCookies[index];
+//            if ([array count] < 3 && index + 1 < [multicookie.powerup.arraysOfDisappearingCookies count]) {
+//                NSMutableArray *nextArray = multicookie.powerup.arraysOfDisappearingCookies[index + 1];
+//                if ([nextArray count] > 0) {
+//                    while ([array count] < 3 && [nextArray count] > 0) {
+//                        BBQCookie *cookieToMove = nextArray[0];
+//                        [array addObject:cookieToMove];
+//                        [nextArray removeObject:cookieToMove];
+//                        
+//                        if ([nextArray count] == 0) {
+//                            [multicookie.powerup.arraysOfDisappearingCookies removeObject:nextArray];
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 }
 
