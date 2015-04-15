@@ -143,15 +143,11 @@
 }
 
 - (void)calculateScoreForChain {
-//    if ([self.chain isATwoCookieChain]) {
-//        
-//    }
-//    else {
-//        
-//    }
     
-    self.chain.scorePerCookie = 30 + (([_chain.cookiesInChain count] - 2) * 10);
-    self.chain.score = self.chain.scorePerCookie * [self.chain.cookiesInChain count];
+    for (BBQCookie *cookie in self.chain.cookiesInChain) {
+        [cookie setScoreForCookieInChain:self.chain];
+        self.chain.score = self.chain.score + cookie.score;
+    }
     self.currentScore = self.currentScore + self.chain.score;
 }
 

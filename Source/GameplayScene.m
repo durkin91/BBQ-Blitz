@@ -559,18 +559,18 @@ static const CGFloat TileHeight = 36.0;
     return block;
 }
 
-- (void)animateScoreForCookies:(NSArray *)cookies scorePerCookie:(NSInteger)scorePerCookie {
+- (void)animateScoreForCookies:(NSArray *)cookies {
     for (BBQCookie *cookie in cookies) {
-        [self animateScoreForSingleCookie:cookie scorePerCookie:scorePerCookie];
+        [self animateScoreForSingleCookie:cookie];
     }
 }
 
-- (void)animateScoreForSingleCookie:(BBQCookie *)cookie scorePerCookie:(NSInteger)scorePerCookie {
+- (void)animateScoreForSingleCookie:(BBQCookie *)cookie {
     //Add a label for the score that slowly fades up
     CGPoint cookieSpriteWorldPos = [_cookiesLayer convertToWorldSpace:[GameplayScene pointForColumn:cookie.column row:cookie.row]];
     CGPoint relativeToSelfPos = [self convertToNodeSpace:cookieSpriteWorldPos];
     
-    NSString *score = [NSString stringWithFormat:@"%lu", (long)scorePerCookie];
+    NSString *score = [NSString stringWithFormat:@"%lu", (long)cookie.score];
     CCLabelTTF *scoreLabel = [CCLabelTTF labelWithString:score fontName:@"GillSans-BoldItalic" fontSize:12];
     scoreLabel.position = relativeToSelfPos;
     scoreLabel.zOrder = 300;
@@ -652,7 +652,7 @@ static const CGFloat TileHeight = 36.0;
     for (NSArray *array in cookie.powerup.arraysOfDisappearingCookies) {
         
         [array enumerateObjectsUsingBlock:^(BBQCookie *powerupCookie, NSUInteger idx, BOOL *stop) {
-            [self animateScoreForSingleCookie:powerupCookie scorePerCookie:cookie.powerup.scorePerCookie];
+            [self animateScoreForSingleCookie:powerupCookie];
             
             NSTimeInterval delay = 0.05*idx;
             
@@ -741,7 +741,7 @@ static const CGFloat TileHeight = 36.0;
 
 
 - (void)animateChain:(BBQChain *)chain completion:(dispatch_block_t)completion {
-    [self animateScoreForCookies:chain.cookiesInChain scorePerCookie:chain.scorePerCookie];
+    [self animateScoreForCookies:chain.cookiesInChain];
     [_drawNode clear];
     [_inProgressDrawNode clear];
     

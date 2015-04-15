@@ -18,7 +18,6 @@
 @interface BBQPowerup : NSObject
 
 @property (assign, nonatomic) NSInteger type;
-@property (assign, nonatomic) NSInteger scorePerCookie;
 @property (assign, nonatomic) NSInteger totalScore;
 @property (strong, nonatomic) NSMutableArray *arraysOfDisappearingCookies;
 @property (strong, nonatomic) NSMutableArray *upgradedMuliticookiePowerupCookiesThatNeedreplacing;

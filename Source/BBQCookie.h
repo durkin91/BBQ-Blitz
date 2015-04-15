@@ -13,6 +13,7 @@
 
 @class BBQCookieOrder;
 @class BBQCombo;
+@class BBQChain;
 
 static const NSUInteger NumCookieTypes = 6;
 static const NSUInteger NumStartingCookies = 3;
@@ -27,6 +28,7 @@ static const NSUInteger NumStartingCookies = 3;
 @property (assign, nonatomic) NSInteger countdown;
 @property (strong, nonatomic) BBQPowerup *powerup;
 @property (strong, nonatomic) BBQCookieOrder *cookieOrder;
+@property (assign, nonatomic) NSInteger score;
 
 
 
@@ -35,5 +37,6 @@ static const NSUInteger NumStartingCookies = 3;
 - (NSString *)highlightedSpriteName;
 - (CCColor *)lineColor;
 - (BOOL)canBeChainedToCookie:(BBQCookie *)potentialCookie isFirstCookieInChain:(BOOL)isFirstCookieInChain ;
+- (void)setScoreForCookieInChain:(BBQChain *)chain;
 
 @end

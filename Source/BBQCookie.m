@@ -182,6 +182,25 @@
     return answer;
 }
 
+- (void)setScoreForCookieInChain:(BBQChain *)chain {
+    
+    if ([self.powerup canBeDetonatedWithoutAChain] && self.powerup.isCurrentlyTemporary == NO) {
+        self.score = 150;
+    }
+    
+    else if ([self.powerup isAMultiCookie] && self.powerup.isCurrentlyTemporary == NO) {
+        self.score = 200;
+    }
+    
+    else if ([self.powerup isARobbersSack] && self.powerup.isCurrentlyTemporary == NO) {
+        self.score = 300;
+    }
+    
+    else {
+        self.score = 30 + (([chain.cookiesInChain count] - 2) * 10);
+    }
+}
+
 
 - (NSString *)description {
     return [NSString stringWithFormat:@"type:%ld square:(%ld, %ld)", (long)self.cookieType, (long)self.column, (long)self.row];

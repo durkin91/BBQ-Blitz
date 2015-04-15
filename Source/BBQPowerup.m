@@ -20,7 +20,6 @@
         self.type = type;
         self.isCurrentlyTemporary = YES;
         self.isReadyToDetonate = NO;
-        self.scorePerCookie = 10;
         
         if ([direction isEqualToString:RIGHT] || [direction isEqualToString:LEFT]) {
             self.direction = HORIZONTAL;
@@ -188,7 +187,25 @@
 - (void)scorePowerup {
     
     for (NSArray *array in self.arraysOfDisappearingCookies) {
-        self.totalScore = self.totalScore + ([array count] * self.scorePerCookie);
+        for (BBQCookie *cookie in array) {
+            if ([cookie.powerup canBeDetonatedWithoutAChain]) {
+                cookie.score = 150;
+            }
+            else if ([cookie.powerup isAPivotPad]) {
+                cookie.score = 250;
+            }
+            else if ([cookie.powerup isAMultiCookie]) {
+                cookie.score = 300;
+            }
+            else if ([cookie.powerup isARobbersSack]) {
+                cookie.score = 500;
+            }
+            else {
+                cookie.score = 30;
+            }
+            
+            self.totalScore = self.totalScore + cookie.score;
+        }
     }
 }
 
