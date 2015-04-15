@@ -434,6 +434,8 @@
 
 - (NSArray *)topUpCookiesWithOptionalUpgradedMultiCookie:(BBQCookie *)multiCookie poweruppedCookieChainedToMulticookie:(BBQCookie *)poweruppedCookie {
     
+    NSMutableArray *potentialCookiesToUpgrade;
+    
     NSMutableArray *columns = [NSMutableArray array];
     NSUInteger cookieType = 0;
     
@@ -452,22 +454,12 @@
                 BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
                 
                 //Add a powerup if required
-                if ([multiCookie.powerup.upgradedMuliticookiePowerupCookiesThatNeedreplacing count] > 0 && cookieType == poweruppedCookie.cookieType) {
-                    NSInteger random = arc4random_uniform(2) + 1;
-                    NSString *direction;
-                    if (random == 1) {
-                        direction = RIGHT;
+                if (multiCookie && cookieType == poweruppedCookie.cookieType) {
+                    if (!potentialCookiesToUpgrade) {
+                        potentialCookiesToUpgrade = [NSMutableArray array];
                     }
-                    else {
-                        direction = UP;
-                    }
+                    [potentialCookiesToUpgrade addObject:cookie];
                     
-                    cookie.powerup = [[BBQPowerup alloc] initWithType:poweruppedCookie.powerup.type direction:direction];
-                    cookie.powerup.isCurrentlyTemporary = NO;
-                    cookie.powerup.isReadyToDetonate = YES;
-                    
-                    [multiCookie.powerup.upgradedMuliticookiePowerupCookiesThatNeedreplacing removeLastObject];
-                    [multiCookie.powerup addNewlyCreatedPowerupToArraysOfPowerupsToDetonate:cookie];
                 }
                 
                 if (!array) {
@@ -478,6 +470,30 @@
             }
         }
     }
+    
+    while ([multiCookie.powerup.upgradedMuliticookiePowerupCookiesThatNeedreplacing count] > 0 && [potentialCookiesToUpgrade count] > 0) {
+        NSInteger randomIndex = arc4random_uniform([potentialCookiesToUpgrade count]);
+        BBQCookie *cookie = potentialCookiesToUpgrade[randomIndex];
+        
+        NSInteger random = arc4random_uniform(2) + 1;
+        NSString *direction;
+        if (random == 1) {
+            direction = RIGHT;
+        }
+        else {
+            direction = UP;
+        }
+        
+        cookie.powerup = [[BBQPowerup alloc] initWithType:poweruppedCookie.powerup.type direction:direction];
+        cookie.powerup.isCurrentlyTemporary = NO;
+        cookie.powerup.isReadyToDetonate = YES;
+        
+        [multiCookie.powerup.upgradedMuliticookiePowerupCookiesThatNeedreplacing removeLastObject];
+        [potentialCookiesToUpgrade removeObject:cookie];
+        
+        [multiCookie.powerup addNewlyCreatedPowerupToArraysOfPowerupsToDetonate:cookie];
+    }
+    
     return columns;
 }
 
