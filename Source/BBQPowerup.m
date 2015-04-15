@@ -187,24 +187,29 @@
 - (void)scorePowerup {
     
     for (NSArray *array in self.arraysOfDisappearingCookies) {
-        for (BBQCookie *cookie in array) {
-            if ([cookie.powerup canBeDetonatedWithoutAChain]) {
-                cookie.score = 150;
-            }
-            else if ([cookie.powerup isAPivotPad]) {
-                cookie.score = 250;
-            }
-            else if ([cookie.powerup isAMultiCookie]) {
-                cookie.score = 300;
-            }
-            else if ([cookie.powerup isARobbersSack]) {
-                cookie.score = 500;
-            }
-            else {
-                cookie.score = 30;
-            }
+        for (id object in array) {
+            if ([object isKindOfClass:[BBQCookie class]]) {
+                BBQCookie *cookie = object;
             
-            self.totalScore = self.totalScore + cookie.score;
+                if ([cookie.powerup canBeDetonatedWithoutAChain]) {
+                    cookie.score = 150;
+                }
+                else if ([cookie.powerup isAPivotPad]) {
+                    cookie.score = 250;
+                }
+                else if ([cookie.powerup isAMultiCookie]) {
+                    cookie.score = 300;
+                }
+                else if ([cookie.powerup isARobbersSack]) {
+                    cookie.score = 500;
+                }
+                else {
+                    cookie.score = 30;
+                }
+                
+                self.totalScore = self.totalScore + cookie.score;
+
+            }
         }
     }
 }
@@ -215,10 +220,13 @@
     for (BBQCookieOrder *cookieOrder in cookieOrders) {
         NSInteger x = 0;
         for (NSArray *array in self.arraysOfDisappearingCookies) {
-            for (BBQCookie *cookie in array) {
-                if (cookieOrder.cookie.cookieType == cookie.cookieType && cookieOrder.quantityLeft > 0 && !cookie.powerup) {
-                    cookie.cookieOrder = cookieOrder;
-                    x++;
+            for (id object in array) {
+                if ([object isKindOfClass:[BBQCookie class]]) {
+                    BBQCookie *cookie = object;
+                    if (cookieOrder.cookie.cookieType == cookie.cookieType && cookieOrder.quantityLeft > 0 && !cookie.powerup) {
+                        cookie.cookieOrder = cookieOrder;
+                        x++;
+                    }
                 }
             }
         }
@@ -228,7 +236,6 @@
 }
 
 - (void)destroyCookieAtColumn:(NSInteger)column row:(NSInteger)row array:(NSMutableArray *)array {
-    
     BBQCookie *cookie = [_level cookieAtColumn:column row:row];
     if (cookie != nil) {
         [_level replaceCookieAtColumn:column row:row withCookie:nil];
@@ -237,6 +244,9 @@
         if (cookie.powerup) {
             cookie.powerup.isReadyToDetonate = YES;
         }
+    }
+    else {
+        [array addObject:[NSNull null]];
     }
 }
 
