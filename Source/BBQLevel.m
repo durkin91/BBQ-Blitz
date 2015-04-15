@@ -467,7 +467,7 @@
                     cookie.powerup.isReadyToDetonate = YES;
                     
                     [multiCookie.powerup.upgradedMuliticookiePowerupCookiesThatNeedreplacing removeLastObject];
-                    
+                    [multiCookie.powerup addNewlyCreatedPowerupToArraysOfPowerupsToDetonate:cookie];
                 }
                 
                 if (!array) {

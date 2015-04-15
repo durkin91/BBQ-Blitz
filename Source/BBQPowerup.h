@@ -34,6 +34,7 @@
 - (BOOL)canOnlyJoinWithCookieNextToIt;
 - (NSMutableArray *)returnArrayOfCookiesRandomlyAssignedToArrays:(NSMutableArray *)oldArray;
 - (void)removeUndetonatedPowerupFromArraysOfPowerupsToDetonate:(BBQCookie *)cookie;
+- (void)addNewlyCreatedPowerupToArraysOfPowerupsToDetonate:(BBQCookie *)cookie;
 
 - (BOOL)isAPivotPad;
 - (BOOL)isAMultiCookie;

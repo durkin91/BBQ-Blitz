@@ -466,13 +466,7 @@
     }
     
     //Now redistribute the other cookies evenly in the leftover arrays
-    NSMutableArray *allCookies = [NSMutableArray array];
-    for (NSInteger i = 1; i < [self.arraysOfDisappearingCookies count]; i++) {
-        NSMutableArray *array = self.arraysOfDisappearingCookies[i];
-        for (BBQCookie *cookie in array) {
-            [allCookies addObject:cookie];
-        }
-    }
+    NSMutableArray *allCookies = [self singleArrayContainingAllCookiesToRemove];
     
     NSMutableArray *finalArrays = [self returnArrayOfCookiesRandomlyAssignedToArrays:allCookies];
     [finalArrays insertObject:[self.arraysOfDisappearingCookies firstObject] atIndex:0];
@@ -483,6 +477,31 @@
         self.upgradedMuliticookiePowerupCookiesThatNeedreplacing = [NSMutableArray array];
     }
     [self.upgradedMuliticookiePowerupCookiesThatNeedreplacing addObject:cookie];
+}
+
+- (void)addNewlyCreatedPowerupToArraysOfPowerupsToDetonate:(BBQCookie *)cookie {
+    NSMutableArray *lastArray = [self.arraysOfDisappearingCookies lastObject];
+    if ([lastArray count] < 3) {
+        [lastArray addObject:cookie];
+    }
+    else {
+        NSMutableArray *newArray = [NSMutableArray array];
+        [newArray addObject:cookie];
+        [self.arraysOfDisappearingCookies addObject:newArray];
+    }
+}
+
+#pragma mark - Helper methods
+
+- (NSMutableArray *)singleArrayContainingAllCookiesToRemove {
+    NSMutableArray *allCookies = [NSMutableArray array];
+    for (NSInteger i = 1; i < [self.arraysOfDisappearingCookies count]; i++) {
+        NSMutableArray *array = self.arraysOfDisappearingCookies[i];
+        for (BBQCookie *cookie in array) {
+            [allCookies addObject:cookie];
+        }
+    }
+    return allCookies;
 }
 
 
