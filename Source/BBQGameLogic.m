@@ -121,7 +121,6 @@
     
     [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
     [cookie.powerup performPowerupWithLevel:self.level cookie:cookie cookieTypeToCollect:cookieTypeToCollect];
-    [cookie.powerup removeDuplicateCookiesFromChainsCookies:self.chain.cookiesInChain];
     [cookie.powerup scorePowerup];
     [cookie.powerup addCookieOrders:self.level.cookieOrders];
 }

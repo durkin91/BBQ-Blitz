@@ -183,17 +183,6 @@
     }
 }
 
-- (void)removeDuplicateCookiesFromChainsCookies:(NSArray *)cookiesInChain {
-    for (BBQCookie *cookie in cookiesInChain) {
-        for (NSMutableArray *array in self.arraysOfDisappearingCookies) {
-            if ([array containsObject:cookie]) {
-                [array removeObject:cookie];
-                break;
-            }
-        }
-    }
-}
-
 - (void)addCookieOrders:(NSArray *)cookieOrders {
     
     //find the right order
@@ -290,7 +279,7 @@
         for (NSInteger column = 0; column < NumColumns; column ++) {
             for (NSInteger row = 0; row < NumRows; row++) {
                 BBQCookie *cookie = [_level cookieAtColumn:column row:row];
-                if (cookie.cookieType == cookieType.cookieType) {
+                if (cookie.cookieType == cookieType.cookieType && [cookie isEqual:cookieType] == NO) {
                     [array addObject:cookie];
                 }
             }
@@ -448,7 +437,7 @@
             NSInteger random = arc4random_uniform(2) + 1;
             NSString *direction;
             if (random == 1) {
-                direction = UP;
+                direction = RIGHT;
             }
             else {
                 direction = UP;
@@ -459,6 +448,7 @@
         }
         
         self.arraysOfDisappearingCookies = [BBQPowerup returnArrayOfCookiesRandomlyAssignedToArrays:oldArray];
+        [self.arraysOfDisappearingCookies[0] addObject:cookieType];
     }
 
 }

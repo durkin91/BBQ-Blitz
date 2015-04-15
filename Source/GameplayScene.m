@@ -802,7 +802,7 @@ static const CGFloat TileHeight = 36.0;
         [self removeHighlightFromCookie:cookie];
         CCActionSequence *sequence = [self animateCookieOrderCollection:cookie];
         [cookie.sprite runAction:sequence];
-        cookie.sprite = nil;
+        //cookie.sprite = nil;
     }
     
     
@@ -810,7 +810,7 @@ static const CGFloat TileHeight = 36.0;
         CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:duration scale:0.1];
         [cookie.sprite runAction:[CCActionSequence actions:scaleAction, [CCActionRemove action], nil]];
         
-        cookie.sprite = nil;
+        //cookie.sprite = nil;
     }
 }
 
