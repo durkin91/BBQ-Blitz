@@ -122,7 +122,13 @@
     [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
     [cookie.powerup performPowerupWithLevel:self.level cookie:cookie cookieTypeToCollect:cookieTypeToCollect];
     [cookie.powerup scorePowerup];
-    [cookie.powerup addCookieOrders:self.level.cookieOrders];
+    
+    if ([cookie.powerup isAMultiCookie] == YES && [self.chain isAMultiCookieUpgradedPowerupChain] == YES) {
+        return;
+    }
+    else {
+        [cookie.powerup addCookieOrders:self.level.cookieOrders];
+    }
 }
 
 - (void)addPowerupScoreToCurrentScore:(BBQPowerup *)powerup {
@@ -137,9 +143,16 @@
 }
 
 - (void)calculateScoreForChain {
-    _chain.scorePerCookie = 30 + (([_chain.cookiesInChain count] - 2) * 10);
-    _chain.score = _chain.scorePerCookie * [_chain.cookiesInChain count];
-    self.currentScore = self.currentScore + _chain.score;
+//    if ([self.chain isATwoCookieChain]) {
+//        
+//    }
+//    else {
+//        
+//    }
+    
+    self.chain.scorePerCookie = 30 + (([_chain.cookiesInChain count] - 2) * 10);
+    self.chain.score = self.chain.scorePerCookie * [self.chain.cookiesInChain count];
+    self.currentScore = self.currentScore + self.chain.score;
 }
 
 - (BBQCookie *)lastCookieInChain {

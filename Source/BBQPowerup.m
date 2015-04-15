@@ -186,6 +186,7 @@
 }
 
 - (void)scorePowerup {
+    
     for (NSArray *array in self.arraysOfDisappearingCookies) {
         self.totalScore = self.totalScore + ([array count] * self.scorePerCookie);
     }
