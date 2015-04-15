@@ -432,7 +432,8 @@
     return columns;
 }
 
-- (NSArray *)topUpCookies {
+- (NSArray *)topUpCookiesWithOptionalUpgradedMultiCookie:(BBQCookie *)multiCookie poweruppedCookieChainedToMulticookie:(BBQCookie *)poweruppedCookie {
+    
     NSMutableArray *columns = [NSMutableArray array];
     NSUInteger cookieType = 0;
     
@@ -449,6 +450,25 @@
                 cookieType = newCookieType;
                 
                 BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
+                
+                //Add a powerup if required
+                if ([multiCookie.powerup.upgradedMuliticookiePowerupCookiesThatNeedreplacing count] > 0 && cookieType == poweruppedCookie.cookieType) {
+                    NSInteger random = arc4random_uniform(2) + 1;
+                    NSString *direction;
+                    if (random == 1) {
+                        direction = RIGHT;
+                    }
+                    else {
+                        direction = UP;
+                    }
+                    
+                    cookie.powerup = [[BBQPowerup alloc] initWithType:poweruppedCookie.powerup.type direction:direction];
+                    cookie.powerup.isCurrentlyTemporary = NO;
+                    cookie.powerup.isReadyToDetonate = YES;
+                    
+                    [multiCookie.powerup.upgradedMuliticookiePowerupCookiesThatNeedreplacing removeLastObject];
+                    
+                }
                 
                 if (!array) {
                     array = [NSMutableArray array];

@@ -272,6 +272,20 @@
     else return NO;
 }
 
+- (NSArray *)topUpCookiesWithMultiCookie:(BBQCookie *)multiCookie {
+    NSArray *columns;
+    if (multiCookie) {
+        BBQCookie *upgradedPowerup = [self.chain returnPowerupJoinedToMultiCookie];
+        columns = [self.level topUpCookiesWithOptionalUpgradedMultiCookie:multiCookie poweruppedCookieChainedToMulticookie:upgradedPowerup];
+    }
+    
+    else {
+        columns = [self.level topUpCookiesWithOptionalUpgradedMultiCookie:nil poweruppedCookieChainedToMulticookie:nil];
+    }
+
+    return columns;
+}
+
 
 #pragma mark - Obstacle methods
 

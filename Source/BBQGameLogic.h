@@ -52,5 +52,6 @@
 - (BOOL)doesNotRequireInProgressLine;
 - (BOOL)isFirstCookieInChain:(BBQCookie *)cookie;
 - (BOOL)isAnUpgradedMultiCookiePowerup:(BBQCookie *)cookie;
+- (NSArray *)topUpCookiesWithMultiCookie:(BBQCookie *)multiCookie;
 
 @end

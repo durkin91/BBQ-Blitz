@@ -350,7 +350,7 @@ static const CGFloat TileHeight = 36.0;
             NSArray *columns = [self.gameLogic.level fillHoles];
             [self animateFallingCookies:columns completion:^{
                 
-                NSArray *columns = [self.gameLogic.level topUpCookies];
+                NSArray *columns = [self.gameLogic topUpCookiesWithMultiCookie:nil];
                 [self animateNewCookies:columns completion:^{
                     
                     [self beginNextTurn];
@@ -712,7 +712,7 @@ static const CGFloat TileHeight = 36.0;
         NSArray *columns = [self.gameLogic.level fillHoles];
         fillHolesDuration = [self animateFallingCookies:columns completion:^{
             
-            NSArray *columns = [self.gameLogic.level topUpCookies];
+            NSArray *columns = [self.gameLogic topUpCookiesWithMultiCookie:multiCookie];
             topUpCookiesDuration = [self animateNewCookies:columns completion:^{
                 
                 [multiCookie.powerup.arraysOfDisappearingCookies removeObject:array];

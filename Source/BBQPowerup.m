@@ -478,6 +478,11 @@
     [finalArrays insertObject:[self.arraysOfDisappearingCookies firstObject] atIndex:0];
     
     self.arraysOfDisappearingCookies = finalArrays;
+    
+    if (!self.upgradedMuliticookiePowerupCookiesThatNeedreplacing) {
+        self.upgradedMuliticookiePowerupCookiesThatNeedreplacing = [NSMutableArray array];
+    }
+    [self.upgradedMuliticookiePowerupCookiesThatNeedreplacing addObject:cookie];
 }
 
 

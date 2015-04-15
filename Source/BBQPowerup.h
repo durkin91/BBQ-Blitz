@@ -21,6 +21,7 @@
 @property (assign, nonatomic) NSInteger scorePerCookie;
 @property (assign, nonatomic) NSInteger totalScore;
 @property (strong, nonatomic) NSMutableArray *arraysOfDisappearingCookies;
+@property (strong, nonatomic) NSMutableArray *upgradedMuliticookiePowerupCookiesThatNeedreplacing;
 @property (strong, nonatomic) NSString *direction;
 @property (assign, nonatomic) BOOL isCurrentlyTemporary;
 @property (assign, nonatomic) BOOL isReadyToDetonate;
