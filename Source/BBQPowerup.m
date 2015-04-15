@@ -113,6 +113,14 @@
     else return NO;
 }
 
+//Box, type 6 or criss cross
+- (BOOL)canBeDetonatedWithoutAChain {
+    if (self.type == 6 || self.type == 20 || self.type == 30) {
+        return YES;
+    }
+    else return NO;
+}
+
 - (BOOL)isAPivotPad {
     if (self.type == 9) return YES;
     else return NO;
@@ -213,26 +221,6 @@
         }
     }
 }
-
-//- (void)destroyOneCookieVertically:(BBQCookie *)rootCookie {
-//    NSInteger rootRow = rootCookie.row;
-//    if (rootRow < NumRows - 1) {
-//        [self destroyCookieAtColumn:rootCookie.column row:rootRow + 1];
-//    }
-//    if (rootRow >= 1) {
-//        [self destroyCookieAtColumn:rootCookie.column row:rootRow - 1];
-//    }
-//}
-//
-//- (void)destroyOneCookieHorizontally:(BBQCookie *)rootCookie {
-//    NSInteger rootColumn = rootCookie.column;
-//    if (rootColumn < NumColumns - 1) {
-//        [self destroyCookieAtColumn:rootColumn + 1 row:rootCookie.row];
-//    }
-//    if (rootColumn >= 1) {
-//        [self destroyCookieAtColumn:rootColumn - 1 row:rootCookie.row];
-//    }
-//}
 
 - (void)destroyEntireColumnOfCookies:(BBQCookie *)rootCookie {
     
@@ -447,13 +435,13 @@
             cookie.powerup.isCurrentlyTemporary = YES;
         }
         
-        self.arraysOfDisappearingCookies = [BBQPowerup returnArrayOfCookiesRandomlyAssignedToArrays:oldArray];
+        self.arraysOfDisappearingCookies = [self returnArrayOfCookiesRandomlyAssignedToArrays:oldArray];
         [self.arraysOfDisappearingCookies[0] addObject:cookieType];
     }
 
 }
 
-+ (NSMutableArray *)returnArrayOfCookiesRandomlyAssignedToArrays:(NSMutableArray *)oldArray {
+- (NSMutableArray *)returnArrayOfCookiesRandomlyAssignedToArrays:(NSMutableArray *)oldArray {
     NSMutableArray *allArrays = [NSMutableArray array];
     while ([oldArray count] > 0) {
         NSMutableArray *newArray = [NSMutableArray array];
@@ -470,6 +458,26 @@
     return allArrays;
 }
 
+- (void)removeUndetonatedPowerupFromArraysOfPowerupsToDetonate:(BBQCookie *)cookie {
+    
+    for (NSInteger index = 0; index < [self.arraysOfDisappearingCookies count]; index ++) {
+        [self.arraysOfDisappearingCookies[index] removeObject:cookie];
+    }
+    
+    //Now redistribute the other cookies evenly in the leftover arrays
+    NSMutableArray *allCookies = [NSMutableArray array];
+    for (NSInteger i = 1; i < [self.arraysOfDisappearingCookies count]; i++) {
+        NSMutableArray *array = self.arraysOfDisappearingCookies[i];
+        for (BBQCookie *cookie in array) {
+            [allCookies addObject:cookie];
+        }
+    }
+    
+    NSMutableArray *finalArrays = [self returnArrayOfCookiesRandomlyAssignedToArrays:allCookies];
+    [finalArrays insertObject:[self.arraysOfDisappearingCookies firstObject] atIndex:0];
+    
+    self.arraysOfDisappearingCookies = finalArrays;
+}
 
 
 #pragma mark - combined powerups
@@ -505,61 +513,6 @@
     [self removeAllCookiesInLayersAroundBlast:rootCookie numberOfLayers:2];
 }
 
-//- (void)destroyRowAndColumnAndAroundRootCookie:(BBQCookie *)rootCookie {
-//    
-//    
-//    [self destroyEntireRowOfCookies:rootCookie];
-//    [self destroyEntireColumnOfCookies:rootCookie];
-//    
-//    //Left side
-//    NSInteger x = 1;
-//    NSInteger leftColumn = rootCookie.column - x;
-//    while (leftColumn >= 0 && x <= 2) {
-//        NSInteger row = rootCookie.row + 2;
-//        for (int i = 0; i <= 4; i ++) {
-//            if (row < NumRows && row > 0) {
-//                [self destroyCookieAtColumn:leftColumn row:row - i];
-//                
-//            }
-//            i++;
-//        }
-//    }
-//    
-//    //Right side
-//    x = 1;
-//    NSInteger rightColumn = rootCookie.column + x;
-//    while (rightColumn < NumColumns && x <= 2) {
-//        NSInteger row = rootCookie.row + 2;
-//        for (int i = 0; i <= 4; i ++) {
-//            if (row < NumRows && row > 0) {
-//                [self destroyCookieAtColumn:rightColumn row:row - i];
-//            }
-//            i++;
-//        }
-//    }
-//    
-//}
-//
-//- (void)destroyThreeByThree:(BBQCookie *)rootCookie {
-//    [self destroyEntireColumnOfCookies:rootCookie];
-//    [self destroyEntireRowOfCookies:rootCookie];
-//    
-//    for (int i = 0; i < NumColumns; i ++) {
-//        [self destroyCookieAtColumn:i row:rootCookie.row + 1];
-//    }
-//    
-//    for (int i = 0; i < NumColumns; i ++) {
-//        [self destroyCookieAtColumn:i row:rootCookie.row - 1];
-//    }
-//    
-//    for (int i = 0; i < NumRows; i ++) {
-//        [self destroyCookieAtColumn:rootCookie.column + 1 row:i];
-//    }
-//    
-//    for (int i = 0; i < NumRows; i ++) {
-//        [self destroyCookieAtColumn:rootCookie.column - 1 row:i];
-//    }
-// 
-//}
+
 
 @end

@@ -28,11 +28,11 @@
 
 - (instancetype)initWithType:(NSInteger)type direction:(NSString *)swipeDirection;
 - (void)performPowerupWithLevel:(BBQLevel *)level cookie:(BBQCookie *)rootCookie cookieTypeToCollect:(BBQCookie *)cookieTypeToCollect;
-- (void)removeDuplicateCookiesFromChainsCookies:(NSArray *)cookiesInChain;
 - (void)scorePowerup;
 - (void)addCookieOrders:(NSArray *)cookieOrders;
 - (BOOL)canOnlyJoinWithCookieNextToIt;
-+ (NSMutableArray *)returnArrayOfCookiesRandomlyAssignedToArrays:(NSMutableArray *)oldArray;
+- (NSMutableArray *)returnArrayOfCookiesRandomlyAssignedToArrays:(NSMutableArray *)oldArray;
+- (void)removeUndetonatedPowerupFromArraysOfPowerupsToDetonate:(BBQCookie *)cookie;
 
 - (BOOL)isAPivotPad;
 - (BOOL)isAMultiCookie;
@@ -46,6 +46,7 @@
 - (BOOL)isATypeSixWithCrissCrossCombo;
 - (BOOL)isaTypeSixWithBoxCombo;
 - (BOOL)isABoxAndCrissCrossCombo;
+- (BOOL)canBeDetonatedWithoutAChain;
 
 
 @end

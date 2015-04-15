@@ -647,7 +647,6 @@ static const CGFloat TileHeight = 36.0;
     //Take care of root cookie
     CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:scaleActionDuration scale:0.1];
     [cookie.sprite runAction:[CCActionSequence actions:scaleAction, [CCActionRemove action], nil]];
-    //cookie.sprite = nil;
     longestDuration = scaleActionDuration;
     
     for (NSArray *array in cookie.powerup.arraysOfDisappearingCookies) {
@@ -658,7 +657,13 @@ static const CGFloat TileHeight = 36.0;
             NSTimeInterval delay = 0.05*idx;
             
             CCActionCallBlock *action = [CCActionCallBlock actionWithBlock:^{
+                
+//                if ([self.gameLogic.chain isAMultiCookieUpgradedPowerupChain] && [self.gameLogic.chain returnPowerupJoinedToMultiCookie].cookieType != powerupCookie.cookieType && [powerupCookie.powerup canBeDetonatedWithoutAChain]) {
+//                    [self animateCookieRemoval:powerupCookie powerupDuration:longestDuration scaleActionDuration:scaleActionDuration detonatePowerupsWithinArray:YES];
+//                }
+                
                 [self animateCookieRemoval:powerupCookie powerupDuration:longestDuration scaleActionDuration:scaleActionDuration detonatePowerupsWithinArray:detonatePowerupsWithinArray];
+
             }];
             
             longestDuration = MAX(longestDuration, scaleActionDuration + delay);
@@ -790,12 +795,15 @@ static const CGFloat TileHeight = 36.0;
 }
 
 - (void)animateCookieRemoval:(BBQCookie *)cookie powerupDuration:(NSTimeInterval)powerupDuration scaleActionDuration:(NSTimeInterval)duration detonatePowerupsWithinArray:(BOOL)detonatePowerupsWithinArray {
+    //Refers to all non upgraded multicookie powerups
     if (cookie.powerup.isReadyToDetonate && detonatePowerupsWithinArray == YES) {
         [self animatePowerupForCookie:cookie detonatePowerupsWithinArray:detonatePowerupsWithinArray];
     }
     
+    //Refers to all upgraded multicookie powerup cookies
     else if (cookie.powerup.isReadyToDetonate && detonatePowerupsWithinArray == NO) {
-        [self.gameLogic.chain removeUndetonatedPowerupFromArraysOfPowerupsToDetonate:cookie];
+        BBQCookie *multicookie = [self.gameLogic.chain returnMultiCookieInMultiCookiePowerup];
+        [multicookie.powerup removeUndetonatedPowerupFromArraysOfPowerupsToDetonate:cookie];
     }
     
     if (cookie.cookieOrder && cookie.sprite != nil) {
