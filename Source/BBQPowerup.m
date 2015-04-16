@@ -41,10 +41,10 @@
     switch (self.type) {
         case 6:
             if ([self.direction isEqualToString:HORIZONTAL]) {
-                [self destroyEntireRowOfCookies:rootCookie];
+                [self destroyEntireRowOfCookies:rootCookie numberOfLayers:100];
             }
             else if ([self.direction isEqualToString:VERTICAL]) {
-                [self destroyEntireColumnOfCookies:rootCookie];
+                [self destroyEntireColumnOfCookies:rootCookie numberOfLayers:100];
             }
             break;
             
@@ -56,17 +56,17 @@
             break;
             
         case 15:
-            [self removeAllCookiesInLayersAroundBlast:rootCookie numberOfLayers:20];
+            [self destroyAllCookiesAroundBlast:rootCookie numberOfLayers:100];
             break;
         
         //Criss Cross
         case 20:
-            [self destroyCrissCrossCookies:rootCookie];
+            [self destroyCrissCrossCookies:rootCookie numberOfLayers:100];
             break;
         
         //Box powerup
         case 30:
-            [self removeAllCookiesInLayersAroundBlast:rootCookie numberOfLayers:1];
+            [self destroyAllCookiesAroundBlast:rootCookie numberOfLayers:1];
             break;
             
         //Combine 2 type six powerups
@@ -250,37 +250,45 @@
     }
 }
 
-- (void)destroyEntireColumnOfCookies:(BBQCookie *)rootCookie {
+- (void)destroyEntireColumnOfCookies:(BBQCookie *)rootCookie numberOfLayers:(NSInteger)numberOfLayers {
     
     //ABOVE
+    NSInteger x = numberOfLayers;
     NSMutableArray *above = [NSMutableArray array];
     [self.arraysOfDisappearingCookies addObject:above];
-    for (NSInteger i = rootCookie.row + 1; i < NumRows; i ++) {
+    for (NSInteger i = rootCookie.row + 1; i < NumRows && x > 0; i ++) {
         [self destroyCookieAtColumn:rootCookie.column row:i array:above];
+        x--;
     }
     
     //BELOW
+    x = numberOfLayers;
     NSMutableArray *below = [NSMutableArray array];
     [self.arraysOfDisappearingCookies addObject:below];
-    for (NSInteger i = rootCookie.row - 1; i >= 0; i--) {
+    for (NSInteger i = rootCookie.row - 1; i >= 0 && x > 0; i--) {
         [self destroyCookieAtColumn:rootCookie.column row:i array:below];
+        x--;
     }
 }
 
-- (void)destroyEntireRowOfCookies:(BBQCookie *)rootCookie {
+- (void)destroyEntireRowOfCookies:(BBQCookie *)rootCookie numberOfLayers:(NSInteger)numberOfLayers {
     
     //RIGHT
+    NSInteger x = numberOfLayers;
     NSMutableArray *right = [NSMutableArray array];
     [self.arraysOfDisappearingCookies addObject:right];
-    for (NSInteger i = rootCookie.column + 1; i < NumColumns; i ++) {
+    for (NSInteger i = rootCookie.column + 1; i < NumColumns && x > 0; i ++) {
         [self destroyCookieAtColumn:i row:rootCookie.row array:right];
+        x--;
     }
     
     //LEFT
+    x = numberOfLayers;
     NSMutableArray *left = [NSMutableArray array];
     [self.arraysOfDisappearingCookies addObject:left];
-    for (NSInteger i = rootCookie.column - 1; i >= 0; i--) {
+    for (NSInteger i = rootCookie.column - 1; i >= 0 && x > 0; i--) {
         [self destroyCookieAtColumn:i row:rootCookie.row array:left];
+        x--;
     }
 }
 
@@ -331,7 +339,7 @@
     }
 }
 
-- (void)destroyCrissCrossCookies:(BBQCookie *)rootCookie {
+- (void)destroyCrissCrossCookies:(BBQCookie *)rootCookie numberOfLayers:(NSInteger)numberOfLayers {
     NSInteger rootColumn = rootCookie.column;
     NSInteger rootRow = rootCookie.row;
     NSInteger x = 1;
@@ -339,7 +347,7 @@
     //Top Left
     NSMutableArray *topLeft = [NSMutableArray array];
     [self.arraysOfDisappearingCookies addObject:topLeft];
-    while (rootColumn - x >= 0 && rootRow + x < NumRows) {
+    while (rootColumn - x >= 0 && rootRow + x < NumRows && x <= numberOfLayers) {
         [self destroyCookieAtColumn:rootColumn - x row:rootRow + x array:topLeft];
         x++;
     }
@@ -348,7 +356,7 @@
     x = 1;
     NSMutableArray *topRight = [NSMutableArray array];
     [self.arraysOfDisappearingCookies addObject:topRight];
-    while (rootColumn + x < NumColumns && rootRow + x < NumRows) {
+    while (rootColumn + x < NumColumns && rootRow + x < NumRows && x <= numberOfLayers) {
         [self destroyCookieAtColumn:rootColumn + x row:rootRow + x array:topRight];
         x++;
     }
@@ -357,7 +365,7 @@
     x = 1;
     NSMutableArray *bottomLeft = [NSMutableArray array];
     [self.arraysOfDisappearingCookies addObject:bottomLeft];
-    while (rootColumn - x >= 0 && rootRow - x >= 0) {
+    while (rootColumn - x >= 0 && rootRow - x >= 0 && x <= numberOfLayers) {
         [self destroyCookieAtColumn:rootColumn - x row:rootRow - x array:bottomLeft];
         x++;
     }
@@ -366,82 +374,208 @@
     x = 1;
     NSMutableArray *bottomRight = [NSMutableArray array];
     [self.arraysOfDisappearingCookies addObject:bottomRight];
-    while (rootColumn + x < NumColumns && rootRow - x >= 0) {
+    while (rootColumn + x < NumColumns && rootRow - x >= 0 && x <= numberOfLayers) {
         [self destroyCookieAtColumn:rootColumn + x row:rootRow - x array:bottomRight];
         x++;
     }
 }
 
-- (void)removeAllCookiesInLayersAroundBlast:(BBQCookie *)rootCookie numberOfLayers:(NSInteger)numberOfLayers {
-    BOOL isFinished = NO;
-    NSInteger x = 1;
-    NSInteger startRowOffset = 0;
-    NSInteger startColumnOffset = 1;
-    while (!isFinished) {
+- (void)destroyAllCookiesAroundBlast:(BBQCookie *)rootCookie numberOfLayers:(NSInteger)numberOfLayers {
+    
+    //ABOVE LEFT UPPER
+    NSInteger x = 2;
+    for (NSInteger column = rootCookie.column - 1; column >= 0 && x <= numberOfLayers; column --) {
         NSMutableArray *array = [NSMutableArray array];
-        
-        //Above
-        if (rootCookie.row + x < NumRows) {
-            for (NSInteger column = rootCookie.column - startColumnOffset; column <= rootCookie.column + startColumnOffset; column++) {
-                if (column >= 0 && column < NumColumns) {
-                    BBQCookie *cookie = [_level cookieAtColumn:column row:rootCookie.row + x];
-                    if (cookie) {
-                        [self destroyCookieAtColumn:column row:rootCookie.row + x array:array];
-                    }
-                }
-            }
+        [self.arraysOfDisappearingCookies addObject:array];
+        for (NSInteger i = x - 1; i > 0; i--) {
+            [array addObject:[NSNull null]];
         }
-        
-        //Below
-        if (rootCookie.row - x >= 0) {
-            for (NSInteger column = rootCookie.column - startColumnOffset; column <= rootCookie.column + startColumnOffset; column++) {
-                if (column >= 0 && column < NumColumns) {
-                    BBQCookie *cookie = [_level cookieAtColumn:column row:rootCookie.row - x];
-                    if (cookie) {
-                        [self destroyCookieAtColumn:column row:rootCookie.row - x array:array];
-                    }
-                }
-            }
+        for (NSInteger row = rootCookie.row + x; row < NumRows && [array count] < numberOfLayers; row++) {
+            [self destroyCookieAtColumn:column row:row array:array];
         }
-        
-        startColumnOffset ++;
-        
-        //Left
-        if (rootCookie.column + x < NumColumns) {
-            for (NSInteger row = rootCookie.row - startRowOffset; row <= rootCookie.row + startRowOffset; row ++) {
-                if (row >= 0 && row < NumRows) {
-                    BBQCookie *cookie = [_level cookieAtColumn:rootCookie.column + x row:row];
-                    if (cookie) {
-                        [self destroyCookieAtColumn:rootCookie.column + x row:row array:array];
-                    }
-                }
-            }
-        }
-        
-        //Right
-        if (rootCookie.column - x >= 0) {
-            for (NSInteger row = rootCookie.row - startRowOffset; row <= rootCookie.row + startRowOffset; row ++) {
-                if (row >= 0 && row < NumRows) {
-                    BBQCookie *cookie = [_level cookieAtColumn:rootCookie.column - x row:row];
-                    if (cookie) {
-                        [self destroyCookieAtColumn:rootCookie.column - x row:row array:array];
-                    }
-                }
-            }
-        }
-        
-        startRowOffset++;
         x++;
-        numberOfLayers --;
-        
-        if ([array count] > 0) {
-            [self.arraysOfDisappearingCookies addObject:array];
-        }
-        if ([array count] == 0 || numberOfLayers <= 0){
-            isFinished = YES;
-        }
     }
+    
+    //ABOVE RIGHT UPPER
+    x = 2;
+    for (NSInteger column = rootCookie.column + 1; column < NumColumns && x <= numberOfLayers; column ++) {
+        NSMutableArray *array = [NSMutableArray array];
+        [self.arraysOfDisappearingCookies addObject:array];
+        for (NSInteger i = x - 1; i > 0; i--) {
+            [array addObject:[NSNull null]];
+        }
+        for (NSInteger row = rootCookie.row + x; row < NumRows && [array count] < numberOfLayers; row++) {
+            [self destroyCookieAtColumn:column row:row array:array];
+        }
+        x++;
+    }
+    
+    //BELOW LEFT
+    x = 2;
+    for (NSInteger column = rootCookie.column - 1; column >= 0 && x <= numberOfLayers; column --) {
+        NSMutableArray *array = [NSMutableArray array];
+        [self.arraysOfDisappearingCookies addObject:array];
+        for (NSInteger i = x - 1; i > 0; i--) {
+            [array addObject:[NSNull null]];
+        }
+        for (NSInteger row = rootCookie.row - x; row >= 0 && [array count] < numberOfLayers; row--) {
+            [self destroyCookieAtColumn:column row:row array:array];
+        }
+        x++;
+    }
+    
+    //BELOW RIGHT
+    x = 2;
+    for (NSInteger column = rootCookie.column + 1; column < NumColumns && x <= numberOfLayers; column ++) {
+        NSMutableArray *array = [NSMutableArray array];
+        [self.arraysOfDisappearingCookies addObject:array];
+        for (NSInteger i = x - 1; i > 0; i--) {
+            [array addObject:[NSNull null]];
+        }
+        for (NSInteger row = rootCookie.row - x; row >= 0 && [array count] < numberOfLayers; row--) {
+            [self destroyCookieAtColumn:column row:row array:array];
+        }
+        x++;
+    }
+    
+    
+    //REVERSE OF THE ABOVE
+    
+    //ABOVE LEFT UPPER
+    x = 2;
+    for (NSInteger row = rootCookie.row - 1; row >= 0 && x <= numberOfLayers; row --) {
+        NSMutableArray *array = [NSMutableArray array];
+        [self.arraysOfDisappearingCookies addObject:array];
+        for (NSInteger i = x - 1; i > 0; i--) {
+            [array addObject:[NSNull null]];
+        }
+        for (NSInteger column = rootCookie.column + x; column < NumColumns && [array count] < numberOfLayers; column++) {
+            [self destroyCookieAtColumn:column row:row array:array];
+        }
+        x++;
+    }
+    
+    //ABOVE RIGHT UPPER
+    x = 2;
+    for (NSInteger row = rootCookie.row + 1; row < NumRows && x <= numberOfLayers; row ++) {
+        NSMutableArray *array = [NSMutableArray array];
+        [self.arraysOfDisappearingCookies addObject:array];
+        for (NSInteger i = x - 1; i > 0; i--) {
+            [array addObject:[NSNull null]];
+        }
+        for (NSInteger column = rootCookie.column + x; column < NumColumns && [array count] < numberOfLayers; column++) {
+            [self destroyCookieAtColumn:column row:row array:array];
+        }
+        x++;
+    }
+    
+    //BELOW LEFT
+    x = 2;
+    for (NSInteger row = rootCookie.row - 1; row >= 0 && x <= numberOfLayers; row --) {
+        NSMutableArray *array = [NSMutableArray array];
+        [self.arraysOfDisappearingCookies addObject:array];
+        for (NSInteger i = x - 1; i > 0; i--) {
+            [array addObject:[NSNull null]];
+        }
+        for (NSInteger column = rootCookie.column - x; column >= 0 && [array count] < numberOfLayers; column--) {
+            [self destroyCookieAtColumn:column row:row array:array];
+        }
+        x++;
+    }
+    
+    //BELOW RIGHT
+    x = 2;
+    for (NSInteger row = rootCookie.row + 1; row < NumRows && x <= numberOfLayers; row ++) {
+        NSMutableArray *array = [NSMutableArray array];
+        [self.arraysOfDisappearingCookies addObject:array];
+        for (NSInteger i = x - 1; i > 0; i--) {
+            [array addObject:[NSNull null]];
+        }
+        for (NSInteger column = rootCookie.column - x; column >= 0 && [array count] < numberOfLayers; column--) {
+            [self destroyCookieAtColumn:column row:row array:array];
+        }
+        x++;
+    }
+
+    
+    
+    //OTHER
+    [self destroyCrissCrossCookies:rootCookie numberOfLayers:numberOfLayers];
+    [self destroyEntireColumnOfCookies:rootCookie numberOfLayers:numberOfLayers];
+    [self destroyEntireRowOfCookies:rootCookie numberOfLayers:numberOfLayers];
+
 }
+
+//- (void)removeAllCookiesInLayersAroundBlast:(BBQCookie *)rootCookie numberOfLayers:(NSInteger)numberOfLayers {
+//    BOOL isFinished = NO;
+//    NSInteger x = 1;
+//    NSInteger startRowOffset = 0;
+//    NSInteger startColumnOffset = 1;
+//    while (!isFinished) {
+//        NSMutableArray *array = [NSMutableArray array];
+//        
+//        //Above
+//        if (rootCookie.row + x < NumRows) {
+//            for (NSInteger column = rootCookie.column - startColumnOffset; column <= rootCookie.column + startColumnOffset; column++) {
+//                if (column >= 0 && column < NumColumns) {
+//                    BBQCookie *cookie = [_level cookieAtColumn:column row:rootCookie.row + x];
+//                    if (cookie) {
+//                        [self destroyCookieAtColumn:column row:rootCookie.row + x array:array];
+//                    }
+//                }
+//            }
+//        }
+//        
+//        //Below
+//        if (rootCookie.row - x >= 0) {
+//            for (NSInteger column = rootCookie.column - startColumnOffset; column <= rootCookie.column + startColumnOffset; column++) {
+//                if (column >= 0 && column < NumColumns) {
+//                    BBQCookie *cookie = [_level cookieAtColumn:column row:rootCookie.row - x];
+//                    if (cookie) {
+//                        [self destroyCookieAtColumn:column row:rootCookie.row - x array:array];
+//                    }
+//                }
+//            }
+//        }
+//        
+//        startColumnOffset ++;
+//        
+//        //Left
+//        if (rootCookie.column + x < NumColumns) {
+//            for (NSInteger row = rootCookie.row - startRowOffset; row <= rootCookie.row + startRowOffset; row ++) {
+//                if (row >= 0 && row < NumRows) {
+//                    BBQCookie *cookie = [_level cookieAtColumn:rootCookie.column + x row:row];
+//                    if (cookie) {
+//                        [self destroyCookieAtColumn:rootCookie.column + x row:row array:array];
+//                    }
+//                }
+//            }
+//        }
+//        
+//        //Right
+//        if (rootCookie.column - x >= 0) {
+//            for (NSInteger row = rootCookie.row - startRowOffset; row <= rootCookie.row + startRowOffset; row ++) {
+//                if (row >= 0 && row < NumRows) {
+//                    BBQCookie *cookie = [_level cookieAtColumn:rootCookie.column - x row:row];
+//                    if (cookie) {
+//                        [self destroyCookieAtColumn:rootCookie.column - x row:row array:array];
+//                    }
+//                }
+//            }
+//        }
+//        
+//        startRowOffset++;
+//        x++;
+//        numberOfLayers --;
+//        
+//        if ([array count] > 0) {
+//            [self.arraysOfDisappearingCookies addObject:array];
+//        }
+//        if ([array count] == 0 || numberOfLayers <= 0){
+//            isFinished = YES;
+//        }
+//    }
+//}
 
 - (void)upgradeMultiCookiePowerupCookiesToCookieType:(BBQCookie *)cookieType {
     NSMutableArray *oldArray = [self.arraysOfDisappearingCookies firstObject];
@@ -536,33 +670,33 @@
 
 //When a type 6 is combined with a type 6
 - (void)destroyTwoTypeSixCombo:(BBQCookie *)rootCookie {
-    [self destroyEntireRowOfCookies:rootCookie];
-    [self destroyEntireColumnOfCookies:rootCookie];
+    [self destroyEntireRowOfCookies:rootCookie numberOfLayers:100];
+    [self destroyEntireColumnOfCookies:rootCookie numberOfLayers:100];
 }
 
 //When 2 boxes are combined
 - (void)destroyTwoBoxCombo:(BBQCookie *)rootCookie {
-    [self removeAllCookiesInLayersAroundBlast:rootCookie numberOfLayers:3];
+    [self destroyAllCookiesAroundBlast:rootCookie numberOfLayers:3];
 }
 
 //when a type six is combined with a box
 - (void)destroyType6WithBoxCombo:(BBQCookie *)rootCookie {
-    [self destroyEntireColumnOfCookies:rootCookie];
-    [self destroyEntireRowOfCookies:rootCookie];
-    [self removeAllCookiesInLayersAroundBlast:rootCookie numberOfLayers:2];
+    [self destroyEntireColumnOfCookies:rootCookie numberOfLayers:100];
+    [self destroyEntireRowOfCookies:rootCookie numberOfLayers:100];
+    [self destroyAllCookiesAroundBlast:rootCookie numberOfLayers:2];
 }
 
 //When a type 6 and a criss cross are combined, or two criss crosses
 - (void)destroyTypeSixAndCrissCrossCombo:(BBQCookie *)rootCookie {
-    [self destroyCrissCrossCookies:rootCookie];
-    [self destroyEntireColumnOfCookies:rootCookie];
-    [self destroyEntireRowOfCookies:rootCookie];
+    [self destroyCrissCrossCookies:rootCookie numberOfLayers:100];
+    [self destroyEntireColumnOfCookies:rootCookie numberOfLayers:100];
+    [self destroyEntireRowOfCookies:rootCookie numberOfLayers:100];
 }
 
 //When a criss cross and a box are combined
 - (void)destroyCrissCrossWithBoxCombo:(BBQCookie *)rootCookie {
-    [self destroyCrissCrossCookies:rootCookie];
-    [self removeAllCookiesInLayersAroundBlast:rootCookie numberOfLayers:2];
+    [self destroyCrissCrossCookies:rootCookie numberOfLayers:100];
+    [self destroyAllCookiesAroundBlast:rootCookie numberOfLayers:2];
 }
 
 

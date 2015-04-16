@@ -431,8 +431,6 @@ static const CGFloat TileHeight = 36.0;
         [self activateCookies:cookiesToActivate];
         self.rootCookie = cookie;
     }
-    
-    [self.gameLogic.chain upgradePowerupsIfNecessary];
 }
 
 #pragma mark - Line Drawing methods
@@ -659,7 +657,7 @@ static const CGFloat TileHeight = 36.0;
                 [self animateScoreForSingleCookie:powerupCookie];
                 
                 
-                NSTimeInterval delay = 0.05*idx;
+                NSTimeInterval delay = 0.1*idx;
                 
                 CCActionCallBlock *action = [CCActionCallBlock actionWithBlock:^{
                     

@@ -111,6 +111,8 @@
 
 - (void)activatePowerupForCookie:(BBQCookie *)cookie {
     
+    [self.chain upgradePowerupsIfNecessary];
+    
     BBQCookie *cookieTypeToCollect;
     if ([cookie.powerup isAMultiCookie]) {
         cookieTypeToCollect = [self.chain.cookiesInChain lastObject];
