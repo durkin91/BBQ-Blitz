@@ -29,7 +29,6 @@
 @property (nonatomic) NSInteger currentScore;
 @property (nonatomic) NSInteger movesLeft;
 @property (strong, nonatomic) BBQChain *chain;
-@property (strong, nonatomic) NSMutableArray *chainIncludingLinkingCookies;
 
 
 - (NSSet *)setupGameLogicWithLevel:(NSInteger)level;
@@ -47,5 +46,12 @@
 - (NSArray *)tryAddingCookieToChain:(BBQCookie *)cookie inDirection:(NSString *)direction;
 - (NSDictionary *)rootCookieLimits:(BBQCookie *)cookie;
 - (NSString *)directionOfPreviousCookieInChain:(BBQCookie *)cookie;
+- (BOOL)doesCookieNeedRemoving:(BBQCookie *)cookie;
+- (void)addPowerupScoreToCurrentScore:(BBQPowerup *)powerup;
+- (void)activatePowerupForCookie:(BBQCookie *)cookie;
+- (BOOL)doesNotRequireInProgressLine;
+- (BOOL)isFirstCookieInChain:(BBQCookie *)cookie;
+- (BOOL)isAnUpgradedMultiCookiePowerup:(BBQCookie *)cookie;
+- (NSArray *)topUpCookiesWithMultiCookie:(BBQCookie *)multiCookie;
 
 @end

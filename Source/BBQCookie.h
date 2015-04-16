@@ -9,12 +9,14 @@
 #import <Foundation/Foundation.h>
 #import "BBQCookieNode.h"
 #import "BBQTile.h"
+#import "BBQPowerup.h"
 
+@class BBQCookieOrder;
 @class BBQCombo;
+@class BBQChain;
 
 static const NSUInteger NumCookieTypes = 6;
-static const NSUInteger NumStartingCookies = 6;
-static const NSUInteger NumCookiesToUpgrade = 40;
+static const NSUInteger NumStartingCookies = 3;
 
 @interface BBQCookie : NSObject
 
@@ -24,7 +26,9 @@ static const NSUInteger NumCookiesToUpgrade = 40;
 @property (strong, nonatomic) BBQCookieNode *sprite;
 @property (assign, nonatomic) BOOL isInStaticTile;
 @property (assign, nonatomic) NSInteger countdown;
-@property (strong, nonatomic) BBQCombo *combo;
+@property (strong, nonatomic) BBQPowerup *powerup;
+@property (strong, nonatomic) BBQCookieOrder *cookieOrder;
+@property (assign, nonatomic) NSInteger score;
 
 
 
@@ -32,5 +36,7 @@ static const NSUInteger NumCookiesToUpgrade = 40;
 - (NSString *)spriteName;
 - (NSString *)highlightedSpriteName;
 - (CCColor *)lineColor;
+- (BOOL)canBeChainedToCookie:(BBQCookie *)potentialCookie isFirstCookieInChain:(BOOL)isFirstCookieInChain ;
+- (void)setScoreForCookieInChain:(BBQChain *)chain;
 
 @end

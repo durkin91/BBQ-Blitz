@@ -7,9 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "BBQCookie.h"
 
 @class BBQLevel;
+@class BBQCookie;
 
 
 #define HORIZONTAL @"Horizontal"
@@ -17,13 +17,37 @@
 
 @interface BBQPowerup : NSObject
 
-@property (strong, nonatomic) BBQCookie *rootCookie;
 @property (assign, nonatomic) NSInteger type;
-@property (strong, nonatomic) NSMutableArray *disappearingCookies;
+@property (assign, nonatomic) NSInteger totalScore;
+@property (strong, nonatomic) NSMutableArray *arraysOfDisappearingCookies;
+@property (strong, nonatomic) NSMutableArray *upgradedMuliticookiePowerupCookiesThatNeedreplacing;
 @property (strong, nonatomic) NSString *direction;
+@property (assign, nonatomic) BOOL isCurrentlyTemporary;
+@property (assign, nonatomic) BOOL isReadyToDetonate;
 
-- (instancetype)initWithCookie:(BBQCookie *)cookie type:(NSInteger)type direction:(NSString *)swipeDirection;
-- (void)performPowerupWithLevel:(BBQLevel *)level;
+
+- (instancetype)initWithType:(NSInteger)type direction:(NSString *)swipeDirection;
+- (void)performPowerupWithLevel:(BBQLevel *)level cookie:(BBQCookie *)rootCookie cookieTypeToCollect:(BBQCookie *)cookieTypeToCollect;
+- (void)scorePowerup;
+- (void)addCookieOrders:(NSArray *)cookieOrders;
+- (BOOL)canOnlyJoinWithCookieNextToIt;
+- (NSMutableArray *)returnArrayOfCookiesRandomlyAssignedToArrays:(NSMutableArray *)oldArray;
+- (void)removeUndetonatedPowerupFromArraysOfPowerupsToDetonate:(BBQCookie *)cookie;
+- (void)addNewlyCreatedPowerupToArraysOfPowerupsToDetonate:(BBQCookie *)cookie;
+
+- (BOOL)isAPivotPad;
+- (BOOL)isAMultiCookie;
+- (BOOL)isARobbersSack;
+- (BOOL)isATypeSixPowerup;
+- (BOOL)isACrissCross;
+- (BOOL)isABox;
+- (BOOL)isATwoSixesCombo;
+- (BOOL)isATwoBoxCombo;
+- (BOOL)isATwoCrissCrossCombo;
+- (BOOL)isATypeSixWithCrissCrossCombo;
+- (BOOL)isaTypeSixWithBoxCombo;
+- (BOOL)isABoxAndCrissCrossCombo;
+- (BOOL)canBeDetonatedWithoutAChain;
 
 
 @end

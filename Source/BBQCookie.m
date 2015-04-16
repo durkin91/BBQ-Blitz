@@ -7,10 +7,11 @@
 //
 
 #import "BBQCookie.h"
+#import "BBQChain.h"
 
 @implementation BBQCookie
 
-- (NSString *)spriteName {
+- (NSString *)spriteNameBase {
     NSString *spriteName;
     
     switch (self.cookieType) {
@@ -46,40 +47,48 @@
     
 }
 
-- (NSString *)highlightedSpriteName {
+- (NSString *)spriteName {
     NSString *spriteName;
     
-    switch (self.cookieType) {
-        case 1:
-            spriteName = @"Croissant-Highlighted";
-            break;
-            
-        case 2:
-            spriteName = @"Cupcake-Highlighted";
-            break;
-            
-        case 3:
-            spriteName = @"Danish-Highlighted";
-            break;
-            
-        case 4:
-            spriteName = @"Donut-Highlighted";
-            break;
-            
-        case 5:
-            spriteName = @"Macaroon-Highlighted";
-            break;
-            
-        case 6:
-            spriteName = @"SugarCookie-Highlighted";
-            break;
-            
-        default:
-            break;
+    if (self.powerup == nil) {
+        spriteName = [self spriteNameBase];
+    }
+    
+    else if (self.powerup && self.powerup.type == 6) {
+        spriteName = [NSString stringWithFormat:@"%@%@", [self spriteNameBase], self.powerup.direction];
+    }
+    
+    else if (self.powerup && self.powerup.type == 9) {
+        spriteName = @"PivotPad";
+    }
+    
+    else if (self.powerup && self.powerup.type == 12) {
+        spriteName = @"MultiCookie";
+    }
+    
+    else if (self.powerup && self.powerup.type == 15) {
+        spriteName = @"RobbersSack";
+    }
+    
+    else if (self.powerup && self.powerup.type == 20) {
+        spriteName = [NSString stringWithFormat:@"%@CrissCross", [self spriteNameBase]];
+    }
+    
+    else if (self.powerup && self.powerup.type == 30) {
+        spriteName = [NSString stringWithFormat:@"%@Box", [self spriteNameBase]];
+    }
+    
+    else {
+        spriteName = [self spriteNameBase];
     }
     
     return spriteName;
+}
+
+- (NSString *)highlightedSpriteName {
     
+    NSString *spriteName = [NSString stringWithFormat:@"%@-Highlighted", [self spriteName]];
+    return spriteName;
 }
 
 - (CCColor *)lineColor {
@@ -115,6 +124,81 @@
     }
     
     return color;
+}
+
+- (BOOL)canBeChainedToCookie:(BBQCookie *)potentialCookie isFirstCookieInChain:(BOOL)isFirstCookieInChain {
+    BOOL answer = NO;
+    
+    //Robbers sacks or multi cookies can't join to a pivot pad
+    if ((self.powerup.isAMultiCookie || self.powerup.isARobbersSack || self.powerup.isAPivotPad) && self.powerup.isCurrentlyTemporary == NO &&
+        (potentialCookie.powerup.isAPivotPad || potentialCookie.powerup.isAMultiCookie || potentialCookie.powerup.isARobbersSack)) {
+        answer = NO;
+    }
+    
+    else if ([self.powerup canOnlyJoinWithCookieNextToIt] &&
+             isFirstCookieInChain &&
+             (potentialCookie.column != self.column + 1 || potentialCookie.column != self.column - 1 || potentialCookie.row != self.row + 1 || potentialCookie.column != self.row - 1)) {
+        answer = NO;
+    }
+    
+    //If the cookie is the first cookie in the chain, and it tries to join with a multicookie or robbers sack then it can
+    else if (([potentialCookie.powerup isAMultiCookie] || [potentialCookie.powerup isARobbersSack]) &&
+             (potentialCookie.column == self.column + 1 || potentialCookie.column == self.column - 1 || potentialCookie.row == self.row + 1 || potentialCookie.row == self.row - 1) &&
+             isFirstCookieInChain) {
+        
+        answer = YES;
+        
+    }
+    
+    //IF the cookie is the first cookie in the chain, and the potential cookie is next to it, and they are both a type 6, box or criss cross then they can be joined.
+    else if (isFirstCookieInChain &&
+             (potentialCookie.column == self.column + 1 || potentialCookie.column == self.column - 1 || potentialCookie.row == self.row + 1 || potentialCookie.row == self.row - 1) &&
+             ([self.powerup isATypeSixPowerup] || [self.powerup isACrissCross] || [self.powerup isABox]) &&
+             ([potentialCookie.powerup isATypeSixPowerup] || [potentialCookie.powerup isACrissCross] || [potentialCookie.powerup isABox])) {
+        answer = YES;
+    }
+    
+    //Multi cookies, robbers sacks and pivot pads can only join with the cookie next to it
+    else if ([self.powerup canOnlyJoinWithCookieNextToIt] &&
+        self.powerup.isCurrentlyTemporary == NO &&
+        (potentialCookie.column == self.column + 1 || potentialCookie.column == self.column - 1 || potentialCookie.row == self.row + 1 || potentialCookie.row == self.row - 1)) {
+        answer = YES;
+    }
+    
+    //Pivot pads can join to anything (but not robbers sack and multi cookie, which has already been taken care of
+    else if ([potentialCookie.powerup isAPivotPad] && potentialCookie.powerup.isCurrentlyTemporary == NO) {
+        answer = YES;
+    }
+    
+    //Same cookie types can join together
+    else if (self.cookieType == potentialCookie.cookieType) {
+        answer = YES;
+    }
+    
+    else {
+        answer = NO;
+    }
+    
+    return answer;
+}
+
+- (void)setScoreForCookieInChain:(BBQChain *)chain {
+    
+    if ([self.powerup canBeDetonatedWithoutAChain] && self.powerup.isCurrentlyTemporary == NO) {
+        self.score = 150;
+    }
+    
+    else if ([self.powerup isAMultiCookie] && self.powerup.isCurrentlyTemporary == NO) {
+        self.score = 200;
+    }
+    
+    else if ([self.powerup isARobbersSack] && self.powerup.isCurrentlyTemporary == NO) {
+        self.score = 300;
+    }
+    
+    else {
+        self.score = 30 + (([chain.cookiesInChain count] - 2) * 10);
+    }
 }
 
 

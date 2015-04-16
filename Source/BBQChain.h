@@ -10,6 +10,7 @@
 #import "BBQCookieOrder.h"
 
 @class BBQCookie;
+@class BBQPowerup;
 
 typedef NS_ENUM(NSUInteger, ChainType) {
     ChainTypeHorizontal,
@@ -25,9 +26,16 @@ typedef NS_ENUM(NSUInteger, ChainType) {
 @property (assign, nonatomic) NSInteger numberOfCookiesForOrder;
 @property (assign, nonatomic) NSInteger cookieType;
 @property (assign, nonatomic) NSInteger scorePerCookie;
+@property (assign, nonatomic) BOOL isClosedChain;
 
 
 - (void)addCookie:(BBQCookie *)cookie;
 - (BOOL)containsCookie:(BBQCookie *)cookie;
 - (BOOL)isACompleteChain;
+- (void)addCookieOrders:(NSArray *)cookieOrders;
+- (BOOL)isATwoCookieChain;
+- (void)upgradePowerupsIfNecessary;
+- (BOOL)isAMultiCookieUpgradedPowerupChain;
+- (BBQCookie *)returnMultiCookieInMultiCookiePowerup;
+- (BBQCookie *)returnPowerupJoinedToMultiCookie;
 @end

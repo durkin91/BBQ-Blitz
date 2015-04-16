@@ -346,12 +346,11 @@ static const CGFloat TileHeight = 36.0;
         [self.gameLogic calculateScoreForChain];
         BBQChain *chain = [self.gameLogic removeCookiesInChain];
         [self animateChain:chain completion:^{
-            [self updateScoreAndMoves];
     
             NSArray *columns = [self.gameLogic.level fillHoles];
             [self animateFallingCookies:columns completion:^{
                 
-                NSArray *columns = [self.gameLogic.level topUpCookies];
+                NSArray *columns = [self.gameLogic topUpCookiesWithMultiCookie:nil];
                 [self animateNewCookies:columns completion:^{
                     
                     [self beginNextTurn];
@@ -438,7 +437,14 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)drawSegmentToCookie:(BBQCookie *)cookie {
     CGPoint cookiePosition = [GameplayScene pointForColumn:cookie.column row:cookie.row];
-    BBQCookie *previousCookie = [self.gameLogic previousCookieToCookieInChain:cookie];
+    
+    BBQCookie *previousCookie;
+    if ([self.gameLogic isFirstCookieInChain:cookie] == YES) {
+        previousCookie = [self.gameLogic.chain.cookiesInChain lastObject];
+    }
+    else {
+        previousCookie = [self.gameLogic previousCookieToCookieInChain:cookie];
+    }
     CGPoint previousCookiePosition = [GameplayScene pointForColumn:previousCookie.column row:previousCookie.row];
     [_drawNode drawSegmentFrom:previousCookiePosition to:cookiePosition radius:2.0 color:[cookie lineColor]];
 }
@@ -450,10 +456,15 @@ static const CGFloat TileHeight = 36.0;
         BBQCookie *cookie = cookiesInChain[i];
         [self drawSegmentToCookie:cookie];
     }
+    if (self.gameLogic.chain.isClosedChain) {
+        
+    }
 }
 
 - (void)drawInProgressLineForColumn:(NSInteger)column row:(NSInteger)row touchLocation:(CGPoint)location {
     [_inProgressDrawNode clear];
+    
+    if ([self.gameLogic doesNotRequireInProgressLine]) return;
     
     //Take care of drawing the in progress line
     CGPoint rootPoint = [GameplayScene pointForColumn:self.rootCookie.column row:self.rootCookie.row];
@@ -535,34 +546,40 @@ static const CGFloat TileHeight = 36.0;
     [cookie.sprite runAction:sequence];
 }
 
-- (void)updateScoreAndMoves {
-    NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-    [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
-    _scoreLabel.string = [formatter stringFromNumber:@(self.gameLogic.currentScore)];
-    _movesLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.movesLeft];
-    NSLog(@"Moves left label: %@", _movesLabel.string);
-
+- (CCActionCallBlock *)updateScoreAndMoves {
+    CCActionCallBlock *block = [CCActionCallBlock actionWithBlock:^{
+        NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+        [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
+        _scoreLabel.string = [formatter stringFromNumber:@(self.gameLogic.currentScore)];
+        _movesLabel.string = [NSString stringWithFormat:@"%ld", (long)self.gameLogic.movesLeft];
+        NSLog(@"Moves left label: %@", _movesLabel.string);
+    }];
+    return block;
 }
 
-- (void)animateScoreForChain:(BBQChain *)chain {
-    for (BBQCookie *cookie in chain.cookiesInChain) {
-        //Add a label for the score that slowly fades up
-        CGPoint cookieSpriteWorldPos = [_cookiesLayer convertToWorldSpace:[GameplayScene pointForColumn:cookie.column row:cookie.row]];
-        CGPoint relativeToSelfPos = [self convertToNodeSpace:cookieSpriteWorldPos];
-        
-        NSString *score = [NSString stringWithFormat:@"%lu", (long)chain.scorePerCookie];
-        CCLabelTTF *scoreLabel = [CCLabelTTF labelWithString:score fontName:@"GillSans-BoldItalic" fontSize:12];
-        scoreLabel.position = relativeToSelfPos;
-        scoreLabel.zOrder = 300;
-        scoreLabel.outlineColor = [CCColor blackColor];
-        scoreLabel.outlineWidth = 1.0;
-        [self addChild:scoreLabel];
-        
-        [BBQAnimations animateScoreLabel:scoreLabel];
+- (void)animateScoreForCookies:(NSArray *)cookies {
+    for (BBQCookie *cookie in cookies) {
+        [self animateScoreForSingleCookie:cookie];
     }
 }
 
-- (void)animateNewCookies:(NSArray *)columns completion:(dispatch_block_t)completion {
+- (void)animateScoreForSingleCookie:(BBQCookie *)cookie {
+    //Add a label for the score that slowly fades up
+    CGPoint cookieSpriteWorldPos = [_cookiesLayer convertToWorldSpace:[GameplayScene pointForColumn:cookie.column row:cookie.row]];
+    CGPoint relativeToSelfPos = [self convertToNodeSpace:cookieSpriteWorldPos];
+    
+    NSString *score = [NSString stringWithFormat:@"%lu", (long)cookie.score];
+    CCLabelTTF *scoreLabel = [CCLabelTTF labelWithString:score fontName:@"GillSans-BoldItalic" fontSize:12];
+    scoreLabel.position = relativeToSelfPos;
+    scoreLabel.zOrder = 300;
+    scoreLabel.outlineColor = [CCColor blackColor];
+    scoreLabel.outlineWidth = 1.0;
+    [self addChild:scoreLabel];
+    
+    [BBQAnimations animateScoreLabel:scoreLabel];
+}
+
+- (NSTimeInterval)animateNewCookies:(NSArray *)columns completion:(dispatch_block_t)completion {
     __block NSTimeInterval longestDuration = 0;
     
     for (NSArray *array in columns) {
@@ -589,9 +606,11 @@ static const CGFloat TileHeight = 36.0;
     [self runAction:[CCActionSequence actions:
         [CCActionDelay actionWithDuration:longestDuration],
         [CCActionCallBlock actionWithBlock:completion], nil]];
+    
+    return longestDuration;
 }
 
-- (void)animateFallingCookies:(NSArray *)columns completion:(dispatch_block_t)completion {
+- (NSTimeInterval)animateFallingCookies:(NSArray *)columns completion:(dispatch_block_t)completion {
     
     __block NSTimeInterval longestDuration = 0;
     
@@ -612,38 +631,200 @@ static const CGFloat TileHeight = 36.0;
     CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil];
     [self runAction:sequence];
     
+    return longestDuration;
+    
 }
 
+- (NSTimeInterval)animatePowerupForCookie:(BBQCookie *)cookie detonatePowerupsWithinArray:(BOOL)detonatePowerupsWithinArray {
+    
+    [self.gameLogic activatePowerupForCookie:cookie];
+    
+    __block NSTimeInterval longestDuration = 0;
+    __block NSTimeInterval scaleActionDuration = 0.3;
+    
+    //Take care of root cookie
+    CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:scaleActionDuration scale:0.1];
+    [cookie.sprite runAction:[CCActionSequence actions:scaleAction, [CCActionRemove action], nil]];
+    longestDuration = scaleActionDuration;
+    
+    for (NSArray *array in cookie.powerup.arraysOfDisappearingCookies) {
+        
+        [array enumerateObjectsUsingBlock:^(id object, NSUInteger idx, BOOL *stop) {
+            
+            if ([object isKindOfClass:[BBQCookie class]]) {
+                BBQCookie *powerupCookie = object;
+                
+                [self animateScoreForSingleCookie:powerupCookie];
+                
+                
+                NSTimeInterval delay = 0.1*idx;
+                
+                CCActionCallBlock *action = [CCActionCallBlock actionWithBlock:^{
+                    
+                    [self animateCookieRemoval:powerupCookie powerupDuration:longestDuration scaleActionDuration:scaleActionDuration detonatePowerupsWithinArray:detonatePowerupsWithinArray];
+                    
+                }];
+                
+                longestDuration = MAX(longestDuration, scaleActionDuration + delay);
+                
+                [powerupCookie.sprite runAction:[CCActionSequence actions:[CCActionDelay actionWithDuration:delay], action, nil]];
+            }
+            
+        }];
+    }
+    
+    [self.gameLogic addPowerupScoreToCurrentScore:cookie.powerup];
+    [self runAction:[self updateScoreAndMoves]];
+    
+    return longestDuration;
+}
+
+- (void)changeMultiCookieUpgradedPowerupSprites:(BBQCookie *)multicookie completion:(dispatch_block_t)completion {
+    
+    __block NSTimeInterval spinDuration = 0.5;
+    
+    for (NSArray *array in multicookie.powerup.arraysOfDisappearingCookies) {
+        
+        [array enumerateObjectsUsingBlock:^(BBQCookie *powerupCookie, NSUInteger idx, BOOL *stop) {
+            //Spin action
+            CCActionRotateBy *firstRotation = [CCActionRotateBy actionWithDuration:spinDuration angle:360.0];
+            CCActionCallBlock *changeTexture = [CCActionCallBlock actionWithBlock:^{
+                [self removeHighlightFromCookie:powerupCookie];
+            }];
+            CCActionSequence *rotationSequence = [CCActionSequence actions:firstRotation, changeTexture, nil];
+            [powerupCookie.sprite runAction:rotationSequence];
+        }];
+    }
+    
+    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:spinDuration + 0.1], [CCActionCallBlock actionWithBlock:completion], nil];
+    [self runAction:sequence];
+}
+
+- (void)animateUpgradedMultiCookiePowerup:(BBQCookie *)multiCookie completion:(dispatch_block_t)completion {
+    
+    __block NSTimeInterval detonationDuration = 0;
+    __block NSTimeInterval fillHolesDuration = 0;
+    __block NSTimeInterval topUpCookiesDuration = 0;
+    
+    NSArray *array = multiCookie.powerup.arraysOfDisappearingCookies[0];
+    detonationDuration = [self animateArrayOfUpgradedMultiCookiePowerups:array completion:^{
+        
+        NSArray *columns = [self.gameLogic.level fillHoles];
+        fillHolesDuration = [self animateFallingCookies:columns completion:^{
+            
+            NSArray *columns = [self.gameLogic topUpCookiesWithMultiCookie:multiCookie];
+            topUpCookiesDuration = [self animateNewCookies:columns completion:^{
+                
+                [multiCookie.powerup.arraysOfDisappearingCookies removeObject:array];
+                
+            }];
+        }];
+    }];
+    
+    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:5.0], [CCActionCallBlock actionWithBlock:completion], nil];
+    [self runAction:sequence];
+}
+
+- (NSTimeInterval)animateArrayOfUpgradedMultiCookiePowerups:(NSArray *)array completion:(dispatch_block_t)completion {
+    NSTimeInterval longestDuration = 0;
+    
+    for (BBQCookie *cookie in array) {
+        NSTimeInterval powerupDuration = [self animatePowerupForCookie:cookie detonatePowerupsWithinArray:NO];
+        longestDuration = MAX(powerupDuration, longestDuration);
+    }
+    
+    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil];
+    [self runAction:sequence];
+    
+    return longestDuration;
+}
+
+
 - (void)animateChain:(BBQChain *)chain completion:(dispatch_block_t)completion {
-    [self animateScoreForChain:chain];
+    [self animateScoreForCookies:chain.cookiesInChain];
     [_drawNode clear];
     [_inProgressDrawNode clear];
     
-    for (NSInteger i = 0; i < [chain.cookiesInChain count]; i++) {
-        BBQCookie *cookie = chain.cookiesInChain[i];
+    NSTimeInterval powerupDuration = 0;
+    NSTimeInterval duration = 0.3;
+
+    if ([chain isAMultiCookieUpgradedPowerupChain]) {
+        BBQCookie *multicookie = [chain returnMultiCookieInMultiCookiePowerup];
+        [self.gameLogic activatePowerupForCookie:multicookie];
         
-        if (i < chain.numberOfCookiesForOrder && cookie.sprite != nil) {
-            [self removeHighlightFromCookie:cookie];
-            CCActionSequence *sequence = [self animateCookieOrderCollection:cookie cookieOrder:chain.cookieOrder];
-            [cookie.sprite runAction:sequence];
-            cookie.sprite = nil;
-        }
+        //Take care of root cookie
+        CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:0.3 scale:0.1];
+        [multicookie.sprite runAction:[CCActionSequence actions:scaleAction, [CCActionRemove action], nil]];
         
-        
-        else if (cookie.sprite != nil) {
-            CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:0.3 scale:0.1];
-            [cookie.sprite runAction:[CCActionSequence actions:scaleAction, [CCActionRemove action], nil]];
+        [self changeMultiCookieUpgradedPowerupSprites:multicookie completion:^{
             
-            cookie.sprite = nil;
-        }
+            [self animateUpgradedMultiCookiePowerup:multicookie completion:^{
+                
+                [self completionBlockForMultiCookiePowerupUpgrade:multicookie];
+            }];
+        }];
     }
     
-    [self runAction:[CCActionSequence actions:[CCActionDelay actionWithDuration:0.3], [CCActionCallBlock actionWithBlock:completion], nil]];
+    else {
+        for (NSInteger i = 0; i < [chain.cookiesInChain count]; i++) {
+            BBQCookie *cookie = chain.cookiesInChain[i];
+            
+            if ([self.gameLogic doesCookieNeedRemoving:cookie]) {
+                
+                [self animateCookieRemoval:cookie powerupDuration:powerupDuration scaleActionDuration:duration detonatePowerupsWithinArray:YES];
+            }
+            
+            else {
+                [self removeHighlightFromCookie:cookie];
+            }
+        }
+        
+        [self runAction:[CCActionSequence actions:[CCActionDelay actionWithDuration:duration], [self updateScoreAndMoves], [CCActionDelay actionWithDuration:powerupDuration], [CCActionCallBlock actionWithBlock:completion], nil]];
+    }
+}
+
+- (void)completionBlockForMultiCookiePowerupUpgrade:(BBQCookie *)multicookie {
+    if ([multicookie.powerup.arraysOfDisappearingCookies count] > 0) {
+        [self animateUpgradedMultiCookiePowerup:multicookie completion:^{
+            [self completionBlockForMultiCookiePowerupUpgrade:multicookie];
+        }];
+    }
+    else {
+        [self beginNextTurn];
+    }
+}
+
+- (void)animateCookieRemoval:(BBQCookie *)cookie powerupDuration:(NSTimeInterval)powerupDuration scaleActionDuration:(NSTimeInterval)duration detonatePowerupsWithinArray:(BOOL)detonatePowerupsWithinArray {
+    //Refers to all non upgraded multicookie powerups
+    if (cookie.powerup.isReadyToDetonate && detonatePowerupsWithinArray == YES) {
+        [self animatePowerupForCookie:cookie detonatePowerupsWithinArray:detonatePowerupsWithinArray];
+    }
+    
+    //Refers to all upgraded multicookie powerup cookies
+    else if (cookie.powerup.isReadyToDetonate && detonatePowerupsWithinArray == NO) {
+        BBQCookie *multicookie = [self.gameLogic.chain returnMultiCookieInMultiCookiePowerup];
+        [multicookie.powerup removeUndetonatedPowerupFromArraysOfPowerupsToDetonate:cookie];
+    }
+    
+    if (cookie.cookieOrder && cookie.sprite != nil) {
+        [self removeHighlightFromCookie:cookie];
+        CCActionSequence *sequence = [self animateCookieOrderCollection:cookie];
+        [cookie.sprite runAction:sequence];
+        //cookie.sprite = nil;
+    }
+    
+    
+    else if (cookie.sprite != nil) {
+        CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:duration scale:0.1];
+        [cookie.sprite runAction:[CCActionSequence actions:scaleAction, [CCActionRemove action], nil]];
+        
+        //cookie.sprite = nil;
+    }
 }
 
 
-- (CCActionSequence *)animateCookieOrderCollection:(BBQCookie *)cookie cookieOrder:(BBQCookieOrder *)cookieOrder {
-    CCSprite *orderSprite = cookieOrder.orderNode.cookieSprite;
+- (CCActionSequence *)animateCookieOrderCollection:(BBQCookie *)cookie {
+    CCSprite *orderSprite = cookie.cookieOrder.orderNode.cookieSprite;
     CGPoint cookieSpriteWorldPos = [cookie.sprite.parent convertToWorldSpace:cookie.sprite.positionInPoints];
     CGPoint relativeToOrderSpritePos = [orderSprite convertToNodeSpace:cookieSpriteWorldPos];
     [cookie.sprite removeFromParent];
@@ -657,12 +838,11 @@ static const CGFloat TileHeight = 36.0;
     CCActionScaleTo *scaleDown = [CCActionScaleTo actionWithDuration:0.1 scale:1.0];
     CCActionRemove *removeSprite = [CCActionRemove action];
     CCActionCallBlock *updateOrderQuantity = [CCActionCallBlock actionWithBlock:^{
-        NSInteger quantityLeft = [cookieOrder.orderNode.quantityLabel.string integerValue];
-        quantityLeft --;
-        cookieOrder.orderNode.quantityLabel.string = [NSString stringWithFormat:@"%i", quantityLeft];
-        if (quantityLeft == 0) {
-            cookieOrder.orderNode.quantityLabel.visible = NO;
-            cookieOrder.orderNode.tickSprite.visible = YES;
+        NSInteger quantityLeft = [cookie.cookieOrder.orderNode.quantityLabel.string integerValue];
+        cookie.cookieOrder.orderNode.quantityLabel.string = [NSString stringWithFormat:@"%lu", (long)cookie.cookieOrder.quantityLeft];
+        if (quantityLeft <= 0) {
+            cookie.cookieOrder.orderNode.quantityLabel.visible = NO;
+            cookie.cookieOrder.orderNode.tickSprite.visible = YES;
         }
     }];
     

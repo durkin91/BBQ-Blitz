@@ -32,7 +32,6 @@
 - (void)startChainWithCookie:(BBQCookie *)cookie {
     self.chain = [[BBQChain alloc] init];
     [self.chain addCookie:cookie];
-    [self.chainIncludingLinkingCookies addObject:cookie];
 }
 
 - (NSArray *)tryAddingCookieToChain:(BBQCookie *)cookie inDirection:(NSString *)direction {
@@ -45,22 +44,39 @@
         array = [NSMutableArray array];
         for (NSInteger i = 0; i <= [potentialCookies indexOfObject:cookie]; i++) {
             BBQCookie *cookieToActivate = potentialCookies[i];
-            [self.chain addCookie:cookieToActivate];
+            if ([[self.chain.cookiesInChain firstObject] isEqual:cookieToActivate] == NO) {
+                [self.chain addCookie:cookieToActivate];
+            }
+            else {
+                self.chain.isClosedChain = YES;
+            }
             [array addObject:cookieToActivate];
+            [self checkForPowerups:cookieToActivate];
         }
     }
-    NSLog(@"Cookies in chain:%@", self.chain.cookiesInChain);
+    
     return array;
 }
 
 - (BOOL)isCookieABackTrack:(BBQCookie *)cookie {
+    BBQCookie *lastCookieInChain = [self.chain.cookiesInChain lastObject];
+    
+    //Check if the player is trying to make a box powerup
+    if ([self.chain.cookiesInChain count] >= 4 &&
+        (cookie.column == lastCookieInChain.column || cookie.row == lastCookieInChain.row) &&
+        [[self.chain.cookiesInChain firstObject] isEqual:cookie]) {
+        return NO;
+    }
+    
     if ([self.chain containsCookie:cookie]) {
         return YES;
     }
+    
     else return NO;
 }
 
 - (NSArray *)backtrackedCookiesForCookie:(BBQCookie *)cookie {
+    self.chain.isClosedChain = NO;
     NSMutableArray *cookiesToRemove = [NSMutableArray array];
     for (NSInteger i = [self.chain.cookiesInChain indexOfObject:cookie] + 1; i < [self.chain.cookiesInChain count]; i++) {
         BBQCookie *cookieToRemove = self.chain.cookiesInChain[i];
@@ -68,39 +84,73 @@
     }
     for (BBQCookie *cookieToRemove in cookiesToRemove) {
         [self.chain.cookiesInChain removeObject:cookieToRemove];
+        if (cookieToRemove.powerup.isCurrentlyTemporary == YES) {
+            cookieToRemove.powerup = nil;
+        }
     }
     return cookiesToRemove;
 }
 
 - (BBQChain *)removeCookiesInChain {
-    [self cookieOrdersForChain];
+    [self.chain addCookieOrders:self.level.cookieOrders];
     for (BBQCookie *cookie in self.chain.cookiesInChain) {
-        [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
+
+        if (cookie.powerup && cookie.powerup.isCurrentlyTemporary == NO) {
+            cookie.powerup.isReadyToDetonate = YES;
+        }
+        else if (cookie.powerup && cookie.powerup.isCurrentlyTemporary == YES) {
+            cookie.powerup.isCurrentlyTemporary = NO;
+        }
+        else if (!cookie.powerup) {
+            [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
+        }
     }
+    
     return self.chain;
 }
 
-
-- (void)calculateScoreForChain {
-    _chain.scorePerCookie = 30 + (([_chain.cookiesInChain count] - 2) * 10);
-    _chain.score = _chain.scorePerCookie * [_chain.cookiesInChain count];
-    self.currentScore = self.currentScore + _chain.score;
-}
-
-- (void)cookieOrdersForChain {
+- (void)activatePowerupForCookie:(BBQCookie *)cookie {
     
-    //find the right order
-    for (BBQCookieOrder *cookieOrder in self.level.cookieOrders) {
-        if (cookieOrder.cookie.cookieType == self.chain.cookieType) {
-            self.chain.cookieOrder = cookieOrder;
-            
-            //Figure out how many of the cookies are used for the order
-            for (NSInteger i = 0; i < [self.chain.cookiesInChain count] && cookieOrder.quantityLeft > 0; i++) {
-                self.chain.numberOfCookiesForOrder ++;
-                cookieOrder.quantityLeft --;
-            }
+    [self.chain upgradePowerupsIfNecessary];
+    
+    BBQCookie *cookieTypeToCollect;
+    if ([cookie.powerup isAMultiCookie]) {
+        cookieTypeToCollect = [self.chain.cookiesInChain lastObject];
+        if ([cookieTypeToCollect.powerup isAMultiCookie] == YES) {
+            cookieTypeToCollect = [self.chain.cookiesInChain firstObject];
         }
     }
+    
+    [self.level replaceCookieAtColumn:cookie.column row:cookie.row withCookie:nil];
+    [cookie.powerup performPowerupWithLevel:self.level cookie:cookie cookieTypeToCollect:cookieTypeToCollect];
+    [cookie.powerup scorePowerup];
+    
+    if ([cookie.powerup isAMultiCookie] == YES && [self.chain isAMultiCookieUpgradedPowerupChain] == YES) {
+        return;
+    }
+    else {
+        [cookie.powerup addCookieOrders:self.level.cookieOrders];
+    }
+}
+
+- (void)addPowerupScoreToCurrentScore:(BBQPowerup *)powerup {
+    self.currentScore = self.currentScore + powerup.totalScore;
+}
+
+- (BOOL)doesCookieNeedRemoving:(BBQCookie *)cookie {
+    if (!cookie.powerup || cookie.powerup.isReadyToDetonate) {
+        return YES;
+    }
+    else return NO;
+}
+
+- (void)calculateScoreForChain {
+    
+    for (BBQCookie *cookie in self.chain.cookiesInChain) {
+        [cookie setScoreForCookieInChain:self.chain];
+        self.chain.score = self.chain.score + cookie.score;
+    }
+    self.currentScore = self.currentScore + self.chain.score;
 }
 
 - (BBQCookie *)lastCookieInChain {
@@ -112,6 +162,10 @@
     BBQCookie *previousCookie;
     if (i > 0) {
         previousCookie = self.chain.cookiesInChain[i - 1];
+    }
+    
+    else if (self.chain.isClosedChain && i == 0) {
+        previousCookie = [self.chain.cookiesInChain lastObject];
     }
     return previousCookie;
 }
@@ -141,6 +195,93 @@
         }
     }
     return direction;
+}
+
+- (BOOL)doesNotRequireInProgressLine {
+    //BBQCookie *firstCookie = [self.chain.cookiesInChain firstObject];
+    if ([self.chain isATwoCookieChain]) {
+        return  YES;
+    }
+    
+    else if (self.chain.isClosedChain) {
+        return YES;
+    }
+    
+    else {
+        return NO;
+    }
+}
+
+- (BOOL)isFirstCookieInChain:(BBQCookie *)cookie {
+    if ([[self.chain.cookiesInChain firstObject] isEqual:cookie]) {
+        return YES;
+    }
+    else return NO;
+}
+
+#pragma mark - Powerup Methods
+
+- (void)checkForPowerups:(BBQCookie *)cookie {
+    
+    NSString *direction = [self directionOfPreviousCookieInChain:cookie];
+
+    //The 6th cookie in a chain will blast out a row or column
+    if ([self.chain.cookiesInChain indexOfObject:cookie] == 5 && !cookie.powerup) {
+        cookie.powerup = [[BBQPowerup alloc] initWithType:6 direction:direction];
+    }
+    
+    //The 9th cookie will turn into a pivot pad
+    else if ([self.chain.cookiesInChain indexOfObject:cookie] == 8 && !cookie.powerup) {
+        cookie.powerup = [[BBQPowerup alloc] initWithType:9 direction:direction];
+    }
+    
+    //The 12th cookie will turn into a multi cookie, which will collect all like cookies on the board
+    else if ([self.chain.cookiesInChain indexOfObject:cookie] == 11 && !cookie.powerup) {
+        cookie.powerup = [[BBQPowerup alloc] initWithType:12 direction:direction];
+    }
+    
+    //The 15th cookie will turn into a robbers sack that collects all jewels
+    else if ([self.chain.cookiesInChain indexOfObject:cookie] == 14 && !cookie.powerup) {
+        cookie.powerup = [[BBQPowerup alloc] initWithType:15 direction:direction];
+    }
+    
+    //Create a criss cross powerup
+    else if ([self.chain.cookiesInChain indexOfObject:cookie] > 3 && [self.level cookieFormsACrissCross:cookie chain:self.chain]) {
+        cookie.powerup = [[BBQPowerup alloc] initWithType:20 direction:direction];
+    }
+    
+    //Create a box powerup
+    else if (self.chain.isClosedChain && [self isFirstCookieInChain:cookie]) {
+        cookie.powerup = [[BBQPowerup alloc] initWithType:30 direction:direction];
+    }
+
+}
+
+- (BOOL)isAnUpgradedMultiCookiePowerup:(BBQCookie *)cookie {
+    BBQCookie *cookieTypeToCollect = [self.chain.cookiesInChain lastObject];
+    if ([cookieTypeToCollect.powerup isAMultiCookie] == YES) {
+        cookieTypeToCollect = [self.chain.cookiesInChain firstObject];
+    }
+    
+    if ([cookie.powerup isAMultiCookie] && ([cookieTypeToCollect.powerup isATypeSixPowerup] || [cookieTypeToCollect.powerup isACrissCross] || [cookieTypeToCollect.powerup isABox])) {
+        return YES;
+    }
+    
+    else return NO;
+}
+
+- (NSArray *)topUpCookiesWithMultiCookie:(BBQCookie *)multiCookie {
+    NSArray *columns;
+    if (multiCookie) {
+        BBQCookie *upgradedPowerup = [self.chain returnPowerupJoinedToMultiCookie];
+        columns = [self.level topUpCookiesWithOptionalUpgradedMultiCookie:multiCookie poweruppedCookieChainedToMulticookie:upgradedPowerup];
+    }
+    
+    else {
+        columns = [self.level topUpCookiesWithOptionalUpgradedMultiCookie:nil poweruppedCookieChainedToMulticookie:nil];
+    }
+
+    return columns;
 }
 
 
@@ -231,7 +372,6 @@
 
 - (void)resetEverythingForNextTurn {
     self.chain = nil;
-    self.chainIncludingLinkingCookies = nil;
 }
 
 #pragma mark - General Helper methods

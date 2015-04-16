@@ -79,7 +79,7 @@
     //UP
     for (NSInteger i = cookie.row + 1; i < NumRows; i++) {
         testCookie = _cookies[cookie.column][i];
-        if (testCookie && testCookie.cookieType == cookie.cookieType) {
+        if ([cookie canBeChainedToCookie:testCookie isFirstCookieInChain:YES]) {
             [array addObject:testCookie];
             break;
         }
@@ -91,7 +91,7 @@
     //RIGHT
     for (NSInteger i = cookie.column + 1; i < NumColumns; i++) {
         testCookie = _cookies[i][cookie.row];
-        if (testCookie && testCookie.cookieType == cookie.cookieType) {
+        if ([cookie canBeChainedToCookie:testCookie isFirstCookieInChain:YES]) {
             [array addObject:testCookie];
             break;
         }
@@ -103,7 +103,7 @@
     //DOWN
     for (NSInteger i = cookie.row - 1; i >= 0; i --) {
         testCookie = _cookies[cookie.column][i];
-        if (testCookie && testCookie.cookieType == cookie.cookieType) {
+        if ([cookie canBeChainedToCookie:testCookie isFirstCookieInChain:YES]) {
             [array addObject:testCookie];
             break;
         }
@@ -116,7 +116,7 @@
     //LEFT
     for (NSInteger i = cookie.column - 1; i >= 0; i++ ) {
         testCookie = _cookies[i][cookie.row];
-        if (testCookie && testCookie.cookieType == cookie.cookieType) {
+        if ([cookie canBeChainedToCookie:testCookie isFirstCookieInChain:YES]) {
             [array addObject:testCookie];
             break;
         }
@@ -131,19 +131,17 @@
 - (NSArray *)allValidCookiesThatCanBeChainedToCookie:(BBQCookie *)cookie direction:(NSString *)direction existingChain:(BBQChain *)existingChain {
     NSMutableArray *array = [NSMutableArray array];
     
+    //If it can only be joined with one cookie (e.g. a multicookie) then return an empty array
+    if ([existingChain isATwoCookieChain] || existingChain.isClosedChain) {
+        return array;
+    }
+    
     if ([direction isEqualToString:UP]) {
         //look above cookie
         for (NSInteger i = cookie.row + 1; i < NumRows; i++) {
             BBQCookie *potentialCookie = _cookies[cookie.column][i];
-            if (potentialCookie && [existingChain.cookiesInChain containsObject:potentialCookie]) {
-                break;
-            }
-            else if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
-                [array addObject:potentialCookie];
-            }
-            else if (!potentialCookie) {
-                break;
-            }
+            BOOL isFinished = [self checkIfCookieIsValid:potentialCookie rootCookie:cookie existingChain:existingChain array:array];
+            if (isFinished) break;
         }
     }
     
@@ -151,15 +149,8 @@
         //look below cookie
         for (NSInteger i = cookie.row - 1; i >= 0; i--) {
             BBQCookie *potentialCookie = _cookies[cookie.column][i];
-            if (potentialCookie && [existingChain.cookiesInChain containsObject:potentialCookie]) {
-                break;
-            }
-            else if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
-                [array addObject:potentialCookie];
-            }
-            else if (!potentialCookie) {
-                break;
-            }
+            BOOL isFinished = [self checkIfCookieIsValid:potentialCookie rootCookie:cookie existingChain:existingChain array:array];
+            if (isFinished) break;
         }
 
     }
@@ -168,15 +159,8 @@
         //look to left of cookie
         for (NSInteger i = cookie.column - 1; i >= 0; i--) {
             BBQCookie *potentialCookie = _cookies[i][cookie.row];
-            if (potentialCookie && [existingChain.cookiesInChain containsObject:potentialCookie]) {
-                break;
-            }
-            else if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
-                [array addObject:potentialCookie];
-            }
-            else if (!potentialCookie) {
-                break;
-            }
+            BOOL isFinished = [self checkIfCookieIsValid:potentialCookie rootCookie:cookie existingChain:existingChain array:array];
+            if (isFinished) break;
         }
 
     }
@@ -185,21 +169,52 @@
         //look to right of cookie
         for (NSInteger i = cookie.column + 1; i < NumColumns; i++) {
             BBQCookie *potentialCookie = _cookies[i][cookie.row];
-            if (potentialCookie && [existingChain.cookiesInChain containsObject:potentialCookie]) {
-                break;
-            }
-            else if (potentialCookie && potentialCookie.cookieType == cookie.cookieType) {
-                [array addObject:potentialCookie];
-            }
-            else if (!potentialCookie) {
-                break;
-            }
+            BOOL isFinished = [self checkIfCookieIsValid:potentialCookie rootCookie:cookie existingChain:existingChain array:array];
+            if (isFinished) break;
         }
 
     }
     
     return array;
 
+}
+
+//Returns whether you need to break the for loop and stop looking for cookies
+- (BOOL)checkIfCookieIsValid:(BBQCookie *)potentialCookie rootCookie:(BBQCookie *)rootCookie existingChain:(BBQChain *)existingChain array:(NSMutableArray *)array {
+    
+    if (!potentialCookie) {
+        return NO;
+    }
+    
+    else if ([potentialCookie isEqual:[existingChain.cookiesInChain firstObject]] && [existingChain.cookiesInChain count] >= 4 && [rootCookie canBeChainedToCookie:potentialCookie isFirstCookieInChain:NO]) {
+        [array addObject:potentialCookie];
+        return YES;
+    }
+    
+    else if (potentialCookie && [existingChain.cookiesInChain containsObject:potentialCookie]) {
+        return NO;
+    }
+    
+    else if ([[existingChain.cookiesInChain firstObject] isEqual:rootCookie] && [existingChain.cookiesInChain count] == 1 && [rootCookie canBeChainedToCookie:potentialCookie isFirstCookieInChain:YES]) {
+        [array addObject:potentialCookie];
+        
+        if ([rootCookie.powerup isAMultiCookie] || [rootCookie.powerup isARobbersSack] || [potentialCookie.powerup isAMultiCookie] || [potentialCookie.powerup isARobbersSack]) {
+            return YES;
+        }
+        
+        else if (([rootCookie.powerup isATypeSixPowerup] || [rootCookie.powerup isACrissCross] || [rootCookie.powerup isABox]) && ([potentialCookie.powerup isATypeSixPowerup] || [potentialCookie.powerup isACrissCross] || [potentialCookie.powerup isABox])) {
+            return YES;
+        }
+        
+        else return NO;
+    }
+    
+    else if ([rootCookie canBeChainedToCookie:potentialCookie isFirstCookieInChain:NO]) {
+        [array addObject:potentialCookie];
+        return NO;
+    }
+    
+    else return NO;
 }
 
 - (NSDictionary *)rootCookieLimits:(BBQCookie *)cookie {
@@ -256,6 +271,81 @@
     }
     
     return limits;
+}
+
+- (BOOL)cookieFormsACrissCross:(BBQCookie *)cookie chain:(BBQChain *)chain {
+    //Find the previous cookie in the chain
+    NSInteger indexOfCookie = [chain.cookiesInChain indexOfObject:cookie];
+    BBQCookie *previousCookie;
+    if (indexOfCookie > 0) {
+        previousCookie = chain.cookiesInChain[indexOfCookie - 1];
+    }
+    
+    //If the cookies are vertical, check on the left for a cookie
+    if (cookie.column == previousCookie.column) {
+        
+        //Find out the top and bottom cookie
+        BBQCookie *bottomCookie;
+        BBQCookie *topCookie;
+        if (cookie.row > previousCookie.row) {
+            bottomCookie = previousCookie;
+            topCookie = cookie;
+        }
+        else {
+            bottomCookie = cookie;
+            topCookie = previousCookie;
+        }
+        
+        for (NSInteger column = bottomCookie.column - 1; column >= 0; column --) {
+            for (NSInteger row = bottomCookie.row + 1; row < topCookie.row; row ++) {
+                BBQCookie *testCookie = _cookies[column][row];
+                if ([chain.cookiesInChain containsObject:testCookie]) {
+                    
+                    //Check along that row for a matching cookie in the chain
+                    for (NSInteger i = bottomCookie.column + 1; i < NumColumns; i++) {
+                        BBQCookie *testCookieTwo = _cookies[i][row];
+                        if ([chain.cookiesInChain containsObject:testCookieTwo]) {
+                            return YES;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    //If the cookies are vertical, check on the left for a cookie
+    else if (cookie.row == previousCookie.row) {
+        
+        //Find out the left and right cookie (named bottom and top)
+        BBQCookie *bottomCookie;
+        BBQCookie *topCookie;
+        if (cookie.column > previousCookie.column) {
+            bottomCookie = previousCookie;
+            topCookie = cookie;
+        }
+        else {
+            bottomCookie = cookie;
+            topCookie = previousCookie;
+        }
+        
+        for (NSInteger row = bottomCookie.row - 1; row >= 0; row --) {
+            for (NSInteger column = bottomCookie.column + 1; column < topCookie.column; column ++) {
+                BBQCookie *testCookie = _cookies[column][row];
+                if ([chain.cookiesInChain containsObject:testCookie]) {
+                    
+                    //Check along that row for a matching cookie in the chain
+                    for (NSInteger i = bottomCookie.row + 1; i < NumRows; i++) {
+                        BBQCookie *testCookieTwo = _cookies[column][i];
+                        if ([chain.cookiesInChain containsObject:testCookieTwo]) {
+                            return YES;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    return NO;
 }
 
 - (NSSet *)createCookiesInBlankTiles {
@@ -342,7 +432,10 @@
     return columns;
 }
 
-- (NSArray *)topUpCookies {
+- (NSArray *)topUpCookiesWithOptionalUpgradedMultiCookie:(BBQCookie *)multiCookie poweruppedCookieChainedToMulticookie:(BBQCookie *)poweruppedCookie {
+    
+    NSMutableArray *potentialCookiesToUpgrade;
+    
     NSMutableArray *columns = [NSMutableArray array];
     NSUInteger cookieType = 0;
     
@@ -360,6 +453,15 @@
                 
                 BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
                 
+                //Add a powerup if required
+                if (multiCookie && cookieType == poweruppedCookie.cookieType) {
+                    if (!potentialCookiesToUpgrade) {
+                        potentialCookiesToUpgrade = [NSMutableArray array];
+                    }
+                    [potentialCookiesToUpgrade addObject:cookie];
+                    
+                }
+                
                 if (!array) {
                     array = [NSMutableArray array];
                     [columns addObject:array];
@@ -368,6 +470,30 @@
             }
         }
     }
+    
+    while ([multiCookie.powerup.upgradedMuliticookiePowerupCookiesThatNeedreplacing count] > 0 && [potentialCookiesToUpgrade count] > 0) {
+        NSInteger randomIndex = arc4random_uniform([potentialCookiesToUpgrade count]);
+        BBQCookie *cookie = potentialCookiesToUpgrade[randomIndex];
+        
+        NSInteger random = arc4random_uniform(2) + 1;
+        NSString *direction;
+        if (random == 1) {
+            direction = RIGHT;
+        }
+        else {
+            direction = UP;
+        }
+        
+        cookie.powerup = [[BBQPowerup alloc] initWithType:poweruppedCookie.powerup.type direction:direction];
+        cookie.powerup.isCurrentlyTemporary = NO;
+        cookie.powerup.isReadyToDetonate = YES;
+        
+        [multiCookie.powerup.upgradedMuliticookiePowerupCookiesThatNeedreplacing removeLastObject];
+        [potentialCookiesToUpgrade removeObject:cookie];
+        
+        [multiCookie.powerup addNewlyCreatedPowerupToArraysOfPowerupsToDetonate:cookie];
+    }
+    
     return columns;
 }
 
