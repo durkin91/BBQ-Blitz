@@ -411,7 +411,6 @@ static const CGFloat TileHeight = 36.0;
 - (void)handleBacktrackedCookie:(BBQCookie *)cookie {
     NSArray *removedCookies = [self.gameLogic backtrackedCookiesForCookie:cookie];
     [self removeHighlightedCookies:removedCookies];
-    //[self animateActivatedCookieInChain:cookie];
     [self redrawSegmentsForCookiesInChain];
     self.rootCookie = cookie;
 }

@@ -76,6 +76,7 @@
 }
 
 - (NSArray *)backtrackedCookiesForCookie:(BBQCookie *)cookie {
+    
     self.chain.isClosedChain = NO;
     NSMutableArray *cookiesToRemove = [NSMutableArray array];
     for (NSInteger i = [self.chain.cookiesInChain indexOfObject:cookie] + 1; i < [self.chain.cookiesInChain count]; i++) {
@@ -198,7 +199,6 @@
 }
 
 - (BOOL)doesNotRequireInProgressLine {
-    //BBQCookie *firstCookie = [self.chain.cookiesInChain firstObject];
     if ([self.chain isATwoCookieChain]) {
         return  YES;
     }
