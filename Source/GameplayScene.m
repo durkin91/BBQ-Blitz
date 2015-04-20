@@ -11,6 +11,7 @@
 #import "BBQCookieOrder.h"
 #import "BBQMovement.h"
 #import "BBQChain.h"
+#import "BBQTileObstacle.h"
 
 
 
@@ -136,13 +137,13 @@ static const CGFloat TileHeight = 36.0;
         for (NSInteger column = 0; column < NumColumns; column++) {
             BBQTile *tile = [self.gameLogic.level tileAtColumn:column row:row];
             if (tile.tileType != 0) {
-                [self createSpriteForMaskTile:tile];
+                [self createSpriteForTile:tile];
             }
         }
     }
 }
 
-- (void)createSpriteForMaskTile:(BBQTile *)tile {
+- (void)createSpriteForTile:(BBQTile *)tile {
     CCSprite *tileSprite;
     if ((tile.column % 2 == 0 && tile.row % 2 == 0) || (tile.column % 2 != 0 && tile.row % 2 != 0)) {
         tileSprite = [CCSprite spriteWithImageNamed:@"sprites/TileRegular-Light.png"];
@@ -156,29 +157,42 @@ static const CGFloat TileHeight = 36.0;
     [self.maskLayer addChild:tileSprite];
     tile.sprite = tileSprite;
     
-//    if (tile.tileType == 3) {
-//        BBQLaserTileNode *laserTileOverlay = (BBQLaserTileNode *)[CCBReader load:@"LaserTile"];
-//        laserTileOverlay.position = [GameplayScene pointForColumn:column row:row];
-//        [self.overlayTilesLayer addChild:laserTileOverlay];
-//        tile.overlayTile = laserTileOverlay;
-//    }
-
+    //Create obstacle sprites
+    BBQTileObstacle *topObstacle;
+    BBQTileObstacle *bottomObstacle;
+    for (BBQTileObstacle *obstacle in tile.obstacles) {
+        if (obstacle.zOrder == 1) {
+            bottomObstacle = obstacle;
+        }
+        else if (obstacle.zOrder == 2) {
+            topObstacle = obstacle;
+        }
+    }
+    
+    if (bottomObstacle) {
+        [self createSpriteForTileObstacle:bottomObstacle];
+    }
+    if (topObstacle) {
+        [self createSpriteForTileObstacle:topObstacle];
+    }
 }
 
-//- (void)createSpriteForTileObstacle:(BBQTile *)tile {
-//    NSString *directory = [NSString stringWithFormat:@"sprites/%@", [tile obstacleSpriteName]];
-//    CCNode *tileSprite = [CCBReader load:directory];
-//    tileSprite.position = [GameplayScene pointForColumn:tile.column row:tile.row];
-//    [self.maskLayer addChild:tileSprite];
-//    tile.sprite = tileSprite;
-//}
-//
-//- (void)drawSpritesForObstacles:(BBQTile *)tile {
-//    //Bottom Obstacle
-//    BBQTile *bottomObstacle = [tile.bottomTileObstacles lastObject];
-//    [self createSpriteForTileObstacle:bottomObstacle];
-//    
-//}
+- (void)createSpriteForTileObstacle:(BBQTileObstacle *)obstacle {
+    NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [obstacle spriteName]];
+    CCSprite *sprite = [CCSprite spriteWithImageNamed:directory];
+    sprite.position = [GameplayScene pointForColumn:obstacle.column row:obstacle.row];
+    NSInteger zOrder = 0;
+    if (obstacle.zOrder == 1) {
+        zOrder = 20;
+    }
+    else if (obstacle.zOrder == 2) {
+        zOrder = 30;
+    }
+    
+    [self.maskLayer addChild:sprite z:zOrder];
+    obstacle.sprite = sprite;
+}
+
 
 - (BBQCookieNode *)createCookieNodeForCookie:(BBQCookie *)cookie column:(NSInteger)column row:(NSInteger)row highlighted:(BOOL)isHighlighted {
     BBQCookieNode *cookieNode = (BBQCookieNode *)[CCBReader load:@"Cookie"];

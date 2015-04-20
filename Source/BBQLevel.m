@@ -9,6 +9,7 @@
 #import "BBQLevel.h"
 #import "BBQGameLogic.h"
 #import "BBQCookieOrder.h"
+#import "BBQTileObstacle.h"
 
 @interface BBQLevel ()
 
@@ -555,15 +556,16 @@
                 
                 else if ([value integerValue] >= 1) {
                     _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:1 column:column row:tileRow];
-                }
-                
-                //Set up obstacles
-                if ([value integerValue] == 2) {
+                    BBQTile *tile = _tiles[column][tileRow];
                     
-                }
-                
-                else if ([value integerValue] == 3) {
+                    //Set up obstacles
+                    if ([value integerValue] == 2) {
+                        [tile addTileObstacles:[NSArray arrayWithObjects:GOLD_PLATED_TILE, nil]];
+                    }
                     
+                    else if ([value integerValue] == 3) {
+                        [tile addTileObstacles:[NSArray arrayWithObjects:GOLD_PLATED_TILE, SILVER_PLATED_TILE, nil]];
+                    }
                 }
                 
             }];

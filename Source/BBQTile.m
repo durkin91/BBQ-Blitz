@@ -7,6 +7,7 @@
 //
 
 #import "BBQTile.h"
+#import "BBQTileObstacle.h"
 
 @implementation BBQTile
 
@@ -40,15 +41,11 @@
     }
 }
 
-- (void)addTileObstacle:(NSString *)tileType {
-//    BBQTile *obstacle = [[BBQTile alloc] initWithTileType:tileType column:self.column row:self.row];
-//    
-//    if ([tileType isEqualToString:REGULAR_TILE] || [tileType isEqualToString:GOLD_PLATED_TILE] || [tileType isEqualToString:SILVER_PLATED_TILE]) {
-//        if (!self.bottomTileObstacles) {
-//            self.bottomTileObstacles = [NSMutableArray array];
-//        }
-//        [self.bottomTileObstacles addObject:obstacle];
-//    }
+- (void)addTileObstacles:(NSArray *)obstacleNames {
+    self.obstacles = [NSMutableArray array];
+    for (NSString *obstacleName in obstacleNames) {
+        BBQTileObstacle *obstacle = [[BBQTileObstacle alloc] initWithType:obstacleName column:self.column row:self.row];
+        [self.obstacles addObject:obstacle];
+    }
 }
-
 @end
