@@ -135,7 +135,7 @@ static const CGFloat TileHeight = 36.0;
     for (NSInteger row = 0; row < NumRows; row ++) {
         for (NSInteger column = 0; column < NumColumns; column++) {
             BBQTile *tile = [self.gameLogic.level tileAtColumn:column row:row];
-            if ([tile.tileType isEqualToString:NO_TILE] == NO) {
+            if (tile.tileType != 0) {
                 [self createSpriteForMaskTile:tile];
             }
         }
@@ -165,20 +165,20 @@ static const CGFloat TileHeight = 36.0;
 
 }
 
-- (void)createSpriteForTileObstacle:(BBQTile *)tile {
-    NSString *directory = [NSString stringWithFormat:@"sprites/%@", [tile obstacleSpriteName]];
-    CCNode *tileSprite = [CCBReader load:directory];
-    tileSprite.position = [GameplayScene pointForColumn:tile.column row:tile.row];
-    [self.maskLayer addChild:tileSprite];
-    tile.sprite = tileSprite;
-}
-
-- (void)drawSpritesForObstacles:(BBQTile *)tile {
-    //Bottom Obstacle
-    BBQTile *bottomObstacle = [tile.bottomTileObstacles lastObject];
-    [self createSpriteForTileObstacle:bottomObstacle];
-    
-}
+//- (void)createSpriteForTileObstacle:(BBQTile *)tile {
+//    NSString *directory = [NSString stringWithFormat:@"sprites/%@", [tile obstacleSpriteName]];
+//    CCNode *tileSprite = [CCBReader load:directory];
+//    tileSprite.position = [GameplayScene pointForColumn:tile.column row:tile.row];
+//    [self.maskLayer addChild:tileSprite];
+//    tile.sprite = tileSprite;
+//}
+//
+//- (void)drawSpritesForObstacles:(BBQTile *)tile {
+//    //Bottom Obstacle
+//    BBQTile *bottomObstacle = [tile.bottomTileObstacles lastObject];
+//    [self createSpriteForTileObstacle:bottomObstacle];
+//    
+//}
 
 - (BBQCookieNode *)createCookieNodeForCookie:(BBQCookie *)cookie column:(NSInteger)column row:(NSInteger)row highlighted:(BOOL)isHighlighted {
     BBQCookieNode *cookieNode = (BBQCookieNode *)[CCBReader load:@"Cookie"];

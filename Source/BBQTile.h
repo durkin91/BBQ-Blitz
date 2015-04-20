@@ -23,12 +23,11 @@
 @property (nonatomic) BOOL requiresACookie;
 @property (nonatomic) NSInteger column;
 @property (nonatomic) NSInteger row;
-@property (strong, nonatomic) NSString *tileType;
+@property (assign, nonatomic) NSInteger tileType;
 @property (strong, nonatomic) NSMutableArray *bottomTileObstacles;
 @property (strong, nonatomic) NSMutableArray *topTileObstacles;
 
-- (NSString *)obstacleSpriteName;
 - (void)addTileObstacle:(NSString *)tileType ;
-- (instancetype)initWithTileType:(NSString *)tileType column:(NSInteger)column row:(NSInteger)row;
+- (instancetype)initWithTileType:(NSInteger)tileType column:(NSInteger)column row:(NSInteger)row;
 
 @end
