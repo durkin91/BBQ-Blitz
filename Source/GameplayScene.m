@@ -135,17 +135,24 @@ static const CGFloat TileHeight = 36.0;
         for (NSInteger column = 0; column < NumColumns; column++) {
             BBQTile *tile = [self.gameLogic.level tileAtColumn:column row:row];
             if (tile.tileType > 0) {
-                [self createSpriteForTile:tile column:column row:row];
+                [self createSpriteForMaskTile:tile column:column row:row];
             }
         }
     }
 }
 
-- (void)createSpriteForTile:(BBQTile *)tile column:(NSInteger)column row:(NSInteger)row {
+- (void)createSpriteForMaskTile:(BBQTile *)tile column:(NSInteger)column row:(NSInteger)row {
     
     //NSString *directory = [NSString stringWithFormat:@"Tiles/%@", [tile spriteName]];
     //CCNode *tileSprite = [CCBReader load:directory];
-    CCSprite *tileSprite = [CCSprite spriteWithImageNamed:@"sprites/MaskTile.png"];
+    CCSprite *tileSprite;
+    if ((column % 2 == 0 && row % 2 == 0) || (column % 2 != 0 && row % 2 != 0)) {
+        tileSprite = [CCSprite spriteWithImageNamed:@"sprites/TileRegular-Light.png"];
+    }
+    
+    else {
+        tileSprite = [CCSprite spriteWithImageNamed:@"sprites/TileRegular-Dark.png"];
+    }
     tileSprite.position = [GameplayScene pointForColumn:column row:row];
     tileSprite.zOrder = 10;
     [self.maskLayer addChild:tileSprite];

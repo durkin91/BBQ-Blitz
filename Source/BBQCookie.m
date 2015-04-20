@@ -79,6 +79,11 @@
         spriteName = [self spriteNameBase];
     }
     
+    //safety net
+    if (spriteName == nil) {
+        spriteName = [self spriteNameBase];
+    }
+    
     return spriteName;
 }
 

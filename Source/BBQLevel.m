@@ -183,7 +183,7 @@
 - (BOOL)checkIfCookieIsValid:(BBQCookie *)potentialCookie rootCookie:(BBQCookie *)rootCookie existingChain:(BBQChain *)existingChain array:(NSMutableArray *)array {
     
     if (!potentialCookie) {
-        return NO;
+        return YES;
     }
     
     else if ([potentialCookie isEqual:[existingChain.cookiesInChain firstObject]] && [existingChain.cookiesInChain count] >= 4 && [rootCookie canBeChainedToCookie:potentialCookie isFirstCookieInChain:NO]) {
@@ -192,7 +192,7 @@
     }
     
     else if (potentialCookie && [existingChain.cookiesInChain containsObject:potentialCookie]) {
-        return NO;
+        return YES;
     }
     
     else if ([[existingChain.cookiesInChain firstObject] isEqual:rootCookie] && [existingChain.cookiesInChain count] == 1 && [rootCookie canBeChainedToCookie:potentialCookie isFirstCookieInChain:YES]) {
