@@ -134,7 +134,7 @@ static const CGFloat TileHeight = 36.0;
     for (NSInteger row = 0; row < NumRows; row ++) {
         for (NSInteger column = 0; column < NumColumns; column++) {
             BBQTile *tile = [self.gameLogic.level tileAtColumn:column row:row];
-            if (tile.tileType > 0) {
+            if ([tile.tileType isEqualToString:NO_TILE] == NO) {
                 [self createSpriteForMaskTile:tile column:column row:row];
             }
         }

@@ -550,39 +550,11 @@
                 
                 //create a tile object depending on the type of tile
                 if ([value integerValue] == 0) {
-                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:0 column:column row:tileRow];
+                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:NO_TILE column:column row:tileRow];
                 }
                 
                 else if ([value integerValue] == 1) {
-                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:1 column:column row:tileRow];
-                }
-                
-                else if ([value integerValue] == 2) {
-                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:2 column:column row:tileRow];
-                }
-                
-                else if ([value integerValue] == 3) {
-                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:3 column:column row:tileRow];
-                }
-                
-                else if ([value integerValue] == 5) {
-                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:5 column:column row:tileRow];
-                }
-                
-                else if ([value integerValue] == 6) {
-                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:6 column:column row:tileRow];
-                    if (!self.steelBlockerFactoryTiles) {
-                        self.steelBlockerFactoryTiles = [@[] mutableCopy];
-                    }
-                    [self.steelBlockerFactoryTiles addObject:[self tileAtColumn:column row:tileRow]];
-                }
-                
-                else if ([value integerValue] == 7) {
-                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:7 column:column row:tileRow];
-                }
-                
-                else if ([value integerValue] == 8) {
-                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:8 column:column row:tileRow];
+                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:REGULAR_TILE column:column row:tileRow];
                 }
                 
             }];
