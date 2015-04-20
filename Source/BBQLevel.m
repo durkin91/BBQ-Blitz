@@ -198,11 +198,11 @@
     else if ([[existingChain.cookiesInChain firstObject] isEqual:rootCookie] && [existingChain.cookiesInChain count] == 1 && [rootCookie canBeChainedToCookie:potentialCookie isFirstCookieInChain:YES]) {
         [array addObject:potentialCookie];
         
-        if ([rootCookie.powerup isAMultiCookie] || [rootCookie.powerup isARobbersSack] || [potentialCookie.powerup isAMultiCookie] || [potentialCookie.powerup isARobbersSack]) {
+        if ([rootCookie.activePowerup isAMultiCookie] || [potentialCookie.activePowerup isAMultiCookie]) {
             return YES;
         }
         
-        else if (([rootCookie.powerup isATypeSixPowerup] || [rootCookie.powerup isACrissCross] || [rootCookie.powerup isABox]) && ([potentialCookie.powerup isATypeSixPowerup] || [potentialCookie.powerup isACrissCross] || [potentialCookie.powerup isABox])) {
+        else if (([rootCookie.activePowerup isATypeSixPowerup] || [rootCookie.activePowerup isACrissCross] || [rootCookie.activePowerup isABox]) && ([potentialCookie.activePowerup isATypeSixPowerup] || [potentialCookie.activePowerup isACrissCross] || [potentialCookie.activePowerup isABox])) {
             return YES;
         }
         
@@ -300,12 +300,18 @@
             for (NSInteger row = bottomCookie.row + 1; row < topCookie.row; row ++) {
                 BBQCookie *testCookie = _cookies[column][row];
                 if ([chain.cookiesInChain containsObject:testCookie]) {
+                    NSInteger testCookieIndex = [chain.cookiesInChain indexOfObject:testCookie];
                     
                     //Check along that row for a matching cookie in the chain
                     for (NSInteger i = bottomCookie.column + 1; i < NumColumns; i++) {
                         BBQCookie *testCookieTwo = _cookies[i][row];
                         if ([chain.cookiesInChain containsObject:testCookieTwo]) {
-                            return YES;
+                            NSInteger testCookieTwoIndex = [chain.cookiesInChain indexOfObject:testCookieTwo];
+                            NSInteger difference = ABS(testCookieIndex - testCookieTwoIndex);
+                            
+                            if (difference == 1) {
+                                return YES;
+                            }
                         }
                     }
                 }
@@ -332,12 +338,18 @@
             for (NSInteger column = bottomCookie.column + 1; column < topCookie.column; column ++) {
                 BBQCookie *testCookie = _cookies[column][row];
                 if ([chain.cookiesInChain containsObject:testCookie]) {
+                    NSInteger testCookieIndex = [chain.cookiesInChain indexOfObject:testCookie];
                     
                     //Check along that row for a matching cookie in the chain
                     for (NSInteger i = bottomCookie.row + 1; i < NumRows; i++) {
                         BBQCookie *testCookieTwo = _cookies[column][i];
                         if ([chain.cookiesInChain containsObject:testCookieTwo]) {
-                            return YES;
+                            NSInteger testCookieTwoIndex = [chain.cookiesInChain indexOfObject:testCookieTwo];
+                            NSInteger difference = ABS(testCookieIndex - testCookieTwoIndex);
+                            
+                            if (difference == 1) {
+                                return YES;
+                            }
                         }
                     }
                 }
@@ -471,7 +483,7 @@
         }
     }
     
-    while ([multiCookie.powerup.upgradedMuliticookiePowerupCookiesThatNeedreplacing count] > 0 && [potentialCookiesToUpgrade count] > 0) {
+    while ([multiCookie.activePowerup.upgradedMuliticookiePowerupCookiesThatNeedreplacing count] > 0 && [potentialCookiesToUpgrade count] > 0) {
         NSInteger randomIndex = arc4random_uniform([potentialCookiesToUpgrade count]);
         BBQCookie *cookie = potentialCookiesToUpgrade[randomIndex];
         
@@ -484,14 +496,12 @@
             direction = UP;
         }
         
-        cookie.powerup = [[BBQPowerup alloc] initWithType:poweruppedCookie.powerup.type direction:direction];
-        cookie.powerup.isCurrentlyTemporary = NO;
-        cookie.powerup.isReadyToDetonate = YES;
+        cookie.activePowerup = [[BBQPowerup alloc] initWithType:poweruppedCookie.activePowerup.type direction:direction];
         
-        [multiCookie.powerup.upgradedMuliticookiePowerupCookiesThatNeedreplacing removeLastObject];
+        [multiCookie.activePowerup.upgradedMuliticookiePowerupCookiesThatNeedreplacing removeLastObject];
         [potentialCookiesToUpgrade removeObject:cookie];
         
-        [multiCookie.powerup addNewlyCreatedPowerupToArraysOfPowerupsToDetonate:cookie];
+        [multiCookie.activePowerup addNewlyCreatedPowerupToArraysOfPowerupsToDetonate:cookie];
     }
     
     return columns;

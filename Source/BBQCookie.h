@@ -16,7 +16,7 @@
 @class BBQChain;
 
 static const NSUInteger NumCookieTypes = 6;
-static const NSUInteger NumStartingCookies = 3;
+static const NSUInteger NumStartingCookies = 6;
 
 @interface BBQCookie : NSObject
 
@@ -26,7 +26,8 @@ static const NSUInteger NumStartingCookies = 3;
 @property (strong, nonatomic) BBQCookieNode *sprite;
 @property (assign, nonatomic) BOOL isInStaticTile;
 @property (assign, nonatomic) NSInteger countdown;
-@property (strong, nonatomic) BBQPowerup *powerup;
+@property (strong, nonatomic) BBQPowerup *activePowerup;
+@property (strong, nonatomic) BBQPowerup *temporaryPowerup;
 @property (strong, nonatomic) BBQCookieOrder *cookieOrder;
 @property (assign, nonatomic) NSInteger score;
 

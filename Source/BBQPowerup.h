@@ -22,11 +22,11 @@
 @property (strong, nonatomic) NSMutableArray *arraysOfDisappearingCookies;
 @property (strong, nonatomic) NSMutableArray *upgradedMuliticookiePowerupCookiesThatNeedreplacing;
 @property (strong, nonatomic) NSString *direction;
-@property (assign, nonatomic) BOOL isCurrentlyTemporary;
 @property (assign, nonatomic) BOOL isReadyToDetonate;
 
 
 - (instancetype)initWithType:(NSInteger)type direction:(NSString *)swipeDirection;
+- (NSString *)powerupName;
 - (void)performPowerupWithLevel:(BBQLevel *)level cookie:(BBQCookie *)rootCookie cookieTypeToCollect:(BBQCookie *)cookieTypeToCollect;
 - (void)scorePowerup;
 - (void)addCookieOrders:(NSArray *)cookieOrders;
@@ -37,7 +37,6 @@
 
 - (BOOL)isAPivotPad;
 - (BOOL)isAMultiCookie;
-- (BOOL)isARobbersSack;
 - (BOOL)isATypeSixPowerup;
 - (BOOL)isACrissCross;
 - (BOOL)isABox;

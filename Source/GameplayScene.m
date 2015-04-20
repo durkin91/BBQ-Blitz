@@ -302,6 +302,7 @@ static const CGFloat TileHeight = 36.0;
             BBQCookie *cookie = [self.gameLogic.level cookieAtColumn:column row:row];
             if ([self.gameLogic isCookieABackTrack:cookie]) {
                 [self handleBacktrackedCookie:cookie];
+                self.gameLogic.chain.isClosedChain = NO;
             }
             
             //UP
@@ -395,6 +396,10 @@ static const CGFloat TileHeight = 36.0;
 - (BOOL)isBacktracking:(CGPoint)location rootPoint:(CGPoint)rootPoint {
     BOOL isBacktracking = NO;
     BBQCookie *previousCookie = [self.gameLogic previousCookieToCookieInChain:self.rootCookie];
+    if (self.gameLogic.chain.isClosedChain == YES) {
+        previousCookie = [self.gameLogic.chain.cookiesInChain lastObject];
+    }
+
     if (previousCookie) {
         CGPoint previousCookieLocation = [GameplayScene pointForColumn:previousCookie.column row:previousCookie.row];
         
@@ -409,10 +414,15 @@ static const CGFloat TileHeight = 36.0;
 }
 
 - (void)handleBacktrackedCookie:(BBQCookie *)cookie {
+    
     NSArray *removedCookies = [self.gameLogic backtrackedCookiesForCookie:cookie];
     [self removeHighlightedCookies:removedCookies];
     [self redrawSegmentsForCookiesInChain];
     self.rootCookie = cookie;
+    
+    BBQCookie *firstCookie = [self.gameLogic.chain.cookiesInChain firstObject];
+    firstCookie.temporaryPowerup = nil;
+    [self highlightCookie:firstCookie];
 }
 
 - (void)activateCookies:(NSArray *)cookies {
@@ -455,18 +465,23 @@ static const CGFloat TileHeight = 36.0;
         BBQCookie *cookie = cookiesInChain[i];
         [self drawSegmentToCookie:cookie];
     }
-    if (self.gameLogic.chain.isClosedChain) {
-        
-    }
 }
 
 - (void)drawInProgressLineForColumn:(NSInteger)column row:(NSInteger)row touchLocation:(CGPoint)location {
     [_inProgressDrawNode clear];
     
-    if ([self.gameLogic doesNotRequireInProgressLine]) return;
-    
     //Take care of drawing the in progress line
-    CGPoint rootPoint = [GameplayScene pointForColumn:self.rootCookie.column row:self.rootCookie.row];
+    BBQCookie *rootCookie;
+    if (self.gameLogic.chain.isClosedChain) {
+        rootCookie = [self.gameLogic.chain.cookiesInChain firstObject];
+    }
+    
+    else {
+        rootCookie = self.rootCookie;
+    }
+    
+    CGPoint rootPoint = [GameplayScene pointForColumn:rootCookie.column row:rootCookie.row];
+    
     float distanceAboveOrBelow = location.y - rootPoint.y;
     float distanceAcross = location.x - rootPoint.x;
     float x = rootPoint.x;
@@ -509,11 +524,20 @@ static const CGFloat TileHeight = 36.0;
         endPoint.x = MAX(endPoint.x, leftLimit.x);
     }
     
-    if ([self isBacktracking:endPoint rootPoint:rootPoint] && (columnAdjusted != self.rootCookie.column || rowAdjusted != self.rootCookie.row)) {
+    BOOL isBacktracking = [self isBacktracking:endPoint rootPoint:rootPoint];
+    if (isBacktracking && (columnAdjusted != rootCookie.column || rowAdjusted != rootCookie.row)) {
         BBQCookie *previousCookie = [self.gameLogic previousCookieToCookieInChain:self.rootCookie];
         [self handleBacktrackedCookie:previousCookie];
         rootPoint = [GameplayScene pointForColumn:self.rootCookie.column row:self.rootCookie.row];
         [_inProgressDrawNode drawSegmentFrom:rootPoint to:endPoint radius:2.0 color:[self.rootCookie lineColor]];
+        
+        BBQCookie *firstCookie = [self.gameLogic.chain.cookiesInChain firstObject];
+        firstCookie.temporaryPowerup = nil;
+        [self highlightCookie:firstCookie];
+        return;
+    }
+    
+    else if (isBacktracking == NO && [self.gameLogic doesNotRequireInProgressLine]) {
         return;
     }
     
@@ -646,7 +670,7 @@ static const CGFloat TileHeight = 36.0;
     [cookie.sprite runAction:[CCActionSequence actions:scaleAction, [CCActionRemove action], nil]];
     longestDuration = scaleActionDuration;
     
-    for (NSArray *array in cookie.powerup.arraysOfDisappearingCookies) {
+    for (NSArray *array in cookie.activePowerup.arraysOfDisappearingCookies) {
         
         [array enumerateObjectsUsingBlock:^(id object, NSUInteger idx, BOOL *stop) {
             
@@ -672,7 +696,7 @@ static const CGFloat TileHeight = 36.0;
         }];
     }
     
-    [self.gameLogic addPowerupScoreToCurrentScore:cookie.powerup];
+    [self.gameLogic addPowerupScoreToCurrentScore:cookie.activePowerup];
     [self runAction:[self updateScoreAndMoves]];
     
     return longestDuration;
@@ -682,7 +706,7 @@ static const CGFloat TileHeight = 36.0;
     
     __block NSTimeInterval spinDuration = 0.5;
     
-    for (NSArray *array in multicookie.powerup.arraysOfDisappearingCookies) {
+    for (NSArray *array in multicookie.activePowerup.arraysOfDisappearingCookies) {
         
         [array enumerateObjectsUsingBlock:^(BBQCookie *powerupCookie, NSUInteger idx, BOOL *stop) {
             //Spin action
@@ -705,7 +729,7 @@ static const CGFloat TileHeight = 36.0;
     __block NSTimeInterval fillHolesDuration = 0;
     __block NSTimeInterval topUpCookiesDuration = 0;
     
-    NSArray *array = multiCookie.powerup.arraysOfDisappearingCookies[0];
+    NSArray *array = multiCookie.activePowerup.arraysOfDisappearingCookies[0];
     detonationDuration = [self animateArrayOfUpgradedMultiCookiePowerups:array completion:^{
         
         NSArray *columns = [self.gameLogic.level fillHoles];
@@ -714,7 +738,7 @@ static const CGFloat TileHeight = 36.0;
             NSArray *columns = [self.gameLogic topUpCookiesWithMultiCookie:multiCookie];
             topUpCookiesDuration = [self animateNewCookies:columns completion:^{
                 
-                [multiCookie.powerup.arraysOfDisappearingCookies removeObject:array];
+                [multiCookie.activePowerup.arraysOfDisappearingCookies removeObject:array];
                 
             }];
         }];
@@ -783,7 +807,7 @@ static const CGFloat TileHeight = 36.0;
 }
 
 - (void)completionBlockForMultiCookiePowerupUpgrade:(BBQCookie *)multicookie {
-    if ([multicookie.powerup.arraysOfDisappearingCookies count] > 0) {
+    if ([multicookie.activePowerup.arraysOfDisappearingCookies count] > 0) {
         [self animateUpgradedMultiCookiePowerup:multicookie completion:^{
             [self completionBlockForMultiCookiePowerupUpgrade:multicookie];
         }];
@@ -795,14 +819,14 @@ static const CGFloat TileHeight = 36.0;
 
 - (void)animateCookieRemoval:(BBQCookie *)cookie powerupDuration:(NSTimeInterval)powerupDuration scaleActionDuration:(NSTimeInterval)duration detonatePowerupsWithinArray:(BOOL)detonatePowerupsWithinArray {
     //Refers to all non upgraded multicookie powerups
-    if (cookie.powerup.isReadyToDetonate && detonatePowerupsWithinArray == YES) {
+    if (cookie.activePowerup && detonatePowerupsWithinArray == YES) {
         [self animatePowerupForCookie:cookie detonatePowerupsWithinArray:detonatePowerupsWithinArray];
     }
     
     //Refers to all upgraded multicookie powerup cookies
-    else if (cookie.powerup.isReadyToDetonate && detonatePowerupsWithinArray == NO) {
+    else if (cookie.activePowerup && detonatePowerupsWithinArray == NO) {
         BBQCookie *multicookie = [self.gameLogic.chain returnMultiCookieInMultiCookiePowerup];
-        [multicookie.powerup removeUndetonatedPowerupFromArraysOfPowerupsToDetonate:cookie];
+        [multicookie.activePowerup removeUndetonatedPowerupFromArraysOfPowerupsToDetonate:cookie];
     }
     
     if (cookie.cookieOrder && cookie.sprite != nil) {

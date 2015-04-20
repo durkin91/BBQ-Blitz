@@ -18,8 +18,6 @@
     self = [super init];
     if (self) {
         self.type = type;
-        self.isCurrentlyTemporary = YES;
-        self.isReadyToDetonate = NO;
         
         if ([direction isEqualToString:RIGHT] || [direction isEqualToString:LEFT]) {
             self.direction = HORIZONTAL;
@@ -31,6 +29,37 @@
     }
     
     return self;
+}
+
+- (NSString *)powerupName {
+    NSString *powerupName;
+    
+    switch (self.type) {
+        case 6:
+            powerupName = self.direction;
+            break;
+            
+        case 9:
+            powerupName = @"PivotPad";
+            break;
+            
+        case 12:
+            powerupName = @"MultiCookie";
+            break;
+            
+        case 20:
+            powerupName = @"CrissCross";
+            break;
+            
+        case 30:
+            powerupName = @"Box";
+            break;
+            
+        default:
+            break;
+    }
+    
+    return powerupName;
 }
 
 - (void)performPowerupWithLevel:(BBQLevel *)level cookie:(BBQCookie *)rootCookie cookieTypeToCollect:(BBQCookie *)cookieTypeToCollect {
@@ -53,10 +82,6 @@
             
         case 12:
             [self removeAllCookiesOfCookieType:cookieTypeToCollect rootCookie:rootCookie];
-            break;
-            
-        case 15:
-            [self destroyAllCookiesAroundBlast:rootCookie numberOfLayers:100];
             break;
         
         //Criss Cross
@@ -106,7 +131,7 @@
 }
 
 - (BOOL)canOnlyJoinWithCookieNextToIt {
-    if (self.type == 9 || self.type == 12 || self.type == 15) {
+    if (self.type == 9 || self.type == 12 ) {
         return YES;
     }
     else return NO;
@@ -127,11 +152,6 @@
 
 - (BOOL)isAMultiCookie {
     if (self.type == 12) return YES;
-    else return NO;
-}
-
-- (BOOL)isARobbersSack {
-    if (self.type == 15) return YES;
     else return NO;
 }
 
@@ -191,18 +211,16 @@
             if ([object isKindOfClass:[BBQCookie class]]) {
                 BBQCookie *cookie = object;
             
-                if ([cookie.powerup canBeDetonatedWithoutAChain]) {
+                if ([cookie.activePowerup canBeDetonatedWithoutAChain]) {
                     cookie.score = 150;
                 }
-                else if ([cookie.powerup isAPivotPad]) {
+                else if ([cookie.activePowerup isAPivotPad]) {
                     cookie.score = 250;
                 }
-                else if ([cookie.powerup isAMultiCookie]) {
+                else if ([cookie.activePowerup isAMultiCookie]) {
                     cookie.score = 300;
                 }
-                else if ([cookie.powerup isARobbersSack]) {
-                    cookie.score = 500;
-                }
+
                 else {
                     cookie.score = 30;
                 }
@@ -223,7 +241,7 @@
             for (id object in array) {
                 if ([object isKindOfClass:[BBQCookie class]]) {
                     BBQCookie *cookie = object;
-                    if (cookieOrder.cookie.cookieType == cookie.cookieType && cookieOrder.quantityLeft > 0 && !cookie.powerup) {
+                    if (cookieOrder.cookie.cookieType == cookie.cookieType && cookieOrder.quantityLeft > 0 && !cookie.activePowerup) {
                         cookie.cookieOrder = cookieOrder;
                         x++;
                     }
@@ -240,10 +258,6 @@
     if (cookie != nil) {
         [_level replaceCookieAtColumn:column row:row withCookie:nil];
         [array addObject:cookie];
-        
-        if (cookie.powerup) {
-            cookie.powerup.isReadyToDetonate = YES;
-        }
     }
     else {
         [array addObject:[NSNull null]];
@@ -296,7 +310,7 @@
 - (void)removeAllCookiesOfCookieType:(BBQCookie *)cookieType rootCookie:(BBQCookie *)rootCookie {
     
     //If the cookieType has no powerup upgrade required, then all cookies are in a seperate array so they are collected at the same time.
-    if ([cookieType.powerup isATypeSixPowerup] || [cookieType.powerup isACrissCross] || [cookieType.powerup isABox]) {
+    if ([cookieType.activePowerup isATypeSixPowerup] || [cookieType.activePowerup isACrissCross] || [cookieType.activePowerup isABox]) {
         NSMutableArray *array = [NSMutableArray array];
         [self.arraysOfDisappearingCookies addObject:array];
         
@@ -321,19 +335,6 @@
                     [self.arraysOfDisappearingCookies addObject:array];
                     [self destroyCookieAtColumn:column row:row array:array];
                 }
-            }
-        }
-    }
-}
-
-- (void)destroyAllCookies:(BBQCookie *)rootCookie {
-    for (NSInteger column = 0; column < NumColumns; column ++) {
-        for (NSInteger row = 0; row < NumRows; row++) {
-            BBQCookie *cookie = [_level cookieAtColumn:column row:row];
-            if (cookie) {
-                NSMutableArray *array = [NSMutableArray array];
-                [self.arraysOfDisappearingCookies addObject:array];
-                [self destroyCookieAtColumn:column row:row array:array];
             }
         }
     }
@@ -580,7 +581,7 @@
 - (void)upgradeMultiCookiePowerupCookiesToCookieType:(BBQCookie *)cookieType {
     NSMutableArray *oldArray = [self.arraysOfDisappearingCookies firstObject];
     
-    if ([cookieType.powerup isATypeSixPowerup] || [cookieType.powerup isABox] || [cookieType.powerup isACrissCross]) {
+    if ([cookieType.activePowerup isATypeSixPowerup] || [cookieType.activePowerup isABox] || [cookieType.activePowerup isACrissCross]) {
         
         //upgrade the cookie type
         for (BBQCookie *cookie in oldArray) {
@@ -592,9 +593,7 @@
             else {
                 direction = UP;
             }
-            cookie.powerup = [[BBQPowerup alloc] initWithType:cookieType.powerup.type direction:direction];
-            cookie.powerup.isCurrentlyTemporary = NO;
-            cookie.powerup.isCurrentlyTemporary = YES;
+            cookie.activePowerup = [[BBQPowerup alloc] initWithType:cookieType.activePowerup.type direction:direction];
         }
         
         self.arraysOfDisappearingCookies = [self returnArrayOfCookiesRandomlyAssignedToArrays:oldArray];

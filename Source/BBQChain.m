@@ -19,7 +19,7 @@
     }
     
     //Only set the chain type if its not a pivot pad
-    if (cookie.powerup.type != 9 && !_cookieType) {
+    if (cookie.activePowerup.type != 9 && !_cookieType) {
         _cookieType = cookie.cookieType;
     }
     
@@ -44,36 +44,35 @@
         secondCookie = [self.cookiesInChain objectAtIndex:1];
     }
     
-    if ([self.cookiesInChain count] == 2 &&
-        ([firstCookie.powerup isAMultiCookie] || [firstCookie.powerup isARobbersSack])) {
+    if ([self.cookiesInChain count] == 2 && [firstCookie.activePowerup isAMultiCookie]) {
         return YES;
     }
     
     else if ([self.cookiesInChain count] == 2 &&
-             ([secondCookie.powerup isAMultiCookie] || [secondCookie.powerup isARobbersSack])) {
+             [secondCookie.activePowerup isAMultiCookie]) {
         return YES;
     }
     
     //If both cookies are either a type 6, box or criss cross powerup
     else if ([self.cookiesInChain count] == 2 &&
-             ([firstCookie.powerup isATypeSixPowerup] || [firstCookie.powerup isACrissCross] || [firstCookie.powerup isABox]) &&
-             ([secondCookie.powerup isATypeSixPowerup] || [secondCookie.powerup isABox] || [secondCookie.powerup isACrissCross])) {
+             ([firstCookie.activePowerup isATypeSixPowerup] || [firstCookie.activePowerup isACrissCross] || [firstCookie.activePowerup isABox]) &&
+             ([secondCookie.activePowerup isATypeSixPowerup] || [secondCookie.activePowerup isABox] || [secondCookie.activePowerup isACrissCross])) {
         return YES;
     }
     
     else if ([self.cookiesInChain count] == 2 &&
-             ([firstCookie.powerup isATwoSixesCombo] ||
-              [firstCookie.powerup isATwoCrissCrossCombo] ||
-              [firstCookie.powerup isATwoBoxCombo] ||
-              [firstCookie.powerup isaTypeSixWithBoxCombo] ||
-              [firstCookie.powerup isATypeSixWithCrissCrossCombo] ||
-              [firstCookie.powerup isABoxAndCrissCrossCombo] ||
-             [secondCookie.powerup isATwoSixesCombo] ||
-             [secondCookie.powerup isATwoCrissCrossCombo] ||
-             [secondCookie.powerup isATwoBoxCombo] ||
-             [secondCookie.powerup isaTypeSixWithBoxCombo] ||
-             [secondCookie.powerup isATypeSixWithCrissCrossCombo] ||
-             [secondCookie.powerup isABoxAndCrissCrossCombo])) {
+             ([firstCookie.activePowerup isATwoSixesCombo] ||
+              [firstCookie.activePowerup isATwoCrissCrossCombo] ||
+              [firstCookie.activePowerup isATwoBoxCombo] ||
+              [firstCookie.activePowerup isaTypeSixWithBoxCombo] ||
+              [firstCookie.activePowerup isATypeSixWithCrissCrossCombo] ||
+              [firstCookie.activePowerup isABoxAndCrissCrossCombo] ||
+             [secondCookie.activePowerup isATwoSixesCombo] ||
+             [secondCookie.activePowerup isATwoCrissCrossCombo] ||
+             [secondCookie.activePowerup isATwoBoxCombo] ||
+             [secondCookie.activePowerup isaTypeSixWithBoxCombo] ||
+             [secondCookie.activePowerup isATypeSixWithCrissCrossCombo] ||
+             [secondCookie.activePowerup isABoxAndCrissCrossCombo])) {
                  
                  return YES;
     }
@@ -85,36 +84,36 @@
         BBQCookie *firstCookie = [self.cookiesInChain firstObject];
         BBQCookie *secondCookie = [self.cookiesInChain lastObject];
         
-        if (firstCookie.powerup.isCurrentlyTemporary == NO && secondCookie.powerup.isCurrentlyTemporary == NO) {
+        if (firstCookie.activePowerup && secondCookie.activePowerup) {
             
-            if ([firstCookie.powerup isATypeSixPowerup] && [secondCookie.powerup isATypeSixPowerup]) {
-                secondCookie.powerup.type = 100;
-                firstCookie.powerup = nil;
+            if ([firstCookie.activePowerup isATypeSixPowerup] && [secondCookie.activePowerup isATypeSixPowerup]) {
+                secondCookie.activePowerup.type = 100;
+                firstCookie.activePowerup = nil;
             }
             
-            else if ([firstCookie.powerup isABox] && [secondCookie.powerup isABox]) {
-                secondCookie.powerup.type = 150;
-                firstCookie.powerup = nil;
+            else if ([firstCookie.activePowerup isABox] && [secondCookie.activePowerup isABox]) {
+                secondCookie.activePowerup.type = 150;
+                firstCookie.activePowerup = nil;
             }
             
-            else if ([firstCookie.powerup isACrissCross] && [secondCookie.powerup isACrissCross]) {
-                secondCookie.powerup.type = 150;
-                firstCookie.powerup = nil;
+            else if ([firstCookie.activePowerup isACrissCross] && [secondCookie.activePowerup isACrissCross]) {
+                secondCookie.activePowerup.type = 150;
+                firstCookie.activePowerup = nil;
             }
             
-            else if (([firstCookie.powerup isATypeSixPowerup] && [secondCookie.powerup isACrissCross]) || ([firstCookie.powerup isACrissCross] && [secondCookie.powerup isATypeSixPowerup])) {
-                secondCookie.powerup.type = 250;
-                firstCookie.powerup = nil;
+            else if (([firstCookie.activePowerup isATypeSixPowerup] && [secondCookie.activePowerup isACrissCross]) || ([firstCookie.activePowerup isACrissCross] && [secondCookie.activePowerup isATypeSixPowerup])) {
+                secondCookie.activePowerup.type = 250;
+                firstCookie.activePowerup = nil;
             }
             
-            else if (([firstCookie.powerup isATypeSixPowerup] && [secondCookie.powerup isABox]) || ([firstCookie.powerup isABox] && [secondCookie.powerup isATypeSixPowerup])) {
-                secondCookie.powerup.type = 300;
-                firstCookie.powerup = nil;
+            else if (([firstCookie.activePowerup isATypeSixPowerup] && [secondCookie.activePowerup isABox]) || ([firstCookie.activePowerup isABox] && [secondCookie.activePowerup isATypeSixPowerup])) {
+                secondCookie.activePowerup.type = 300;
+                firstCookie.activePowerup = nil;
             }
             
-            else if (([firstCookie.powerup isABox] && [secondCookie.powerup isACrissCross]) || ([firstCookie.powerup isACrissCross] && [secondCookie.powerup isABox])) {
-                secondCookie.powerup.type = 350;
-                firstCookie.powerup = nil;
+            else if (([firstCookie.activePowerup isABox] && [secondCookie.activePowerup isACrissCross]) || ([firstCookie.activePowerup isACrissCross] && [secondCookie.activePowerup isABox])) {
+                secondCookie.activePowerup.type = 350;
+                firstCookie.activePowerup = nil;
             }
         }
     }
@@ -126,7 +125,7 @@
     for (BBQCookieOrder *cookieOrder in cookieOrders) {
         NSInteger x = 0;
         for (BBQCookie *cookie in self.cookiesInChain) {
-            if (cookieOrder.cookie.cookieType == cookie.cookieType && cookieOrder.quantityLeft > 0 && !cookie.powerup) {
+            if (cookieOrder.cookie.cookieType == cookie.cookieType && cookieOrder.quantityLeft > 0 && !cookie.activePowerup) {
                 cookie.cookieOrder = cookieOrder;
                 x++;
             }
@@ -155,8 +154,8 @@
         BBQCookie *firstCookie = self.cookiesInChain[0];
         BBQCookie *secondCookie = self.cookiesInChain[1];
         
-        if (([firstCookie.powerup isAMultiCookie] || [secondCookie.powerup isAMultiCookie]) &&
-            ([secondCookie.powerup isATypeSixPowerup] || [secondCookie.powerup isABox] || [secondCookie.powerup isACrissCross] || [firstCookie.powerup isATypeSixPowerup] || [firstCookie.powerup isABox] || [firstCookie.powerup isACrissCross])) {
+        if (([firstCookie.activePowerup isAMultiCookie] || [secondCookie.activePowerup isAMultiCookie]) &&
+            ([secondCookie.activePowerup isATypeSixPowerup] || [secondCookie.activePowerup isABox] || [secondCookie.activePowerup isACrissCross] || [firstCookie.activePowerup isATypeSixPowerup] || [firstCookie.activePowerup isABox] || [firstCookie.activePowerup isACrissCross])) {
             return YES;
             
         }
@@ -168,7 +167,7 @@
 - (BBQCookie *)returnMultiCookieInMultiCookiePowerup {
     BBQCookie *multicookie;
     for (BBQCookie *cookie in self.cookiesInChain) {
-        if ([cookie.powerup isAMultiCookie]) {
+        if ([cookie.activePowerup isAMultiCookie]) {
             multicookie = cookie;
             break;
         }
@@ -179,7 +178,7 @@
 - (BBQCookie *)returnPowerupJoinedToMultiCookie {
     BBQCookie *powerupCookie;
     for (BBQCookie *cookie in self.cookiesInChain) {
-        if ([cookie.powerup canBeDetonatedWithoutAChain]) {
+        if ([cookie.activePowerup canBeDetonatedWithoutAChain]) {
             powerupCookie = cookie;
             break;
         }
@@ -190,5 +189,7 @@
 -(NSString *)description {
     return [NSString stringWithFormat:@"Cookies involved: %@", self.cookiesInChain];
 }
+
+
 
 @end
