@@ -419,7 +419,7 @@
         for (NSInteger row = 0; row < NumRows; row++) {
             
             BBQTile *tile = _tiles[column][row];
-            if (tile.tileType != 0 && _cookies[column][row] == nil) {
+            if (![tile.tileType isEqualToString:NO_TILE] && _cookies[column][row] == nil) {
                 for (NSInteger lookup = row + 1; lookup < NumRows; lookup ++) {
                     BBQCookie *cookie = _cookies[column][lookup];
                     
@@ -455,7 +455,7 @@
         NSMutableArray *array;
         for (NSInteger row = NumRows - 1; row >= 0 && _cookies[column][row] == nil; row--) {
             BBQTile *tile = _tiles[column][row];
-            if (tile.tileType != 0) {
+            if (![tile.tileType isEqualToString:NO_TILE]) {
                 NSUInteger newCookieType;
                 do {
                     newCookieType = arc4random_uniform(NumStartingCookies) + 1;
@@ -555,6 +555,16 @@
                 
                 else if ([value integerValue] == 1) {
                     _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:REGULAR_TILE column:column row:tileRow];
+                }
+                
+                else if ([value integerValue] == 2) {
+                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:GOLD_PLATED_TILE column:column row:tileRow];
+                }
+                
+                else if ([value integerValue] == 3) {
+                    _tiles[column][tileRow] = [[BBQTile alloc] initWithTileType:SILVER_PLATED_TILE column:column row:tileRow];
+                    BBQTile *tile = _tiles[column][tileRow];
+                    [tile addTileObstacle:GOLD_PLATED_TILE];
                 }
                 
             }];

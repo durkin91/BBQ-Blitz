@@ -34,6 +34,7 @@
 		15B8EC3F1AB948D60073D90F /* BBQChain.m in Sources */ = {isa = PBXBuildFile; fileRef = 15B8EC3E1AB948D60073D90F /* BBQChain.m */; };
 		15B8EC421ABFDD860073D90F /* BBQCombo.m in Sources */ = {isa = PBXBuildFile; fileRef = 15B8EC411ABFDD860073D90F /* BBQCombo.m */; };
 		15B8EC451AC273C60073D90F /* BBQCookieOrder.m in Sources */ = {isa = PBXBuildFile; fileRef = 15B8EC441AC273C60073D90F /* BBQCookieOrder.m */; };
+		15C12A471AE4D6AD00B29FF7 /* BBQTileObstacle.m in Sources */ = {isa = PBXBuildFile; fileRef = 15C12A461AE4D6AD00B29FF7 /* BBQTileObstacle.m */; };
 		5B12100C19748281004C1E1D /* BridgeKitV3.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B12100B19748281004C1E1D /* BridgeKitV3.framework */; };
 		5B121029197484DA004C1E1D /* BridgeKitV3.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B12100B19748281004C1E1D /* BridgeKitV3.framework */; };
 		5B12102A197484DD004C1E1D /* BbqBlitzActivity.java in Sources */ = {isa = PBXBuildFile; fileRef = 5B12101B19748413004C1E1D /* BbqBlitzActivity.java */; };
@@ -244,6 +245,8 @@
 		15B8EC411ABFDD860073D90F /* BBQCombo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQCombo.m; path = Source/BBQCombo.m; sourceTree = "<group>"; };
 		15B8EC431AC273C60073D90F /* BBQCookieOrder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQCookieOrder.h; path = Source/BBQCookieOrder.h; sourceTree = "<group>"; };
 		15B8EC441AC273C60073D90F /* BBQCookieOrder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQCookieOrder.m; path = Source/BBQCookieOrder.m; sourceTree = "<group>"; };
+		15C12A451AE4D6AD00B29FF7 /* BBQTileObstacle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBQTileObstacle.h; path = Source/BBQTileObstacle.h; sourceTree = "<group>"; };
+		15C12A461AE4D6AD00B29FF7 /* BBQTileObstacle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBQTileObstacle.m; path = Source/BBQTileObstacle.m; sourceTree = "<group>"; };
 		5B12100919748273004C1E1D /* libEGL.so */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libEGL.so; path = /usr/lib/armv7a/libEGL.so; sourceTree = SDKROOT; };
 		5B12100B19748281004C1E1D /* BridgeKitV3.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BridgeKitV3.framework; path = System/Library/Frameworks/BridgeKitV3.framework; sourceTree = SDKROOT; };
 		5B12100F197483EE004C1E1D /* ic_launcher.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ic_launcher.png; sourceTree = "<group>"; };
@@ -402,6 +405,8 @@
 				15B8EC441AC273C60073D90F /* BBQCookieOrder.m */,
 				15337B161AC5326800D862F2 /* BBQMovement.h */,
 				15337B171AC5326800D862F2 /* BBQMovement.m */,
+				15C12A451AE4D6AD00B29FF7 /* BBQTileObstacle.h */,
+				15C12A461AE4D6AD00B29FF7 /* BBQTileObstacle.m */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -1075,6 +1080,7 @@
 				15AB57821A661A9F00DFB4D6 /* BBQCookie.m in Sources */,
 				15A95AA61A7F5BCD00E007D6 /* BBQCookieNode.m in Sources */,
 				15A95A8D1A78AD6400E007D6 /* MainScene.m in Sources */,
+				15C12A471AE4D6AD00B29FF7 /* BBQTileObstacle.m in Sources */,
 				7A046D8C19E8A20E004C4763 /* GameplayScene.m in Sources */,
 				15A95A9F1A7AFCE500E007D6 /* BBQReplayNode.m in Sources */,
 				5B121038197487F2004C1E1D /* AppDelegate.m in Sources */,

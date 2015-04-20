@@ -24,8 +24,11 @@
 @property (nonatomic) NSInteger column;
 @property (nonatomic) NSInteger row;
 @property (strong, nonatomic) NSString *tileType;
+@property (strong, nonatomic) NSMutableArray *bottomTileObstacles;
+@property (strong, nonatomic) NSMutableArray *topTileObstacles;
 
-- (NSString *)spriteName;
+- (NSString *)obstacleSpriteName;
+- (void)addTileObstacle:(NSString *)tileType ;
 - (instancetype)initWithTileType:(NSString *)tileType column:(NSInteger)column row:(NSInteger)row;
 
 @end
