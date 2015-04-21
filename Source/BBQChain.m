@@ -134,19 +134,6 @@
         cookieOrder.quantityLeft = MAX(0, cookieOrder.quantityLeft);
     }
     
-    //    //find the right order
-    //    for (BBQCookieOrder *cookieOrder in self.level.cookieOrders) {
-    //        if (cookieOrder.cookie.cookieType == self.chain.cookieType) {
-    //            self.chain.cookieOrder = cookieOrder;
-    //
-    //            //Figure out how many of the cookies are used for the order
-    //            for (NSInteger i = 0; i < [self.chain.cookiesInChain count] && cookieOrder.quantityLeft > 0; i++) {
-    //                self.chain.numberOfCookiesForOrder ++;
-    //                cookieOrder.quantityLeft --;
-    //            }
-    //        }
-    //    }
-    
 }
 
 - (BOOL)isAMultiCookieUpgradedPowerupChain {

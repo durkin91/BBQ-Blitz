@@ -7,9 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "BBQCookie.h"
 #import "BBQCookieOrderNode.h"
-#import "BBQTileObstacle.h"
+
+@class BBQTileObstacle;
+@class BBQCookie;
+
 
 @interface BBQCookieOrder : NSObject
 

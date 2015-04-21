@@ -170,15 +170,21 @@ static const CGFloat TileHeight = 36.0;
     }
     
     if (bottomObstacle) {
-        [self createSpriteForTileObstacle:bottomObstacle zOrder:-1000];
+        [self createSpriteForTileObstacle:bottomObstacle zOrder:-1000 forCookieOrderCollection:NO];
     }
     if (topObstacle) {
-        [self createSpriteForTileObstacle:topObstacle zOrder:-1000];
+        [self createSpriteForTileObstacle:topObstacle zOrder:-1000 forCookieOrderCollection:NO];
     }
 }
 
-- (void)createSpriteForTileObstacle:(BBQTileObstacle *)obstacle zOrder:(NSInteger)zOrder {
-    NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [obstacle spriteName]];
+- (void)createSpriteForTileObstacle:(BBQTileObstacle *)obstacle zOrder:(NSInteger)zOrder forCookieOrderCollection:(BOOL)isForCookieOrderCollection {
+    NSString *directory;
+    if (isForCookieOrderCollection == NO) {
+        directory = [NSString stringWithFormat:@"sprites/%@.png", [obstacle spriteName]];
+    }
+    else {
+        directory = [NSString stringWithFormat:@"sprites/%@.png", [obstacle spriteNameForPurposesOfCookieOrderCollection]];
+    }
     CCSprite *sprite = [CCSprite spriteWithImageNamed:directory];
     sprite.position = [GameplayScene pointForColumn:obstacle.column row:obstacle.row];
     
@@ -266,7 +272,14 @@ static const CGFloat TileHeight = 36.0;
     for (int i = 0; i < [orderObjects count]; i++) {
         BBQCookieOrder *order = orderObjects[i];
         BBQCookieOrderNode *orderView = orderviews[i];
-        NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [order.cookie spriteName]];
+        orderView.quantityLabel.visible = YES;
+        NSString *directory;
+        if (order.cookie) {
+            directory = [NSString stringWithFormat:@"sprites/%@.png", [order.cookie spriteName]];
+        }
+        else if (order.obstacle) {
+            directory = [NSString stringWithFormat:@"sprites/%@.png", [order.obstacle spriteName]];
+        }
         CCSprite *sprite = [CCSprite spriteWithImageNamed:directory];
         sprite.anchorPoint = CGPointMake(0.5, 0.5);
         [orderView.cookieSprite addChild:sprite];
@@ -844,11 +857,12 @@ static const CGFloat TileHeight = 36.0;
 - (void)animateObstaclesForCookie:(BBQCookie *)cookie {
     //Deal with obstacle on the cookie's tile
     BBQTileObstacle *obstacleOnTile = [self.gameLogic removeObstacleOnTileForCookie:cookie];
+    [obstacleOnTile addOrderToObstacle:self.gameLogic.level.cookieOrders];
     NSInteger zOrder = obstacleOnTile.sprite.zOrder;
     
     BBQTileObstacle *newActiveObstacle = [self.gameLogic activeObstacleForTileAtColumn:cookie.column row:cookie.row];
     if (newActiveObstacle) {
-        [self createSpriteForTileObstacle:newActiveObstacle zOrder:zOrder - 1];
+        [self createSpriteForTileObstacle:newActiveObstacle zOrder:zOrder - 1 forCookieOrderCollection:NO];
     }
     
     
@@ -858,9 +872,47 @@ static const CGFloat TileHeight = 36.0;
         CGPoint cookieSpriteWorldPos = [cookie.sprite.parent convertToWorldSpace:cookie.sprite.positionInPoints];
         explosion.position = cookieSpriteWorldPos;
         [self addChild:explosion];
-        [obstacleOnTile.sprite removeFromParent];
+        if (obstacleOnTile.cookieOrder) {
+            NSInteger zOrderOfObstacleSprite = obstacleOnTile.sprite.zOrder;
+            [obstacleOnTile.sprite removeFromParent];
+            [self createSpriteForTileObstacle:obstacleOnTile zOrder:zOrderOfObstacleSprite forCookieOrderCollection:YES];
+            [self animateObstacleOrderCollection:obstacleOnTile];
+        }
+        else {
+            [obstacleOnTile.sprite removeFromParent];
+        }
     }
 }
+
+- (void)animateObstacleOrderCollection:(BBQTileObstacle *)obstacle {
+    CCSprite *orderSprite = obstacle.cookieOrder.orderNode.cookieSprite;
+    CGPoint obstacleSpriteWorldPos = [obstacle.sprite.parent convertToWorldSpace:obstacle.sprite.positionInPoints];
+    CGPoint relativeToOrderSpritePos = [orderSprite convertToNodeSpace:obstacleSpriteWorldPos];
+    [obstacle.sprite removeFromParent];
+    [orderSprite addChild:obstacle.sprite];
+    obstacle.sprite.position = relativeToOrderSpritePos;
+    
+    CGPoint endPosition = orderSprite.position;
+    
+    CCActionMoveTo *move = [CCActionMoveTo actionWithDuration:1.0 position:endPosition];
+    CCActionScaleTo *scaleUp = [CCActionScaleTo actionWithDuration:0.1 scale:1.2];
+    CCActionScaleTo *scaleDown = [CCActionScaleTo actionWithDuration:0.1 scale:1.0];
+    CCActionRemove *removeSprite = [CCActionRemove action];
+    CCActionCallBlock *updateOrderQuantity = [CCActionCallBlock actionWithBlock:^{
+        NSInteger quantityLeft = [obstacle.cookieOrder.orderNode.quantityLabel.string integerValue];
+        obstacle.cookieOrder.orderNode.quantityLabel.string = [NSString stringWithFormat:@"%lu", (long)obstacle.cookieOrder.quantityLeft];
+        if (quantityLeft <= 0) {
+            obstacle.cookieOrder.orderNode.quantityLabel.visible = NO;
+            obstacle.cookieOrder.orderNode.tickSprite.visible = YES;
+        }
+    }];
+    
+    CCActionSequence *orderActionSequence = [CCActionSequence actions:move, scaleUp, scaleDown, removeSprite, updateOrderQuantity, nil];
+    [obstacle.sprite runAction:orderActionSequence];
+}
+
+
+
 
 #pragma mark - Upgraded multicookie powerup methods
 
