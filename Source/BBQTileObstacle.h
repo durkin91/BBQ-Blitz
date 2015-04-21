@@ -13,6 +13,9 @@
 
 #define GOLD_PLATED_TILE @"Gold Plated Tile"
 #define SILVER_PLATED_TILE @"Silver Plated Tile"
+#define WAD_OF_CASH_ONE @"Wad Of Cash One"
+#define WAD_OF_CASH_TWO @"Wad Of Cash Two"
+#define WAD_OF_CASH_THREE @"Wad Of Cash Three"
 
 @interface BBQTileObstacle : NSObject
 

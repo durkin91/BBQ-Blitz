@@ -42,10 +42,18 @@
 }
 
 - (void)addTileObstacles:(NSArray *)obstacleNames {
-    self.obstacles = [NSMutableArray array];
+    if (!self.obstacles) {
+        self.obstacles = [NSMutableArray array];
+    }
     for (NSString *obstacleName in obstacleNames) {
         BBQTileObstacle *obstacle = [[BBQTileObstacle alloc] initWithType:obstacleName column:self.column row:self.row];
-        [self.obstacles addObject:obstacle];
+        [self addTileObstacle:obstacle];
     }
+}
+
+- (void)addTileObstacle:(BBQTileObstacle *)obstacle {
+    [self.obstacles addObject:obstacle];
+    self.isABlocker = obstacle.isABlocker;
+    self.requiresACookie = obstacle.requiresACookie;
 }
 @end

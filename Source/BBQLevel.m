@@ -540,8 +540,8 @@
     if (self != nil) {
         NSDictionary *dictionary = [self loadJSON:filename];
         
-        //Loop through the rows
-        [dictionary[@"tiles"] enumerateObjectsUsingBlock:^(NSArray *array, NSUInteger row, BOOL *stop) {
+        //Bottom tiles
+        [dictionary[@"bottomTiles"] enumerateObjectsUsingBlock:^(NSArray *array, NSUInteger row, BOOL *stop) {
             
             //Loop through the columns in the current row
             [array enumerateObjectsUsingBlock:^(NSNumber *value, NSUInteger column, BOOL *stop) {
@@ -570,6 +570,40 @@
                 
             }];
         }];
+        
+        //Top obstacles
+        [dictionary[@"topObstacles"] enumerateObjectsUsingBlock:^(NSArray *array, NSUInteger row, BOOL *stop) {
+            
+            //Loop through the columns in the current row
+            [array enumerateObjectsUsingBlock:^(NSNumber *value, NSUInteger column, BOOL *stop) {
+                
+                //Note that in cocos (0,0) is at the bottom of the screen so we need to read this file upside down
+                NSInteger tileRow = NumRows - row - 1;
+                
+                //create a tile object depending on the type of tile
+                BBQTile *tile = _tiles[column][tileRow];
+                
+                BBQTileObstacle *obstacle;
+                if ([value integerValue] == 1) {
+                    obstacle = [[BBQTileObstacle alloc] initWithType:WAD_OF_CASH_ONE column:column row:tileRow];
+                }
+                else if ([value integerValue] == 2) {
+                    obstacle = [[BBQTileObstacle alloc] initWithType:WAD_OF_CASH_TWO column:column row:tileRow];
+                }
+                else if ([value integerValue] == 3) {
+                    obstacle = [[BBQTileObstacle alloc] initWithType:WAD_OF_CASH_THREE column:column row:tileRow];
+                }
+                
+                if (obstacle) {
+                    if (!tile.obstacles) {
+                        tile.obstacles = [NSMutableArray array];
+                    }
+                    [tile addTileObstacle:obstacle];
+                }
+            }];
+        }];
+
+        
         
         self.targetScore = [dictionary[@"targetScore"] unsignedIntegerValue];
         self.maximumMoves = [dictionary[@"moves"] unsignedIntegerValue];

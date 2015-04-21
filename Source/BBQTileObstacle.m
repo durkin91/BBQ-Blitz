@@ -31,13 +31,29 @@
     else if ([_type isEqualToString:SILVER_PLATED_TILE]) {
         spriteName = @"SilverPlatedTile";
     }
+    
+    else if ([_type isEqualToString:WAD_OF_CASH_ONE]) {
+        spriteName = @"WadOfCashOne";
+    }
+    
+    else if ([_type isEqualToString:WAD_OF_CASH_TWO]) {
+        spriteName = @"WadOfCashTwo";
+    }
+    
+    else if ([_type isEqualToString:WAD_OF_CASH_THREE]) {
+        spriteName = @"WadOfCashThree";
+    }
+    
     return spriteName;
  }
 
 - (NSString *)spriteNameForPurposesOfCookieOrderCollection {
     NSString *spriteName;
-    if ([self.type isEqualToString:GOLD_PLATED_TILE] || [self.type isEqualToString:SILVER_PLATED_TILE]) {
+    if ([_type isEqualToString:GOLD_PLATED_TILE] || [_type isEqualToString:SILVER_PLATED_TILE]) {
         spriteName = @"GoldPlatedTile";
+    }
+    else if ([_type isEqualToString:WAD_OF_CASH_ONE] || [_type isEqualToString:WAD_OF_CASH_TWO] || [_type isEqualToString:WAD_OF_CASH_THREE]) {
+        spriteName = @"WadOfCashOne";
     }
     return spriteName;
 }
@@ -54,6 +70,12 @@
         _isABlocker = NO;
         _requiresACookie = YES;
         _zOrder = 1;
+    }
+    
+    else if ([_type isEqualToString:WAD_OF_CASH_ONE] || [_type isEqualToString:WAD_OF_CASH_TWO] || [_type isEqualToString:WAD_OF_CASH_THREE]) {
+        _isABlocker = YES;
+        _requiresACookie = NO;
+        _zOrder = 2;
     }
 }
 
@@ -74,6 +96,10 @@
     NSString *newType;
     if ([self.type isEqualToString:GOLD_PLATED_TILE] || [self.type isEqualToString:SILVER_PLATED_TILE]) {
         newType = GOLD_PLATED_TILE;
+    }
+    
+    else if ([_type isEqualToString:WAD_OF_CASH_ONE] || [_type isEqualToString:WAD_OF_CASH_TWO] ||[_type isEqualToString:WAD_OF_CASH_THREE]) {
+        newType = WAD_OF_CASH_ONE;
     }
     return newType;
 }
