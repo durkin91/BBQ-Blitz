@@ -285,6 +285,10 @@ static const CGFloat TileHeight = 36.0;
         [orderView.cookieSprite addChild:sprite];
         orderView.quantityLabel.string = [NSString stringWithFormat:@"%ld", (long)order.quantity];
         
+        if (order.obstacle) {
+            orderView.cookieSprite.scale = 0.9;
+        }
+        
         order.orderNode = orderView;
         orderView.zOrder = 5 - i;
         
@@ -768,6 +772,7 @@ static const CGFloat TileHeight = 36.0;
         //Take care of root cookie
         CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:0.3 scale:0.1];
         [multicookie.sprite runAction:[CCActionSequence actions:scaleAction, [CCActionRemove action], nil]];
+        [self animateObstaclesForCookie:multicookie];
         
         [self changeMultiCookieUpgradedPowerupSprites:multicookie completion:^{
             
