@@ -96,7 +96,6 @@
 }
 
 - (BBQChain *)removeCookiesInChain {
-    [self.chain addCookieOrders:self.level.cookieOrders];
     for (BBQCookie *cookie in self.chain.cookiesInChain) {
         
         if (cookie.activePowerup) {
@@ -302,66 +301,6 @@
     BBQTileObstacle *obstacle = [tile.obstacles lastObject];
     return obstacle;
 }
-
-
-
-#pragma mark - Obstacle methods
-
-//- (void)explodeSteelBlockerTiles:(BBQComboAnimation *)combo {
-//    
-//    NSMutableArray *adjacentTiles = [@[] mutableCopy];
-//    if (!combo.cookieB.isInStaticTile) {
-//        
-//        if (combo.cookieB.row < NumRows - 1) {
-//            BBQTile *above = [self.level tileAtColumn:combo.cookieB.column row:combo.cookieB.row + 1];
-//            [adjacentTiles addObject:above];
-//        }
-//        
-//        if (combo.cookieB.row > 0) {
-//            BBQTile *below = [self.level tileAtColumn:combo.cookieB.column row:combo.cookieB.row - 1];
-//            [adjacentTiles addObject:below];
-//        }
-//        
-//        if (combo.cookieB.column > 0) {
-//            BBQTile *left = [self.level tileAtColumn:combo.cookieB.column - 1 row:combo.cookieB.row];
-//            [adjacentTiles addObject:left];
-//        }
-//        
-//        if (combo.cookieB.column < NumColumns - 1) {
-//            BBQTile *right = [self.level tileAtColumn:combo.cookieB.column + 1 row:combo.cookieB.row];
-//            [adjacentTiles addObject:right];
-//        }
-//        
-//        for (BBQTile *tile in adjacentTiles) {
-//            if (tile.tileType == 5) {
-//                if (!combo.steelBlockerTiles) {
-//                    combo.steelBlockerTiles = [@[] mutableCopy];
-//                }
-//                [combo.steelBlockerTiles addObject:tile];
-//            }
-//        }
-//    }
-//}
-
-//- (void)turnSteelBlockerIntoRegularTilesForCombos:(NSArray *)combos {
-//    for (BBQComboAnimation *combo in combos) {
-//        for (BBQTile *tile in combo.steelBlockerTiles) {
-//            tile.tileType = 1;
-//        }
-//    }
-//}
-
-//- (NSArray *)createNewSteelBlockerTilesWithBlankTiles:(NSArray *)blankTiles {
-//    NSMutableArray *newTiles = [@[] mutableCopy];
-//    
-//    for (int i = 0; i < [self.level.steelBlockerFactoryTiles count]; i ++) {
-//        NSUInteger randomTileIndex = arc4random_uniform([blankTiles count]);
-//        BBQTile *chosenTile = [blankTiles objectAtIndex:randomTileIndex];
-//        chosenTile.tileType = 5;
-//        [newTiles addObject:chosenTile];
-//    }
-//    return newTiles;
-//}
 
 
 

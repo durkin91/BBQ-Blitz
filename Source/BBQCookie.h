@@ -39,5 +39,6 @@ static const NSUInteger NumStartingCookies = 6;
 - (CCColor *)lineColor;
 - (BOOL)canBeChainedToCookie:(BBQCookie *)potentialCookie isFirstCookieInChain:(BOOL)isFirstCookieInChain ;
 - (void)setScoreForCookieInChain:(BBQChain *)chain;
+- (void)addCookieOrder:(NSArray *)cookieOrders;
 
 @end

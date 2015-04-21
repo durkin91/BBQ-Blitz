@@ -119,22 +119,6 @@
     }
 }
 
-- (void)addCookieOrders:(NSArray *)cookieOrders {
-    
-    //find the right order
-    for (BBQCookieOrder *cookieOrder in cookieOrders) {
-        NSInteger x = 0;
-        for (BBQCookie *cookie in self.cookiesInChain) {
-            if (cookieOrder.cookie.cookieType == cookie.cookieType && cookieOrder.quantityLeft > 0 && !cookie.activePowerup) {
-                cookie.cookieOrder = cookieOrder;
-                x++;
-            }
-        }
-        cookieOrder.quantityLeft = cookieOrder.quantityLeft - x;
-        cookieOrder.quantityLeft = MAX(0, cookieOrder.quantityLeft);
-    }
-    
-}
 
 - (BOOL)isAMultiCookieUpgradedPowerupChain {
     if ([self.cookiesInChain count] == 2) {

@@ -291,7 +291,6 @@ static const CGFloat TileHeight = 36.0;
         
         order.orderNode = orderView;
         orderView.zOrder = 5 - i;
-        
     }
 }
 
@@ -788,7 +787,7 @@ static const CGFloat TileHeight = 36.0;
             BBQCookie *cookie = chain.cookiesInChain[i];
             
             if ([self.gameLogic doesCookieNeedRemoving:cookie]) {
-                
+                [cookie addCookieOrder:self.gameLogic.level.cookieOrders];
                 [self animateCookieRemoval:cookie powerupDuration:powerupDuration scaleActionDuration:duration detonatePowerupsWithinArray:YES];
             }
             

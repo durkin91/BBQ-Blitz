@@ -198,6 +198,21 @@
     }
 }
 
+- (void)addCookieOrder:(NSArray *)cookieOrders {
+    
+    //find the right order
+    for (BBQCookieOrder *cookieOrder in cookieOrders) {
+        NSInteger x = 0;
+        if (cookieOrder.cookie.cookieType == self.cookieType && cookieOrder.quantityLeft > 0 && !self.activePowerup) {
+            self.cookieOrder = cookieOrder;
+            x++;
+        }
+        cookieOrder.quantityLeft = cookieOrder.quantityLeft - x;
+        cookieOrder.quantityLeft = MAX(0, cookieOrder.quantityLeft);
+    }
+    
+}
+
 
 - (NSString *)description {
     return [NSString stringWithFormat:@"type:%ld square:(%ld, %ld)", (long)self.cookieType, (long)self.column, (long)self.row];

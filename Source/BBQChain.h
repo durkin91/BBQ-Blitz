@@ -32,7 +32,6 @@ typedef NS_ENUM(NSUInteger, ChainType) {
 - (void)addCookie:(BBQCookie *)cookie;
 - (BOOL)containsCookie:(BBQCookie *)cookie;
 - (BOOL)isACompleteChain;
-- (void)addCookieOrders:(NSArray *)cookieOrders;
 - (BOOL)isATwoCookieChain;
 - (void)upgradePowerupsIfNecessary;
 - (BOOL)isAMultiCookieUpgradedPowerupChain;
