@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "BBQLaserTileNode.h"
+#import "BBQTileObstacle.h"
 
 @interface BBQTile : NSObject
 
@@ -20,6 +21,7 @@
 @property (nonatomic) NSInteger row;
 @property (assign, nonatomic) NSInteger tileType;
 @property (strong, nonatomic) NSMutableArray *obstacles;
+@property (strong, nonatomic) BBQTileObstacle *activeObstacle;
 
 
 - (instancetype)initWithTileType:(NSInteger)tileType column:(NSInteger)column row:(NSInteger)row;
