@@ -170,23 +170,26 @@ static const CGFloat TileHeight = 36.0;
     }
     
     if (bottomObstacle) {
-        [self createSpriteForTileObstacle:bottomObstacle];
+        [self createSpriteForTileObstacle:bottomObstacle zOrder:-1000];
     }
     if (topObstacle) {
-        [self createSpriteForTileObstacle:topObstacle];
+        [self createSpriteForTileObstacle:topObstacle zOrder:-1000];
     }
 }
 
-- (void)createSpriteForTileObstacle:(BBQTileObstacle *)obstacle {
+- (void)createSpriteForTileObstacle:(BBQTileObstacle *)obstacle zOrder:(NSInteger)zOrder {
     NSString *directory = [NSString stringWithFormat:@"sprites/%@.png", [obstacle spriteName]];
     CCSprite *sprite = [CCSprite spriteWithImageNamed:directory];
     sprite.position = [GameplayScene pointForColumn:obstacle.column row:obstacle.row];
-    NSInteger zOrder = 0;
-    if (obstacle.zOrder == 1) {
-        zOrder = 20;
-    }
-    else if (obstacle.zOrder == 2) {
-        zOrder = 30;
+    
+    //Give a negative zOrder as a parameter if I want it to do the default zorder
+    if (zOrder < 0) {
+        if (obstacle.zOrder == 1) {
+            zOrder = 100;
+        }
+        else if (obstacle.zOrder == 2) {
+            zOrder = 200;
+        }
     }
     
     [self.maskLayer addChild:sprite z:zOrder];
@@ -805,6 +808,9 @@ static const CGFloat TileHeight = 36.0;
         
         //cookie.sprite = nil;
     }
+    
+    //Animate obstacles
+    [self animateObstaclesForCookie:cookie];
 }
 
 
@@ -833,6 +839,29 @@ static const CGFloat TileHeight = 36.0;
     
     CCActionSequence *orderActionSequence = [CCActionSequence actions:move, scaleUp, scaleDown, removeSprite, updateOrderQuantity, nil];
     return orderActionSequence;
+}
+
+- (void)animateObstaclesForCookie:(BBQCookie *)cookie {
+    //Deal with obstacle on the cookie's tile
+    BBQTileObstacle *obstacleOnTile = [self.gameLogic removeObstacleOnTileForCookie:cookie];
+    NSInteger zOrder = obstacleOnTile.sprite.zOrder;
+    
+    BBQTileObstacle *newActiveObstacle = [self.gameLogic activeObstacleForTileAtColumn:cookie.column row:cookie.row];
+    if (newActiveObstacle) {
+        [self createSpriteForTileObstacle:newActiveObstacle zOrder:zOrder - 1];
+    }
+    
+    
+    if ([obstacleOnTile.type isEqualToString:GOLD_PLATED_TILE] || [obstacleOnTile.type isEqualToString:SILVER_PLATED_TILE]) {
+        CCParticleSystem *explosion = (CCParticleSystem *)[CCBReader load:@"SteelBlockersEffect"];
+        explosion.autoRemoveOnFinish = YES;
+        CGPoint cookieSpriteWorldPos = [cookie.sprite.parent convertToWorldSpace:cookie.sprite.positionInPoints];
+        explosion.position = cookieSpriteWorldPos;
+        [self addChild:explosion];
+        [obstacleOnTile.sprite removeFromParent];
+    }
+    
+    
 }
 
 #pragma mark - Upgraded multicookie powerup methods

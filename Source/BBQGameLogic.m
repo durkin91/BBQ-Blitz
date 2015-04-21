@@ -290,6 +290,19 @@
     return columns;
 }
 
+- (BBQTileObstacle *)removeObstacleOnTileForCookie:(BBQCookie *)cookie {
+    BBQTile *tile = [self.level tileAtColumn:cookie.column row:cookie.row];
+    BBQTileObstacle *obstacle = [tile.obstacles lastObject];
+    [tile.obstacles removeObject:obstacle];
+    return obstacle;
+}
+
+- (BBQTileObstacle *)activeObstacleForTileAtColumn:(NSInteger)column row:(NSInteger)row {
+    BBQTile *tile = [self.level tileAtColumn:column row:row];
+    BBQTileObstacle *obstacle = [tile.obstacles lastObject];
+    return obstacle;
+}
+
 
 #pragma mark - Obstacle methods
 

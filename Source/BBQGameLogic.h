@@ -54,4 +54,7 @@
 - (BOOL)isAnUpgradedMultiCookiePowerup:(BBQCookie *)cookie;
 - (NSArray *)topUpCookiesWithMultiCookie:(BBQCookie *)multiCookie;
 
+- (BBQTileObstacle *)removeObstacleOnTileForCookie:(BBQCookie *)cookie;
+- (BBQTileObstacle *)activeObstacleForTileAtColumn:(NSInteger)column row:(NSInteger)row;
+
 @end
