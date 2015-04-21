@@ -9,14 +9,17 @@
 #import <Foundation/Foundation.h>
 #import "BBQCookie.h"
 #import "BBQCookieOrderNode.h"
+#import "BBQTileObstacle.h"
 
 @interface BBQCookieOrder : NSObject
 
 @property (strong, nonatomic) BBQCookie *cookie;
+@property (strong, nonatomic) BBQTileObstacle *obstacle;
 @property (assign, nonatomic) NSInteger quantity;
 @property (assign, nonatomic) NSInteger quantityLeft;
 @property (strong, nonatomic) BBQCookieOrderNode *orderNode;
 
 -(instancetype)initWithCookieType:(NSInteger)cookieType startingAmount:(NSInteger)startingAmount;
+- (instancetype)initWithObstacle:(NSString *)obstacleName startingAmount:(NSInteger)startingAmount;
 
 @end

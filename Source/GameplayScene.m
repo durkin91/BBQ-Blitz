@@ -722,6 +722,7 @@ static const CGFloat TileHeight = 36.0;
                 CCActionCallBlock *action = [CCActionCallBlock actionWithBlock:^{
                     
                     [self animateCookieRemoval:powerupCookie powerupDuration:longestDuration scaleActionDuration:scaleActionDuration detonatePowerupsWithinArray:detonatePowerupsWithinArray];
+                    [self animateObstaclesForCookie:powerupCookie];
                     
                 }];
                 
@@ -776,6 +777,8 @@ static const CGFloat TileHeight = 36.0;
             else {
                 [self removeHighlightFromCookie:cookie];
             }
+            
+            [self animateObstaclesForCookie:cookie];
         }
         
         [self runAction:[CCActionSequence actions:[CCActionDelay actionWithDuration:duration], [self updateScoreAndMoves], [CCActionDelay actionWithDuration:powerupDuration], [CCActionCallBlock actionWithBlock:completion], nil]];
@@ -808,9 +811,6 @@ static const CGFloat TileHeight = 36.0;
         
         //cookie.sprite = nil;
     }
-    
-    //Animate obstacles
-    [self animateObstaclesForCookie:cookie];
 }
 
 
@@ -860,8 +860,6 @@ static const CGFloat TileHeight = 36.0;
         [self addChild:explosion];
         [obstacleOnTile.sprite removeFromParent];
     }
-    
-    
 }
 
 #pragma mark - Upgraded multicookie powerup methods

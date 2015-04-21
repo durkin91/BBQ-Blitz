@@ -11,6 +11,10 @@
 #import "BBQTile.h"
 #import "BBQChain.h"
 
+#define ORDER_TYPE @"type"
+#define ORDER_QUANTITY @"quantity"
+#define ORDER_ID @"id"
+
 
 @class BBQCookieOrder;
 

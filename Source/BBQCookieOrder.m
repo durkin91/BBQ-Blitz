@@ -21,4 +21,15 @@
     return self;
 }
 
+- (instancetype)initWithObstacle:(NSString *)obstacleName startingAmount:(NSInteger)startingAmount {
+    self = [super init];
+    if (self) {
+        self.obstacle = [[BBQTileObstacle alloc] init];
+        self.obstacle.type = obstacleName;
+        self.quantity = startingAmount;
+        self.quantityLeft = startingAmount;
+    }
+    return self;
+}
+
 @end

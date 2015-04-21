@@ -573,22 +573,37 @@
         
         self.targetScore = [dictionary[@"targetScore"] unsignedIntegerValue];
         self.maximumMoves = [dictionary[@"moves"] unsignedIntegerValue];
-        if (dictionary[@"securityGuardCountdown"]) {
-            self.securityGuardCountdown = [dictionary[@"securityGuardCountdown"] unsignedIntegerValue];
+        
+        //Setup Orders
+        NSArray *orderData = dictionary[@"orderData"];
+        self.cookieOrders = [NSMutableArray array];
+        NSMutableArray *array = [NSMutableArray array];
+        
+        for (NSDictionary *data in orderData) {
+            NSInteger quantity = [data[@"quantity"] unsignedIntegerValue];
+            
+            //Order is an obstacle
+            if ([data[@"type"] isEqualToString:@"obstacle"]) {
+                NSString *obstacleName = data[@"id"];
+                BBQCookieOrder *obstacleOrder = [[BBQCookieOrder alloc] initWithObstacle:obstacleName startingAmount:quantity];
+                [array addObject:obstacleOrder];
+            }
+            
+            //Order is a cookie
+            else if ([data[@"type"] isEqualToString:@"cookie"]) {
+                NSInteger type = [data[@"id"] unsignedIntegerValue];
+                BBQCookieOrder *cookieOrder = [[BBQCookieOrder alloc] initWithCookieType:type startingAmount:quantity];
+                [array addObject:cookieOrder];
+            }
+            
+            else {
+                NSLog(@"Order is neither an obstacle or a cookie");
+            }
+            
         }
         
-        //Setup Cookie Order objects
-        NSArray *orderTypes = dictionary[@"orderCookieType"];
-        NSArray *orderQuantities = dictionary[@"orderCookieQuantity"];
-        NSMutableArray *orders = [NSMutableArray array];
-        self.cookieOrders = [@[] mutableCopy];
-        for (int i = 0; i < [orderTypes count]; i ++) {
-            NSInteger orderType = [orderTypes[i] unsignedIntegerValue];
-            NSInteger orderQuantity = [orderQuantities[i] unsignedIntegerValue];
-            BBQCookieOrder *cookieOrder = [[BBQCookieOrder alloc] initWithCookieType:orderType startingAmount:orderQuantity];
-            [orders addObject:cookieOrder];
-        }
-        self.cookieOrders = orders;
+        self.cookieOrders = array;
+        
 
     }
     
