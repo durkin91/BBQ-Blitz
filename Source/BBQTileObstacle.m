@@ -60,22 +60,18 @@
 
 -(void)setupProperties {
     
-    if ([_type isEqualToString:GOLD_PLATED_TILE]) {
+    if ([_type isEqualToString:GOLD_PLATED_TILE] || [_type isEqualToString:SILVER_PLATED_TILE]) {
         _isABlocker = NO;
         _requiresACookie = YES;
         _zOrder = 1;
-    }
-    
-    else if ([_type isEqualToString:SILVER_PLATED_TILE]) {
-        _isABlocker = NO;
-        _requiresACookie = YES;
-        _zOrder = 1;
+        _detonatesWhenAdjacentToCookie = NO;
     }
     
     else if ([_type isEqualToString:WAD_OF_CASH_ONE] || [_type isEqualToString:WAD_OF_CASH_TWO] || [_type isEqualToString:WAD_OF_CASH_THREE]) {
         _isABlocker = YES;
         _requiresACookie = NO;
         _zOrder = 2;
+        _detonatesWhenAdjacentToCookie = YES;
     }
 }
 

@@ -56,5 +56,6 @@
 
 - (BBQTileObstacle *)removeObstacleOnTileForCookie:(BBQCookie *)cookie;
 - (BBQTileObstacle *)activeObstacleForTileAtColumn:(NSInteger)column row:(NSInteger)row;
+- (NSArray *)removeObstaclesAroundTileForCookie:(BBQCookie *)cookie;
 
 @end

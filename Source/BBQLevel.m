@@ -385,11 +385,6 @@
                 
                 BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
                 
-                if (tile.isABlocker) {
-                    cookie.isInStaticTile = YES;
-                }
-                else cookie.isInStaticTile = NO;
-                
                 [set addObject:cookie];
             }
             
@@ -420,7 +415,7 @@
         for (NSInteger row = 0; row < NumRows; row++) {
             
             BBQTile *tile = _tiles[column][row];
-            if (tile.tileType != 0 && _cookies[column][row] == nil) {
+            if (tile.requiresACookie && _cookies[column][row] == nil) {
                 for (NSInteger lookup = row + 1; lookup < NumRows; lookup ++) {
                     BBQCookie *cookie = _cookies[column][lookup];
                     
@@ -456,7 +451,7 @@
         NSMutableArray *array;
         for (NSInteger row = NumRows - 1; row >= 0 && _cookies[column][row] == nil; row--) {
             BBQTile *tile = _tiles[column][row];
-            if (tile.tileType != 0) {
+            if (tile.requiresACookie) {
                 NSUInteger newCookieType;
                 do {
                     newCookieType = arc4random_uniform(NumStartingCookies) + 1;
@@ -582,24 +577,19 @@
                 
                 //create a tile object depending on the type of tile
                 BBQTile *tile = _tiles[column][tileRow];
-                
-                BBQTileObstacle *obstacle;
-                if ([value integerValue] == 1) {
-                    obstacle = [[BBQTileObstacle alloc] initWithType:WAD_OF_CASH_ONE column:column row:tileRow];
-                }
-                else if ([value integerValue] == 2) {
-                    obstacle = [[BBQTileObstacle alloc] initWithType:WAD_OF_CASH_TWO column:column row:tileRow];
-                }
-                else if ([value integerValue] == 3) {
-                    obstacle = [[BBQTileObstacle alloc] initWithType:WAD_OF_CASH_THREE column:column row:tileRow];
-                }
-                
-                if (obstacle) {
-                    if (!tile.obstacles) {
-                        tile.obstacles = [NSMutableArray array];
+                if (tile) {
+                    
+                    if ([value integerValue] == 1) {
+                        [tile addTileObstacles:[NSArray arrayWithObjects:WAD_OF_CASH_ONE, nil]];
                     }
-                    [tile addTileObstacle:obstacle];
+                    else if ([value integerValue] == 2) {
+                        [tile addTileObstacles:[NSArray arrayWithObjects:WAD_OF_CASH_ONE, WAD_OF_CASH_TWO, nil]];
+                    }
+                    else if ([value integerValue] == 3) {
+                        [tile addTileObstacles:[NSArray arrayWithObjects:WAD_OF_CASH_ONE, WAD_OF_CASH_TWO, WAD_OF_CASH_THREE, nil]];
+                    }
                 }
+                
             }];
         }];
 

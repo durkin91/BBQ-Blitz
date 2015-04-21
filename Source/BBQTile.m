@@ -28,7 +28,7 @@
     switch (tileType) {
         case 0:
         self.requiresACookie = NO;
-        self.isABlocker = YES;
+        self.isABlocker = NO;
         break;
         
         case 1:
@@ -55,5 +55,17 @@
     [self.obstacles addObject:obstacle];
     self.isABlocker = obstacle.isABlocker;
     self.requiresACookie = obstacle.requiresACookie;
+}
+
+- (void)removeTileObstacle:(BBQTileObstacle *)obstacle {
+    [self.obstacles removeObject:obstacle];
+    BBQTileObstacle *newActiveObstacle = [_obstacles lastObject];
+    if (newActiveObstacle) {
+        self.requiresACookie = newActiveObstacle.requiresACookie;
+        self.isABlocker = newActiveObstacle.isABlocker;
+    }
+    else {
+        self.tileType = 1;
+    }
 }
 @end

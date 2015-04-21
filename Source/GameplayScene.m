@@ -659,7 +659,7 @@ static const CGFloat TileHeight = 36.0;
     __block NSTimeInterval longestDuration = 0;
     
     for (NSArray *array in columns) {
-        NSInteger startRow = ((BBQCookie *)[array firstObject]).row + 1;
+        NSInteger startRow = NumRows;
         
         [array enumerateObjectsUsingBlock:^(BBQCookie *cookie, NSUInteger idx, BOOL *stop) {
             BBQCookieNode *sprite = [self createCookieNodeForCookie:cookie column:cookie.column row:startRow highlighted:NO];
@@ -861,31 +861,47 @@ static const CGFloat TileHeight = 36.0;
 - (void)animateObstaclesForCookie:(BBQCookie *)cookie {
     //Deal with obstacle on the cookie's tile
     BBQTileObstacle *obstacleOnTile = [self.gameLogic removeObstacleOnTileForCookie:cookie];
-    [obstacleOnTile addOrderToObstacle:self.gameLogic.level.cookieOrders];
-    NSInteger zOrder = obstacleOnTile.sprite.zOrder;
+    if (obstacleOnTile) {
+        [self prepareObstacleForRemoval:obstacleOnTile];
+        
+        
+        if ([obstacleOnTile.type isEqualToString:GOLD_PLATED_TILE] || [obstacleOnTile.type isEqualToString:SILVER_PLATED_TILE]) {
+            [self prepareObstacleForOrderCollection:obstacleOnTile];
+        }
+    }
     
-    BBQTileObstacle *newActiveObstacle = [self.gameLogic activeObstacleForTileAtColumn:cookie.column row:cookie.row];
+    //Deal with obstacles around the cookie's tile
+    NSArray *adjacentObstacles = [self.gameLogic removeObstaclesAroundTileForCookie:cookie];
+    for (BBQTileObstacle *obstacle in adjacentObstacles) {
+        [self prepareObstacleForRemoval:obstacle];
+        
+        if ([obstacle.type isEqualToString:WAD_OF_CASH_ONE] || [obstacle.type isEqualToString:WAD_OF_CASH_TWO] || [obstacle.type isEqualToString:WAD_OF_CASH_THREE]) {
+            [self prepareObstacleForOrderCollection:obstacle];
+        }
+    }
+}
+
+- (void)prepareObstacleForRemoval:(BBQTileObstacle *)obstacle {
+    [obstacle addOrderToObstacle:self.gameLogic.level.cookieOrders];
+    NSInteger zOrder = obstacle.sprite.zOrder;
+    
+    BBQTileObstacle *newActiveObstacle = [self.gameLogic activeObstacleForTileAtColumn:obstacle.column row:obstacle.row];
     if (newActiveObstacle) {
         [self createSpriteForTileObstacle:newActiveObstacle zOrder:zOrder - 1 forCookieOrderCollection:NO];
     }
-    
-    
-    if ([obstacleOnTile.type isEqualToString:GOLD_PLATED_TILE] || [obstacleOnTile.type isEqualToString:SILVER_PLATED_TILE]) {
-        CCParticleSystem *explosion = (CCParticleSystem *)[CCBReader load:@"SteelBlockersEffect"];
-        explosion.autoRemoveOnFinish = YES;
-        CGPoint cookieSpriteWorldPos = [cookie.sprite.parent convertToWorldSpace:cookie.sprite.positionInPoints];
-        explosion.position = cookieSpriteWorldPos;
-        [self addChild:explosion];
-        if (obstacleOnTile.cookieOrder) {
-            NSInteger zOrderOfObstacleSprite = obstacleOnTile.sprite.zOrder;
-            [obstacleOnTile.sprite removeFromParent];
-            [self createSpriteForTileObstacle:obstacleOnTile zOrder:zOrderOfObstacleSprite forCookieOrderCollection:YES];
-            [self animateObstacleOrderCollection:obstacleOnTile];
-        }
-        else {
-            [obstacleOnTile.sprite removeFromParent];
-        }
+}
+
+- (void)prepareObstacleForOrderCollection:(BBQTileObstacle *)obstacle {
+    if (obstacle.cookieOrder) {
+        NSInteger zOrderOfObstacleSprite = obstacle.sprite.zOrder;
+        [obstacle.sprite removeFromParent];
+        [self createSpriteForTileObstacle:obstacle zOrder:zOrderOfObstacleSprite forCookieOrderCollection:YES];
+        [self animateObstacleOrderCollection:obstacle];
     }
+    else {
+        [obstacle.sprite removeFromParent];
+    }
+
 }
 
 - (void)animateObstacleOrderCollection:(BBQTileObstacle *)obstacle {

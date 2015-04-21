@@ -27,5 +27,6 @@
 - (instancetype)initWithTileType:(NSInteger)tileType column:(NSInteger)column row:(NSInteger)row;
 - (void)addTileObstacles:(NSArray *)obstacleName;
 - (void)addTileObstacle:(BBQTileObstacle *)obstacle;
+- (void)removeTileObstacle:(BBQTileObstacle *)obstacle;
 
 @end

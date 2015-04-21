@@ -28,6 +28,7 @@
 
 @property (assign, nonatomic) BOOL isABlocker;
 @property (assign, nonatomic) BOOL requiresACookie;
+@property (assign, nonatomic) BOOL detonatesWhenAdjacentToCookie;
 
 
 - (instancetype)initWithType:(NSString *)type column:(NSInteger)column row:(NSInteger)row;
