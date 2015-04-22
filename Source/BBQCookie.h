@@ -16,7 +16,7 @@
 @class BBQChain;
 
 static const NSUInteger NumCookieTypes = 6;
-static const NSUInteger NumStartingCookies = 3;
+static const NSUInteger NumStartingCookies = 6;
 
 @interface BBQCookie : NSObject
 

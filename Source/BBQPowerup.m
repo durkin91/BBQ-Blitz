@@ -260,7 +260,8 @@
         [array addObject:cookie];
     }
     else {
-        [array addObject:[NSNull null]];
+        BBQTile *tile = [_level tileAtColumn:column row:row];
+        [array addObject:tile];
     }
 }
 

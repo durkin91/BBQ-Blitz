@@ -739,13 +739,20 @@ static const CGFloat TileHeight = 36.0;
                 CCActionCallBlock *action = [CCActionCallBlock actionWithBlock:^{
                     
                     [self animateCookieRemoval:powerupCookie powerupDuration:longestDuration scaleActionDuration:scaleActionDuration detonatePowerupsWithinArray:detonatePowerupsWithinArray];
-                    [self animateObstaclesForCookie:powerupCookie];
+                    [self animateObstaclesForColumn:powerupCookie.column row:powerupCookie.row includeAdjacentObstacles:NO];
                     
                 }];
                 
                 longestDuration = MAX(longestDuration, scaleActionDuration + delay);
                 
                 [powerupCookie.sprite runAction:[CCActionSequence actions:[CCActionDelay actionWithDuration:delay], action, nil]];
+            }
+            
+            else if ([object isKindOfClass:[BBQTile class]]) {
+                BBQTile *tile = object;
+                if (tile.tileType != 0) {
+                    [self animateObstaclesForColumn:tile.column row:tile.row includeAdjacentObstacles:NO];
+                }
             }
             
         }];
@@ -772,7 +779,7 @@ static const CGFloat TileHeight = 36.0;
         //Take care of root cookie
         CCActionScaleTo *scaleAction = [CCActionScaleTo actionWithDuration:0.3 scale:0.1];
         [multicookie.sprite runAction:[CCActionSequence actions:scaleAction, [CCActionRemove action], nil]];
-        [self animateObstaclesForCookie:multicookie];
+        [self animateObstaclesForColumn:multicookie.column row:multicookie.row includeAdjacentObstacles:YES];
         
         [self changeMultiCookieUpgradedPowerupSprites:multicookie completion:^{
             
@@ -796,7 +803,7 @@ static const CGFloat TileHeight = 36.0;
                 [self removeHighlightFromCookie:cookie];
             }
             
-            [self animateObstaclesForCookie:cookie];
+            [self animateObstaclesForColumn:cookie.column row:cookie.row includeAdjacentObstacles:YES];
         }
         
         [self runAction:[CCActionSequence actions:[CCActionDelay actionWithDuration:duration], [self updateScoreAndMoves], [CCActionDelay actionWithDuration:powerupDuration], [CCActionCallBlock actionWithBlock:completion], nil]];
@@ -859,9 +866,9 @@ static const CGFloat TileHeight = 36.0;
     return orderActionSequence;
 }
 
-- (void)animateObstaclesForCookie:(BBQCookie *)cookie {
+- (void)animateObstaclesForColumn:(NSInteger)column row:(NSInteger)row includeAdjacentObstacles:(BOOL)includeAdjacentObstacles {
     //Deal with obstacle on the cookie's tile
-    BBQTileObstacle *obstacleOnTile = [self.gameLogic removeObstacleOnTileForCookie:cookie];
+    BBQTileObstacle *obstacleOnTile = [self.gameLogic removeObstacleOnTileForColumn:column row:row];
     if (obstacleOnTile) {
         [self prepareObstacleForRemoval:obstacleOnTile];
         
@@ -869,15 +876,21 @@ static const CGFloat TileHeight = 36.0;
         if ([obstacleOnTile.type isEqualToString:GOLD_PLATED_TILE] || [obstacleOnTile.type isEqualToString:SILVER_PLATED_TILE]) {
             [self prepareObstacleForOrderCollection:obstacleOnTile];
         }
+        
+        else if ([obstacleOnTile.type isEqualToString:WAD_OF_CASH_ONE] || [obstacleOnTile.type isEqualToString:WAD_OF_CASH_TWO] || [obstacleOnTile.type isEqualToString:WAD_OF_CASH_THREE]) {
+            [self prepareObstacleForOrderCollection:obstacleOnTile];
+        }
     }
     
     //Deal with obstacles around the cookie's tile
-    NSArray *adjacentObstacles = [self.gameLogic removeObstaclesAroundTileForCookie:cookie];
-    for (BBQTileObstacle *obstacle in adjacentObstacles) {
-        [self prepareObstacleForRemoval:obstacle];
-        
-        if ([obstacle.type isEqualToString:WAD_OF_CASH_ONE] || [obstacle.type isEqualToString:WAD_OF_CASH_TWO] || [obstacle.type isEqualToString:WAD_OF_CASH_THREE]) {
-            [self prepareObstacleForOrderCollection:obstacle];
+    if (includeAdjacentObstacles == YES) {
+        NSArray *adjacentObstacles = [self.gameLogic removeObstaclesAroundTileForColumn:column row:row];
+        for (BBQTileObstacle *obstacle in adjacentObstacles) {
+            [self prepareObstacleForRemoval:obstacle];
+            
+            if ([obstacle.type isEqualToString:WAD_OF_CASH_ONE] || [obstacle.type isEqualToString:WAD_OF_CASH_TWO] || [obstacle.type isEqualToString:WAD_OF_CASH_THREE]) {
+                [self prepareObstacleForOrderCollection:obstacle];
+            }
         }
     }
 }

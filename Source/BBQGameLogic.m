@@ -289,8 +289,8 @@
     return columns;
 }
 
-- (BBQTileObstacle *)removeObstacleOnTileForCookie:(BBQCookie *)cookie {
-    BBQTile *tile = [self.level tileAtColumn:cookie.column row:cookie.row];
+- (BBQTileObstacle *)removeObstacleOnTileForColumn:(NSInteger)column row:(NSInteger)row {
+    BBQTile *tile = [self.level tileAtColumn:column row:row];
     BBQTileObstacle *obstacle = [tile.obstacles lastObject];
     [tile removeTileObstacle:obstacle];
     return obstacle;
@@ -302,27 +302,27 @@
     return obstacle;
 }
 
-- (NSArray *)removeObstaclesAroundTileForCookie:(BBQCookie *)cookie {
+- (NSArray *)removeObstaclesAroundTileForColumn:(NSInteger)column row:(NSInteger)row {
     NSMutableArray *obstacles = [NSMutableArray array];
     
     //Above
-    if (cookie.row + 1 < NumRows) {
-        [self addAdjacentObstacleAtColumn:cookie.column row:cookie.row + 1 array:obstacles];
+    if (row + 1 < NumRows) {
+        [self addAdjacentObstacleAtColumn:column row:row + 1 array:obstacles];
     }
     
     //Below
-    if (cookie.row - 1 >= 0) {
-        [self addAdjacentObstacleAtColumn:cookie.column row:cookie.row - 1 array:obstacles];
+    if (row - 1 >= 0) {
+        [self addAdjacentObstacleAtColumn:column row:row - 1 array:obstacles];
     }
     
     //Left
-    if (cookie.column - 1 >= 0) {
-        [self addAdjacentObstacleAtColumn:cookie.column - 1  row:cookie.row array:obstacles];
+    if (column - 1 >= 0) {
+        [self addAdjacentObstacleAtColumn:column - 1  row:row array:obstacles];
     }
     
     //Right
-    if (cookie.column + 1 < NumColumns) {
-        [self addAdjacentObstacleAtColumn:cookie.column + 1 row:cookie.row array:obstacles];
+    if (column + 1 < NumColumns) {
+        [self addAdjacentObstacleAtColumn:column + 1 row:row array:obstacles];
     }
     return obstacles;
 }

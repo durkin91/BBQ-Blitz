@@ -20,6 +20,7 @@
 @implementation BBQLevel {
     BBQCookie *_cookies[NumColumns][NumRows];
     BBQTile *_tiles[NumColumns][NumRows];
+    NSArray *_beginningCookieData;
 }
 
 - (BBQCookie *)cookieAtColumn:(NSInteger)column row:(NSInteger)row {
@@ -364,34 +365,69 @@
 - (NSSet *)createCookiesInBlankTiles {
     NSMutableSet *set = [NSMutableSet set];
     
-    //loop through rows and columns
-    for (NSInteger row = 0; row < NumRows; row++) {
-        for (NSInteger column = 0; column < NumColumns; column++) {
-            BBQTile *tile = _tiles[column][row];
-            if (_cookies[column][row] == nil && tile.requiresACookie == YES) {
+    if (_beginningCookieData) {
+        [_beginningCookieData enumerateObjectsUsingBlock:^(NSArray *array, NSUInteger row, BOOL *stop) {
+            
+            //Loop through the columns in the current row
+            [array enumerateObjectsUsingBlock:^(NSNumber *value, NSUInteger column, BOOL *stop) {
                 
-                NSUInteger cookieType;
-                do {
-                    cookieType = arc4random_uniform(NumStartingCookies) + 1;
+                //Note that in cocos (0,0) is at the bottom of the screen so we need to read this file upside down
+                NSInteger tileRow = NumRows - row - 1;
+                
+                //create a tile object depending on the type of tile
+                BBQTile *tile = _tiles[column][tileRow];
+                if (tile && tile.requiresACookie) {
+                    NSInteger number = [value integerValue];
+                    if (number == 1) {
+                        [self createIndividualRandomCookieForColumn:column row:tileRow set:set];
+                    }
+                    else if (number >= 11 && number <= 10 + NumStartingCookies) {
+                        NSInteger cookieType = number - 10;
+                        BBQCookie *cookie = [self createCookieAtColumn:column row:tileRow withType:cookieType];
+                        [set addObject:cookie];
+                    }
                 }
                 
-                while ((column >= 2 &&
-                        _cookies[column - 1][row].cookieType == cookieType &&
-                        _cookies[column - 2][row].cookieType == cookieType)
-                       ||
-                       (row >= 2 &&
-                        _cookies[column][row - 1].cookieType == cookieType &&
-                        _cookies[column][row - 2].cookieType == cookieType));
+            }];
+        }];
+        
+        _beginningCookieData = nil;
+        
+    }
+    
+    else {
+        //loop through rows and columns
+        for (NSInteger row = 0; row < NumRows; row++) {
+            for (NSInteger column = 0; column < NumColumns; column++) {
+                BBQTile *tile = _tiles[column][row];
+                if (_cookies[column][row] == nil && tile.requiresACookie == YES) {
+                    [self createIndividualRandomCookieForColumn:column row:row set:set];
+                }
                 
-                BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
-                
-                [set addObject:cookie];
             }
-            
         }
     }
     
     return set;
+}
+
+- (void)createIndividualRandomCookieForColumn:(NSInteger)column row:(NSInteger)row set:(NSMutableSet *)set {
+    NSUInteger cookieType;
+    do {
+        cookieType = arc4random_uniform(NumStartingCookies) + 1;
+    }
+    
+    while ((column >= 2 &&
+            _cookies[column - 1][row].cookieType == cookieType &&
+            _cookies[column - 2][row].cookieType == cookieType)
+           ||
+           (row >= 2 &&
+            _cookies[column][row - 1].cookieType == cookieType &&
+            _cookies[column][row - 2].cookieType == cookieType));
+    
+    BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
+    
+    [set addObject:cookie];
 }
 
 
@@ -593,8 +629,7 @@
             }];
         }];
 
-        
-        
+        _beginningCookieData = dictionary[@"cookies"];
         self.targetScore = [dictionary[@"targetScore"] unsignedIntegerValue];
         self.maximumMoves = [dictionary[@"moves"] unsignedIntegerValue];
         
