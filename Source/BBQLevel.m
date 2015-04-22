@@ -21,7 +21,7 @@
     BBQCookie *_cookies[NumColumns][NumRows];
     BBQTile *_tiles[NumColumns][NumRows];
     NSArray *_beginningCookieData;
-    NSArray *_startingTilesForCookieMovements;
+    NSArray *_sectionsForCookieMovements;
 }
 
 - (BBQCookie *)cookieAtColumn:(NSInteger)column row:(NSInteger)row {
@@ -446,21 +446,21 @@
 - (NSArray *)fillHoles {
     NSMutableArray *columns = [NSMutableArray array];
     
-    [self startingTiles];
+    [self sectionsForCookieMovements];
     
-    for (BBQTile *startingTile in _startingTilesForCookieMovements) {
-        NSInteger column = startingTile.column;
+    for (NSArray *section in _sectionsForCookieMovements) {
         NSMutableArray *array;
-        for (NSInteger row = startingTile.row; row < NumRows; row ++) {
-            BBQTile *tile = _tiles[column][row];
-            if (tile.requiresACookie && _cookies[column][row] == nil) {
-                for (NSInteger lookup = row + 1; lookup < NumRows; lookup ++) {
-                    BBQCookie *cookie = _cookies[column][lookup];
+        for (NSInteger i = [section count] - 1; i >= 0; i--) {
+            BBQTile *tile = section[i];
+            if (tile.requiresACookie && _cookies[tile.column][tile.row] == nil) {
+                for (NSInteger lookup = i - 1; lookup >= 0 ; lookup --) {
+                    BBQTile *tileAbove = section[lookup];
+                    BBQCookie *cookie = _cookies[tileAbove.column][tileAbove.row];
                     
                     if (cookie != nil) {
-                        _cookies[column][lookup] = nil;
-                        _cookies[column][row] = cookie;
-                        cookie.row = row;
+                        _cookies[tileAbove.column][tileAbove.row] = nil;
+                        _cookies[tile.column][tile.row] = cookie;
+                        cookie.row = tile.row;
                         
                         if (!array) {
                             array = [NSMutableArray array];
@@ -471,9 +471,37 @@
                         break;
                     }
                 }
+
             }
         }
     }
+    
+//    for (BBQTile *startingTile in _startingTilesForCookieMovements) {
+//        NSInteger column = startingTile.column;
+//        NSMutableArray *array;
+//        for (NSInteger row = startingTile.row; row < NumRows; row ++) {
+//            BBQTile *tile = _tiles[column][row];
+//            if (tile.requiresACookie && _cookies[column][row] == nil) {
+//                for (NSInteger lookup = row + 1; lookup < NumRows; lookup ++) {
+//                    BBQCookie *cookie = _cookies[column][lookup];
+//                    
+//                    if (cookie != nil) {
+//                        _cookies[column][lookup] = nil;
+//                        _cookies[column][row] = cookie;
+//                        cookie.row = row;
+//                        
+//                        if (!array) {
+//                            array = [NSMutableArray array];
+//                            [columns addObject:array];
+//                        }
+//                        [array addObject:cookie];
+//                        
+//                        break;
+//                    }
+//                }
+//            }
+//        }
+//    }
     return columns;
 }
 
@@ -484,12 +512,10 @@
     NSMutableArray *columns = [NSMutableArray array];
     NSUInteger cookieType = 0;
     
-    for (BBQTile *startingTile in _startingTilesForCookieMovements) {
+    for (NSArray *section in _sectionsForCookieMovements) {
         NSMutableArray *array;
-        NSInteger column = startingTile.column;
-        for (NSInteger row = NumRows - 1; row >= startingTile.row && _cookies[column][row] == nil; row--) {
-            BBQTile *tile = _tiles[column][row];
-            if (tile.requiresACookie) {
+        for (BBQTile *tile in section) {
+            if (tile.requiresACookie && _cookies[tile.column][tile.row] == nil) {
                 NSUInteger newCookieType;
                 do {
                     newCookieType = arc4random_uniform(NumStartingCookies) + 1;
@@ -497,7 +523,7 @@
                 while (newCookieType == cookieType);
                 cookieType = newCookieType;
                 
-                BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
+                BBQCookie *cookie = [self createCookieAtColumn:tile.column row:tile.row withType:cookieType];
                 
                 //Add a powerup if required
                 if (multiCookie && cookieType == poweruppedCookie.cookieType) {
@@ -513,11 +539,11 @@
                     [columns addObject:array];
                 }
                 [array addObject:cookie];
+
             }
         }
-        
     }
-    _startingTilesForCookieMovements = nil;
+    _sectionsForCookieMovements = nil;
     
     while ([multiCookie.activePowerup.upgradedMuliticookiePowerupCookiesThatNeedreplacing count] > 0 && [potentialCookiesToUpgrade count] > 0) {
         NSInteger randomIndex = arc4random_uniform([potentialCookiesToUpgrade count]);
@@ -543,22 +569,29 @@
     return columns;
 }
 
-- (void)startingTiles {
-    NSMutableArray *startingTiles = [NSMutableArray array];
+- (void)sectionsForCookieMovements {
+    NSMutableArray *sections = [NSMutableArray array];
     for (NSInteger column = 0; column < NumColumns; column ++) {
+        BOOL startNewSection = YES;
+        NSMutableArray *section;
         for (NSInteger row = NumRows - 1; row >= 0; row --) {
             BBQTile *tile = _tiles[column][row];
-            if (tile.tileType != 0 && tile.isABlocker && row + 1 < NumRows) {
-                [startingTiles addObject:_tiles[column][row + 1]];
-                break;
+            
+            if (startNewSection && tile.isABlocker == NO) {
+                section = [NSMutableArray array];
+                [sections addObject:section];
+                startNewSection = NO;
             }
-            else if (tile.row == 0) {
-                [startingTiles addObject:tile];
-                break;
+            
+            if (tile.isABlocker == NO) {
+                [section addObject:tile];
+            }
+            else {
+                startNewSection = YES;
             }
         }
     }
-    _startingTilesForCookieMovements = startingTiles;
+    _sectionsForCookieMovements = sections;
 }
 
 
@@ -635,7 +668,7 @@
                 
                 //create a tile object depending on the type of tile
                 BBQTile *tile = _tiles[column][tileRow];
-                if (tile) {
+                if (tile.tileType != 0) {
                     
                     if ([value integerValue] == 1) {
                         [tile addTileObstacles:[NSArray arrayWithObjects:WAD_OF_CASH_ONE, nil]];
