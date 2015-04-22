@@ -886,7 +886,7 @@ static const CGFloat TileHeight = 36.0;
     NSInteger zOrder = obstacle.sprite.zOrder;
     
     BBQTileObstacle *newActiveObstacle = [self.gameLogic activeObstacleForTileAtColumn:obstacle.column row:obstacle.row];
-    if (newActiveObstacle) {
+    if (newActiveObstacle && newActiveObstacle.sprite == nil) {
         [self createSpriteForTileObstacle:newActiveObstacle zOrder:zOrder - 1 forCookieOrderCollection:NO];
     }
 }
