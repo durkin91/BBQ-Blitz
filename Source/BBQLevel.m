@@ -21,7 +21,6 @@
     BBQCookie *_cookies[NumColumns][NumRows];
     BBQTile *_tiles[NumColumns][NumRows];
     NSArray *_beginningCookieData;
-    NSArray *_sectionsForCookieMovements;
 }
 
 - (BBQCookie *)cookieAtColumn:(NSInteger)column row:(NSInteger)row {
@@ -448,7 +447,7 @@
     
     [self sectionsForCookieMovements];
     
-    for (NSArray *section in _sectionsForCookieMovements) {
+    for (NSArray *section in [self sectionsForCookieMovements]) {
         NSMutableArray *array;
         for (NSInteger i = [section count] - 1; i >= 0; i--) {
             BBQTile *tile = section[i];
@@ -512,10 +511,11 @@
     NSMutableArray *columns = [NSMutableArray array];
     NSUInteger cookieType = 0;
     
-    for (NSArray *section in _sectionsForCookieMovements) {
+    for (BBQTile *tile in [self startingTilesForToppingUpWithNewCookies]) {
+        NSInteger column = tile.column;
         NSMutableArray *array;
-        for (BBQTile *tile in section) {
-            if (tile.requiresACookie && _cookies[tile.column][tile.row] == nil) {
+        for (NSInteger row = NumRows - 1; row >= tile.row && _cookies[column][row] == nil; row--) {
+            if (_tiles[column][row] != nil) {
                 NSUInteger newCookieType;
                 do {
                     newCookieType = arc4random_uniform(NumStartingCookies) + 1;
@@ -523,7 +523,7 @@
                 while (newCookieType == cookieType);
                 cookieType = newCookieType;
                 
-                BBQCookie *cookie = [self createCookieAtColumn:tile.column row:tile.row withType:cookieType];
+                BBQCookie *cookie = [self createCookieAtColumn:column row:row withType:cookieType];
                 
                 //Add a powerup if required
                 if (multiCookie && cookieType == poweruppedCookie.cookieType) {
@@ -539,11 +539,10 @@
                     [columns addObject:array];
                 }
                 [array addObject:cookie];
-
+                
             }
         }
     }
-    _sectionsForCookieMovements = nil;
     
     while ([multiCookie.activePowerup.upgradedMuliticookiePowerupCookiesThatNeedreplacing count] > 0 && [potentialCookiesToUpgrade count] > 0) {
         NSInteger randomIndex = arc4random_uniform([potentialCookiesToUpgrade count]);
@@ -569,7 +568,7 @@
     return columns;
 }
 
-- (void)sectionsForCookieMovements {
+- (NSArray *)sectionsForCookieMovements {
     NSMutableArray *sections = [NSMutableArray array];
     for (NSInteger column = 0; column < NumColumns; column ++) {
         BOOL startNewSection = YES;
@@ -591,7 +590,48 @@
             }
         }
     }
-    _sectionsForCookieMovements = sections;
+    return sections;
+}
+
+//- (NSArray *)sectionsForToppingUpWithNewCookies {
+//    NSMutableArray *sections = [NSMutableArray array];
+//    for (NSInteger column = 0; column < NumColumns; column ++) {
+//        NSMutableArray *section;
+//        for (NSInteger row = NumRows - 1; row >= 0; row --) {
+//            BBQTile *tile = _tiles[column][row];
+//            
+//            if (tile.isABlocker == NO) {
+//                [section addObject:tile];
+//            }
+//            else {
+//                break;
+//            }
+//        }
+//    }
+//    return sections;
+//}
+
+- (NSArray *)startingTilesForToppingUpWithNewCookies {
+    NSMutableArray *array = [NSMutableArray array];
+    for (NSInteger column = 0; column < NumColumns; column++) {
+        BBQTile *startingTile;
+        for (NSInteger row = NumRows - 1; row >= 0; row --) {
+            BBQTile *tile = _tiles[column][row];
+            if (tile.isABlocker == NO || tile.row == 0) {
+                startingTile = tile;
+                if (tile.row == 0) {
+                    [array addObject:startingTile];
+                }
+            }
+            else {
+                if (startingTile) {
+                    [array addObject:startingTile];
+                }
+                break;
+            }
+        }
+    }
+    return array;
 }
 
 
