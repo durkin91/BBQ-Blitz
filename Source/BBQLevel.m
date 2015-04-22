@@ -445,11 +445,26 @@
 - (NSArray *)fillHoles {
     NSMutableArray *columns = [NSMutableArray array];
     
+    //Find the starting tile by looking for the highest blocker in the column
+    NSMutableArray *startingTiles = [NSMutableArray array];
     for (NSInteger column = 0; column < NumColumns; column ++) {
+        for (NSInteger row = NumRows - 1; row >= 0; row --) {
+            BBQTile *tile = _tiles[column][row];
+            if (tile.tileType != 0 && tile.isABlocker && row + 1 < NumRows) {
+                [startingTiles addObject:_tiles[column][row + 1]];
+                break;
+            }
+            else if (tile.row == 0) {
+                [startingTiles addObject:tile];
+                break;
+            }
+        }
+    }
+    
+    for (BBQTile *startingTile in startingTiles) {
+        NSInteger column = startingTile.column;
         NSMutableArray *array;
-        
-        for (NSInteger row = 0; row < NumRows; row++) {
-            
+        for (NSInteger row = startingTile.row; row < NumRows; row ++) {
             BBQTile *tile = _tiles[column][row];
             if (tile.requiresACookie && _cookies[column][row] == nil) {
                 for (NSInteger lookup = row + 1; lookup < NumRows; lookup ++) {
@@ -468,7 +483,6 @@
                         
                         break;
                     }
-                    
                 }
             }
         }
