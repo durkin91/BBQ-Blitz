@@ -512,23 +512,25 @@
     for (BBQTile *startingTile in [self startingTilesForToppingUpWithNewCookies]) {
         NSInteger column = startingTile.column;
         for (NSInteger row = startingTile.row; row < NumRows; row++) {
-            NSUInteger newCookieType;
-            do {
-                newCookieType = arc4random_uniform(NumStartingCookies) + 1;
-            }
-            while (newCookieType == cookieType);
-            cookieType = newCookieType;
-            
-            BBQCookie *newCookie = [self createCookieAtColumn:column row:row withType:cookieType];
-            _cookies[column][row] = newCookie;
-            
-            BBQStraightMovement *movement = [[BBQStraightMovement alloc] initWithDestinationColumn:column row:row];
-            movement.isNewCookie = YES;
-            movement.numberOfTilesToPauseForNewCookie = row - startingTile.row;
-            [newCookie addMovement:movement];
-            
-            if ([cookiesToMove containsObject:newCookie] == NO) {
-                [cookiesToMove addObject:newCookie];
+            if (_tiles[column][row].requiresACookie && _cookies[column][row] == nil) {
+                NSUInteger newCookieType;
+                do {
+                    newCookieType = arc4random_uniform(NumStartingCookies) + 1;
+                }
+                while (newCookieType == cookieType);
+                cookieType = newCookieType;
+                
+                BBQCookie *newCookie = [self createCookieAtColumn:column row:row withType:cookieType];
+                _cookies[column][row] = newCookie;
+                
+                BBQStraightMovement *movement = [[BBQStraightMovement alloc] initWithDestinationColumn:column row:row];
+                movement.isNewCookie = YES;
+                movement.numberOfTilesToPauseForNewCookie = row - startingTile.row;
+                [newCookie addMovement:movement];
+                
+                if ([cookiesToMove containsObject:newCookie] == NO) {
+                    [cookiesToMove addObject:newCookie];
+                }
             }
         }
     }
@@ -750,16 +752,12 @@
             if (tile.requiresACookie && _cookies[tile.column][tile.row] == nil) {
                 startingTile = tile;
             }
-            else if (tile.row == 0) {
-                startingTile = tile;
-                [array addObject:startingTile];
-            }
-            else {
-                if (startingTile) {
-                    [array addObject:startingTile];
-                }
+            else if (tile.isABlocker || _cookies[tile.column][tile.row]) {
                 break;
             }
+        }
+        if (startingTile) {
+            [array addObject:startingTile];
         }
     }
     return array;

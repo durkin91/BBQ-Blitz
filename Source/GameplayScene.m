@@ -656,7 +656,7 @@ static const CGFloat TileHeight = 36.0;
 - (NSTimeInterval)animateFallingAndNewCookies:(NSArray *)cookiesToMove completion:(dispatch_block_t)completion {
     
     NSTimeInterval longestDuration = 0;
-    NSTimeInterval tileDuration = 1.0;
+    NSTimeInterval tileDuration = 0.1;
     
     for (BBQCookie *cookie in cookiesToMove) {
         NSTimeInterval delay = 0.5;
@@ -684,8 +684,12 @@ static const CGFloat TileHeight = 36.0;
             }
         }
     }
-    
-    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil];
+    CCActionCallBlock *removeMovements = [CCActionCallBlock actionWithBlock:^{
+        for (BBQCookie *cookie in cookiesToMove) {
+            cookie.movements = nil;
+        }
+    }];
+    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], removeMovements, [CCActionCallBlock actionWithBlock:completion], nil];
     [self runAction:sequence];
     
     return longestDuration;
