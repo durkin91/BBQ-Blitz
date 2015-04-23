@@ -15,6 +15,9 @@
 #define ORDER_QUANTITY @"quantity"
 #define ORDER_ID @"id"
 
+#define STRAIGHT_MOVEMENTS @"Straight Movements"
+#define DIAGONAL_MOVEMENTS @"Diagonal Movements"
+#define NEW_COOKIES @"New Cookies"
 
 @class BBQCookieOrder;
 

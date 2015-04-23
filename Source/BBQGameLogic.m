@@ -9,7 +9,6 @@
 #import "BBQGameLogic.h"
 #import "BBQCookie.h"
 #import "BBQTile.h"
-#import "BBQMovement.h"
 #import "BBQPowerup.h"
 #import "BBQCombo.h"
 #import "BBQCookieOrder.h"

@@ -550,8 +550,8 @@
 						<string>Text</string>
 						<key>value</key>
 						<array>
-							<string>DIAMOND
-DASH</string>
+							<string>HIPPO
+HEIST</string>
 							<false/>
 						</array>
 					</dict>
@@ -687,6 +687,8 @@ DASH</string>
 						</array>
 					</dict>
 				</array>
+				<key>selected</key>
+				<true/>
 			</dict>
 		</array>
 		<key>customClass</key>

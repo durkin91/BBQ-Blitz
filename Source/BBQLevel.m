@@ -475,34 +475,79 @@
         }
     }
     
-//    for (BBQTile *startingTile in _startingTilesForCookieMovements) {
-//        NSInteger column = startingTile.column;
-//        NSMutableArray *array;
-//        for (NSInteger row = startingTile.row; row < NumRows; row ++) {
+    return columns;
+}
+
+
+//- (NSDictionary *)fillHoles {
+//    NSDictionary *dictionary = @{ STRAIGHT_MOVEMENTS : [NSMutableArray array],
+//                                  DIAGONAL_MOVEMENTS : [NSMutableArray array],
+//                                  NEW_COOKIES : [NSMutableArray array],
+//                                  };
+//    for (NSInteger column = 0; column < NumColumns; column ++) {
+//        for (NSInteger row = 0; row < NumRows - 1; row++) {
 //            BBQTile *tile = _tiles[column][row];
 //            if (tile.requiresACookie && _cookies[column][row] == nil) {
-//                for (NSInteger lookup = row + 1; lookup < NumRows; lookup ++) {
-//                    BBQCookie *cookie = _cookies[column][lookup];
-//                    
-//                    if (cookie != nil) {
-//                        _cookies[column][lookup] = nil;
-//                        _cookies[column][row] = cookie;
-//                        cookie.row = row;
-//                        
-//                        if (!array) {
-//                            array = [NSMutableArray array];
-//                            [columns addObject:array];
-//                        }
-//                        [array addObject:cookie];
-//                        
+//                for (NSInteger lookup = row + 1; lookup < NumRows; lookup++) {
+//                    BBQTile *tileAbove = _tiles[column][lookup];
+//                    if (tileAbove.isABlocker) {
+//                        row = tileAbove.row + 1;
 //                        break;
+//                    }
+//                    else {
+//                        BBQCookie *cookieAbove = _cookies[column][lookup];
+//                        if (cookieAbove) {
+//                            _cookies[column][lookup] = nil;
+//                            _cookies[column][lookup - 1] = cookieAbove;
+//                            cookieAbove.row = lookup - 1;
+//                            [dictionary[STRAIGHT_MOVEMENTS] addObject:cookieAbove];
+//                            break;
+//                        }
 //                    }
 //                }
 //            }
 //        }
 //    }
-    return columns;
-}
+//    
+//    for (NSInteger column = 0; column < NumColumns; column++) {
+//        for (NSInteger row = NumRows - 1; row >= 0; row --) {
+//            BBQTile *tile = _tiles[column][row];
+//            if (tile.isABlocker == NO) {
+//                BBQTile *tileToFill = [self tileToFillWithNewCookieFromTopTile:tile];
+//                if (tileToFill) {
+//                    BBQCookie *cookie = _cookies[tileToFill.column][tileToFill.row];
+//                    if (cookie == nil) {
+//                        NSUInteger newCookieType = newCookieType = arc4random_uniform(NumStartingCookies) + 1;
+//                        _cookies[tileToFill.column][tileToFill.row] = [self createCookieAtColumn:tileToFill.column row:tileToFill.row withType:newCookieType];
+//                        [dictionary[NEW_COOKIES] addObject:_cookies[tileToFill.column][tileToFill.row]];
+//                    }
+//                }
+//                else {
+//                    break;
+//                }
+//            }
+//        }
+//    }
+//    return dictionary;
+//}
+//
+//- (BBQTile *)tileToFillWithNewCookieFromTopTile:(BBQTile *)topTile {
+//    if (topTile.requiresACookie) {
+//        return topTile;
+//    }
+//    else {
+//        for (NSInteger lookDown = topTile.row - 1; lookDown >= 0; lookDown --) {
+//            BBQTile *tileBelow = _tiles[topTile.column][lookDown];
+//            if (tileBelow.requiresACookie) {
+//                return tileBelow;
+//            }
+//            else if (tileBelow.isABlocker) {
+//                return nil;
+//            }
+//        }
+//        return nil;
+//    }
+//}
 
 - (NSArray *)topUpCookiesWithOptionalUpgradedMultiCookie:(BBQCookie *)multiCookie poweruppedCookieChainedToMulticookie:(BBQCookie *)poweruppedCookie {
     

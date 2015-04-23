@@ -9,7 +9,6 @@
 #import "WorldsScene.h"
 #import "BBQLaserTileNode.h"
 #import "BBQCookieOrder.h"
-#import "BBQMovement.h"
 #import "BBQChain.h"
 #import "BBQTileObstacle.h"
 
@@ -653,6 +652,18 @@ static const CGFloat TileHeight = 36.0;
     [self addChild:scoreLabel];
     
     [BBQAnimations animateScoreLabel:scoreLabel];
+}
+
+- (NSTimeInterval)animateFallingAndNewCookies:(NSDictionary *)dictionary completion:(dispatch_block_t)completion {
+    
+    __block NSTimeInterval duration = 0.1;
+    
+    //Straight Movements
+    [dictionary[STRAIGHT_MOVEMENTS] enumerateObjectsUsingBlock:^(BBQCookie *cookie, NSUInteger idx, BOOL *stop) {
+        CGPoint newPosition = [GameplayScene pointForColumn:cookie.column row: cookie.row];
+        CCActionMoveTo *moveAction = [CCActionMoveTo actionWithDuration:duration position:newPosition];
+        [cookie.sprite runAction:moveAction];
+    }];
 }
 
 - (NSTimeInterval)animateNewCookies:(NSArray *)columns completion:(dispatch_block_t)completion {
