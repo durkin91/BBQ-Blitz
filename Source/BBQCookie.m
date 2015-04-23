@@ -213,6 +213,13 @@
     
 }
 
+- (void)addMovement:(id)movement {
+    if (!_movements) {
+        _movements = [NSMutableArray array];
+    }
+    [_movements addObject:movement];
+}
+
 
 - (NSString *)description {
     return [NSString stringWithFormat:@"type:%ld square:(%ld, %ld)", (long)self.cookieType, (long)self.column, (long)self.row];

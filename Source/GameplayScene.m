@@ -11,6 +11,9 @@
 #import "BBQCookieOrder.h"
 #import "BBQChain.h"
 #import "BBQTileObstacle.h"
+#import "BBQStraightMovement.h"
+#import "BBQDiagonalMovement.h"
+#import "BBQPauseMovement.h"
 
 
 
@@ -399,17 +402,13 @@ static const CGFloat TileHeight = 36.0;
         [self.gameLogic calculateScoreForChain];
         BBQChain *chain = [self.gameLogic removeCookiesInChain];
         [self animateChain:chain completion:^{
-    
-            NSArray *columns = [self.gameLogic.level fillHoles];
-            [self animateFallingCookies:columns completion:^{
+            
+            NSArray *cookiesToMove = [self.gameLogic.level fillHoles];
+            [self animateFallingAndNewCookies:cookiesToMove completion:^{
                 
-                NSArray *columns = [self.gameLogic topUpCookiesWithMultiCookie:nil];
-                [self animateNewCookies:columns completion:^{
-                    
-                    [self beginNextTurn];
-                    
-                }];
+                [self beginNextTurn];
             }];
+    
         }];
     }
 }
@@ -654,16 +653,43 @@ static const CGFloat TileHeight = 36.0;
     [BBQAnimations animateScoreLabel:scoreLabel];
 }
 
-- (NSTimeInterval)animateFallingAndNewCookies:(NSDictionary *)dictionary completion:(dispatch_block_t)completion {
+- (NSTimeInterval)animateFallingAndNewCookies:(NSArray *)cookiesToMove completion:(dispatch_block_t)completion {
     
-    __block NSTimeInterval duration = 0.1;
+    NSTimeInterval longestDuration = 0;
+    NSTimeInterval tileDuration = 1.0;
     
-    //Straight Movements
-    [dictionary[STRAIGHT_MOVEMENTS] enumerateObjectsUsingBlock:^(BBQCookie *cookie, NSUInteger idx, BOOL *stop) {
-        CGPoint newPosition = [GameplayScene pointForColumn:cookie.column row: cookie.row];
-        CCActionMoveTo *moveAction = [CCActionMoveTo actionWithDuration:duration position:newPosition];
-        [cookie.sprite runAction:moveAction];
-    }];
+    for (BBQCookie *cookie in cookiesToMove) {
+        NSTimeInterval delay = 0.5;
+        for (NSInteger i = 0; i < [cookie.movements count]; i++) {
+            id movement = cookie.movements[i];
+            if ([movement isKindOfClass:[BBQStraightMovement class]]) {
+                BBQStraightMovement *straightMovement = movement;
+                if (straightMovement.isNewCookie) {
+                    NSInteger startRow = NumRows;
+                    BBQCookieNode *sprite = [self createCookieNodeForCookie:cookie column:straightMovement.destinationColumn row:startRow highlighted:NO];
+                    cookie.sprite = sprite;
+                    delay = delay + straightMovement.numberOfTilesToPauseForNewCookie * tileDuration;
+                }
+                
+                CGPoint newPosition = [GameplayScene pointForColumn:straightMovement.destinationColumn row:straightMovement.destinationRow];
+                
+                NSTimeInterval duration = ((cookie.sprite.position.y - newPosition.y) / TileHeight) * tileDuration;
+                longestDuration = MAX(longestDuration, duration + delay);
+                
+                CCActionMoveTo *moveAction = [CCActionMoveTo actionWithDuration:duration position:newPosition];
+                CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:delay], moveAction, nil];
+                [cookie.sprite runAction:sequence];
+                
+                delay = delay + duration;
+            }
+        }
+    }
+    
+    CCActionSequence *sequence = [CCActionSequence actions:[CCActionDelay actionWithDuration:longestDuration], [CCActionCallBlock actionWithBlock:completion], nil];
+    [self runAction:sequence];
+    
+    return longestDuration;
+
 }
 
 - (NSTimeInterval)animateNewCookies:(NSArray *)columns completion:(dispatch_block_t)completion {

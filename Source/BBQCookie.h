@@ -30,6 +30,7 @@ static const NSUInteger NumStartingCookies = 6;
 @property (strong, nonatomic) BBQPowerup *temporaryPowerup;
 @property (strong, nonatomic) BBQCookieOrder *cookieOrder;
 @property (assign, nonatomic) NSInteger score;
+@property (strong, nonatomic) NSMutableArray *movements;
 
 
 
@@ -40,5 +41,6 @@ static const NSUInteger NumStartingCookies = 6;
 - (BOOL)canBeChainedToCookie:(BBQCookie *)potentialCookie isFirstCookieInChain:(BOOL)isFirstCookieInChain ;
 - (void)setScoreForCookieInChain:(BBQChain *)chain;
 - (void)addCookieOrder:(NSArray *)cookieOrders;
+- (void)addMovement:(id)movement;
 
 @end
