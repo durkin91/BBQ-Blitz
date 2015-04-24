@@ -489,6 +489,11 @@
         for (NSInteger row = 0; row < NumRows; row++) {
             if (_tiles[column][row].requiresACookie && _cookies[column][row] == nil) {
                 for (NSInteger lookup = row + 1; lookup < NumRows; lookup++) {
+                    BBQTile *tile = _tiles[column][lookup];
+                    if (tile.isABlocker) {
+                        break;
+                    }
+                    
                     BBQCookie *cookie = _cookies[column][lookup];
                     if (cookie != nil) {
                         _cookies[column][lookup] = nil;
