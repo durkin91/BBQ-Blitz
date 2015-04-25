@@ -446,12 +446,6 @@
 
 - (NSArray *)fillHoles {
     NSMutableArray *cookiesToMove = [NSMutableArray array];
-    NSInteger changesCount = [self fillHolesLogic:cookiesToMove numberOfRounds:1];
-    NSInteger numberOfRounds = 2;
-    while (changesCount > 0) {
-        changesCount = [self fillHolesLogic:cookiesToMove numberOfRounds:numberOfRounds];
-        numberOfRounds ++;
-    }
     
     for (NSInteger column = 0; column < NumColumns; column ++) {
         for (NSInteger row = 0; row < NumRows; row ++) {
@@ -459,6 +453,13 @@
                 [cookiesToMove addObject:_cookies[column][row]];
             }
         }
+    }
+    
+    NSInteger changesCount = [self fillHolesLogic:cookiesToMove numberOfRounds:1];
+    NSInteger numberOfRounds = 2;
+    while (changesCount > 0) {
+        changesCount = [self fillHolesLogic:cookiesToMove numberOfRounds:numberOfRounds];
+        numberOfRounds ++;
     }
 
     return cookiesToMove;
@@ -469,12 +470,12 @@
     
     NSInteger count = 0;
     
-    for (NSInteger row = 0; row < NumRows - 1; row++) {
+    for (NSInteger row = 0; row < NumRows; row++) {
         for (NSInteger column = 0; column < NumColumns; column++) {
             if (_tiles[column][row].requiresACookie && _cookies[column][row] == nil) {
                 
                 //First priority: check if there is a cookie above it that can be moved down one tile
-                BBQCookie *cookieAbove = _cookies[column][row + 1];
+                BBQCookie *cookieAbove = [self cookieAboveColumn:column row:row];
                 if (cookieAbove) {
                     [self handleCookieAbove:cookieAbove];
                     count++;
@@ -485,7 +486,7 @@
                     BBQCookie *cookieDiagonally = [self diagonalCookieToMoveForColumn:column row:row];
                     if (cookieDiagonally) {
                         
-                        if ([self cookiesBelowAreAllSettled:cookieDiagonally]) {
+                        if ([self isCookieBelowSettledForColumn:cookieDiagonally.column row:cookieDiagonally.row] && ![self isBelowFallingCookiesForColumn:column row:row]) {
                             [self handleCookieDiagonally:cookieDiagonally column:column row:row];
                             count++;
                         }
@@ -493,10 +494,8 @@
                     
                     //Third Priority: Check if it is at the top of the board, and can have a new cookie assigned to it
                     else {
-                        BBQTile *topTileInColumn = [self validTopTileForColumn:column row:row];
-                        
-                        if (topTileInColumn) {
-                            BBQCookie *newCookie = [self createNewCookieWithMovementsForTopTile:topTileInColumn numberOfRounds:numberOfRounds];
+                        if ([self isTheTopTile:_tiles[column][row]]) {
+                            BBQCookie *newCookie = [self createNewCookieWithMovementsForTopTile:_tiles[column][row] numberOfRounds:numberOfRounds];
                             [array addObject:newCookie];
                             count++;
                         }
@@ -518,6 +517,14 @@
         }
     }
     return count;
+}
+
+- (BBQCookie *)cookieAboveColumn:(NSInteger)column row:(NSInteger)row {
+    BBQCookie *cookieAbove;
+    if (row < NumRows - 1) {
+        cookieAbove = _cookies[column][row + 1];
+    }
+    return cookieAbove;
 }
 
 - (BBQCookie *)createNewCookieWithMovementsForTopTile:(BBQTile *)topTileInColumn numberOfRounds:(NSInteger)numberOfRounds {
@@ -552,20 +559,58 @@
     
     BBQStraightMovement *movement = [[BBQStraightMovement alloc] initWithStartColumn:cookieAbove.column startRow:cookieAbove.row destinationColumn:cookieAbove.column destinationRow:cookieAbove.row - 1];
     [cookieAbove addMovement:movement];
+    
+    cookieAbove.row = cookieAbove.row - 1;
 }
 
-- (BOOL)cookiesBelowAreAllSettled:(BBQCookie *)cookie {
-    BOOL isOk = YES;
-    for (NSInteger lookDown = cookie.row - 1; lookDown >= 0; lookDown--) {
-        if (_cookies[cookie.column][lookDown] == nil && _tiles[cookie.column][cookie.row].requiresACookie) {
-            isOk = NO;
+//- (BOOL)cookiesBelowAreAllSettled:(BBQCookie *)cookie {
+//    BOOL isOk = YES;
+//    for (NSInteger lookDown = cookie.row - 1; lookDown >= 0; lookDown--) {
+//        if (_cookies[cookie.column][lookDown] == nil && _tiles[cookie.column][cookie.row].requiresACookie) {
+//            isOk = NO;
+//            break;
+//        }
+//        else if (_tiles[cookie.column][lookDown].isABlocker) {
+//            break;
+//        }
+//    }
+//    return isOk;
+//}
+
+- (BOOL)isTheTopTile:(BBQTile *)tile {
+    
+    BOOL isTopTile = NO;
+    
+    if (tile.row == NumRows - 1) {
+        isTopTile = YES;
+    }
+    else {
+        for (NSInteger lookup = tile.row + 1; lookup < NumRows; lookup ++) {
+            BBQTile *testTile = _tiles[tile.column][lookup];
+            if (testTile.tileType == 0) {
+                isTopTile = YES;
+            }
+            else {
+                isTopTile = NO;
+                break;
+            }
+        }
+    }
+    return isTopTile;
+}
+
+- (BOOL)isBelowFallingCookiesForColumn:(NSInteger)column row:(NSInteger)row {
+    BOOL answer = NO;
+    for (NSInteger lookup = row + 1; lookup < NumRows; lookup ++) {
+        if (_cookies[column][lookup] != nil) {
+            answer = YES;
             break;
         }
-        else if (_tiles[cookie.column][lookDown].isABlocker) {
+        else if (_tiles[column][lookup].isABlocker) {
             break;
         }
     }
-    return isOk;
+    return answer;
 }
 
 - (BBQTile *)validTopTileForColumn:(NSInteger)column row:(NSInteger)row {
@@ -588,6 +633,8 @@
 }
 
 - (BBQCookie *)diagonalCookieToMoveForColumn:(NSInteger)column row:(NSInteger)row {
+    if (row >= NumRows - 1) return nil;
+    
     NSInteger random = arc4random_uniform(2) + 1;
     BBQCookie *potentialCookie;
     BBQCookie *potentialCookieTwo;
@@ -633,6 +680,18 @@
         }
         else if ([[_cookies[column][row - 1].movements lastObject] isKindOfClass:[BBQPauseMovement class]]) {
             isOk = YES;
+        }
+        
+        else {
+            for (NSInteger lookdown = row - 1; lookdown >= 0; lookdown --) {
+                if (_tiles[column][lookdown].tileType == 0) {
+                    isOk = YES;
+                }
+                else {
+                    isOk = NO;
+                    break;
+                }
+            }
         }
     }
     else if (row == 0) {
