@@ -12,5 +12,9 @@
 
 @property (assign, nonatomic) NSInteger destinationColumn;
 @property (assign, nonatomic) NSInteger destinationRow;
+@property (assign, nonatomic) NSInteger startColumn;
+@property (assign, nonatomic) NSInteger startRow;
+
+- (instancetype)initWithDestinationColumn:(NSInteger)column row:(NSInteger)row;
 
 @end

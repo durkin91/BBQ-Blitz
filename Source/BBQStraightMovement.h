@@ -12,6 +12,8 @@
 
 @property (assign, nonatomic) NSInteger destinationColumn;
 @property (assign, nonatomic) NSInteger destinationRow;
+@property (assign, nonatomic) NSInteger startColumn;
+@property (assign, nonatomic) NSInteger startRow;
 @property (assign, nonatomic) BOOL isNewCookie;
 @property (assign, nonatomic) NSInteger numberOfTilesToPauseForNewCookie;
 

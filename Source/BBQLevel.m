@@ -444,75 +444,25 @@
     return cookie;
 }
 
-
-//- (NSArray *)fillHoles {
-//    NSMutableArray *columns = [NSMutableArray array];
-//    
-//    [self sectionsForCookieMovements];
-//    
-//    for (NSArray *section in [self sectionsForCookieMovements]) {
-//        NSMutableArray *array;
-//        for (NSInteger i = [section count] - 1; i >= 0; i--) {
-//            BBQTile *tile = section[i];
-//            if (tile.requiresACookie && _cookies[tile.column][tile.row] == nil) {
-//                for (NSInteger lookup = i - 1; lookup >= 0 ; lookup --) {
-//                    BBQTile *tileAbove = section[lookup];
-//                    BBQCookie *cookie = _cookies[tileAbove.column][tileAbove.row];
-//                    
-//                    if (cookie != nil) {
-//                        _cookies[tileAbove.column][tileAbove.row] = nil;
-//                        _cookies[tile.column][tile.row] = cookie;
-//                        cookie.row = tile.row;
-//                        
-//                        if (!array) {
-//                            array = [NSMutableArray array];
-//                            [columns addObject:array];
-//                        }
-//                        [array addObject:cookie];
-//                        
-//                        break;
-//                    }
-//                }
-//
-//            }
-//        }
-//    }
-//    
-//    return columns;
-//}
-
 - (NSArray *)fillHoles {
     NSMutableArray *cookiesToMove = [NSMutableArray array];
     
-    //Push all cookies down
-    for (NSInteger column = 0; column < NumColumns; column++) {
-        for (NSInteger row = 0; row < NumRows; row++) {
-            if (_tiles[column][row].requiresACookie && _cookies[column][row] == nil) {
-                for (NSInteger lookup = row + 1; lookup < NumRows; lookup++) {
-                    BBQTile *tile = _tiles[column][lookup];
-                    if (tile.isABlocker) {
-                        break;
-                    }
-                    
-                    BBQCookie *cookie = _cookies[column][lookup];
-                    if (cookie != nil) {
-                        _cookies[column][lookup] = nil;
-                        _cookies[column][row] = cookie;
-                        cookie.row = row;
-                        
-                        BBQStraightMovement *movement = [[BBQStraightMovement alloc] initWithDestinationColumn:column row:row];
-                        [cookie addMovement:movement];
-                        if ([cookiesToMove containsObject:cookie] == NO) {
-                            [cookiesToMove addObject:cookie];
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-    }
+    NSInteger straightCount = [self straightDroppingCookiesWithArray:cookiesToMove];
+    NSInteger newCookieCount = [self newCookiesToAnimateWithArray:cookiesToMove];
+    NSInteger diagonalCount = 100;
     
-    //Add in new cookies
+    while (straightCount > 0 && newCookieCount > 0 && diagonalCount > 0) {
+        diagonalCount = [self diagonalDroppingCookiesWithArray:cookiesToMove];
+        straightCount = [self straightDroppingCookiesWithArray:cookiesToMove];
+        newCookieCount = [self newCookiesToAnimateWithArray:cookiesToMove];
+    }
+
+    return cookiesToMove;
+    
+}
+
+- (NSInteger)newCookiesToAnimateWithArray:(NSMutableArray *)array {
+    NSInteger count = 0;
     NSUInteger cookieType = 0;
     for (BBQTile *startingTile in [self startingTilesForToppingUpWithNewCookies]) {
         NSInteger column = startingTile.column;
@@ -529,45 +479,166 @@
                 _cookies[column][row] = newCookie;
                 
                 BBQStraightMovement *movement = [[BBQStraightMovement alloc] initWithDestinationColumn:column row:row];
+                movement.startColumn = column;
+                movement.startRow = 9;
                 movement.isNewCookie = YES;
                 movement.numberOfTilesToPauseForNewCookie = row - startingTile.row;
                 [newCookie addMovement:movement];
                 
-                if ([cookiesToMove containsObject:newCookie] == NO) {
-                    [cookiesToMove addObject:newCookie];
+                if ([array containsObject:newCookie] == NO) {
+                    [array addObject:newCookie];
+                }
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+- (NSInteger)straightDroppingCookiesWithArray:(NSMutableArray *)array {
+    //Push all cookies down
+    NSInteger count = 0;
+    for (NSInteger column = 0; column < NumColumns; column++) {
+        for (NSInteger row = 0; row < NumRows; row++) {
+            if (_tiles[column][row].requiresACookie && _cookies[column][row] == nil) {
+                for (NSInteger lookup = row + 1; lookup < NumRows; lookup++) {
+                    BBQTile *tile = _tiles[column][lookup];
+                    if (tile.isABlocker) {
+                        break;
+                    }
+                    
+                    BBQCookie *cookie = _cookies[column][lookup];
+                    if (cookie != nil) {
+                        _cookies[column][lookup] = nil;
+                        _cookies[column][row] = cookie;
+                        cookie.row = row;
+                        
+                        BBQStraightMovement *movement = [[BBQStraightMovement alloc] initWithDestinationColumn:column row:row];
+                        movement.startColumn = column;
+                        movement.startRow = lookup;
+                        [cookie addMovement:movement];
+                        if ([array containsObject:cookie] == NO) {
+                            [array addObject:cookie];
+                        }
+                        count++;
+                        break;
+                    }
                 }
             }
         }
     }
-    
-    
-    
-    
-//    NSUInteger cookieType = 0;
-//    for (NSInteger column = 0; column < NumColumns; column++) {
-//        for (NSInteger row = NumRows - 1; row >= 0; row --) {
-//            BBQTile *tile = _tiles[column][row];
-//            if (tile.isABlocker || _cookies[column][row] != nil) {
-//                break;
-//            }
-//            else if (tile.requiresACookie && _cookies[column][row] == nil) {
-//                NSUInteger newCookieType;
-//                do {
-//                    newCookieType = arc4random_uniform(NumStartingCookies) + 1;
-//                }
-//                while (newCookieType == cookieType);
-//                cookieType = newCookieType;
-//                
-//                _cookies[column][row] = [self createCookieAtColumn:column row:row withType:cookieType];
-//                [cookiesToMove addObject:_cookies[column][row]];
-//            }
-//        }
-//    }
-    
-    
-    
-    return cookiesToMove;
-    
+    return count;
+}
+
+- (NSInteger)diagonalDroppingCookiesWithArray:(NSMutableArray *)array {
+    //Diagonal drops
+    NSInteger count = 0;
+    for (NSInteger row = 0; row < NumRows; row ++) {
+        for (NSInteger column = 0; column < NumColumns; column ++) {
+            if (_tiles[column][row].requiresACookie && _cookies[column][row] == nil) {
+                
+                //Figure out if a diagonal cookie can be put in this spot (i.e. there are no cookies above it)
+                BOOL needsADiagonalCookie = YES;
+                for (NSInteger lookup = row + 1; lookup < NumRows - 1; lookup++) {
+                    BBQTile *tile = _tiles[column][lookup];
+                    BBQCookie *cookie = _cookies[column][lookup];
+                    if (cookie) {
+                        needsADiagonalCookie = NO;
+                        break;
+                    }
+                    else if (tile.isABlocker) {
+                        break;
+                    }
+                }
+                
+                if (needsADiagonalCookie) {
+                    NSInteger random = arc4random_uniform(2) + 1;
+                    BBQCookie *potentialCookie;
+                    BBQCookie *potentialCookieTwo;
+                    if (random == 1) {
+                        if (column >= 1) {
+                            potentialCookie = _cookies[column - 1][row + 1];
+                            if (column <= NumColumns - 2) {
+                                potentialCookieTwo = _cookies[column + 1][row + 1];
+                            }
+                        }
+                        else  {
+                            potentialCookie = _cookies[column + 1][row + 1];
+                        }
+                    }
+                    else {
+                        if (column <= NumColumns - 2) {
+                            potentialCookie = _cookies[column + 1][row + 1];
+                            if (column >= 1) {
+                                potentialCookieTwo = _cookies[column - 1][row + 1];
+                            }
+                        }
+                        else {
+                            potentialCookie = _cookies[column - 1][row + 1];
+                        }
+                    }
+                    
+                    BBQCookie *actualCookieToMove;
+                    if (potentialCookie != nil) {
+                        actualCookieToMove = potentialCookie;
+                    }
+                    else if (potentialCookieTwo != nil) {
+                        actualCookieToMove = potentialCookieTwo;
+                    }
+                    
+                    if (actualCookieToMove) {
+                        
+                        //Add in the pause movements
+                        BBQCookie *cookieBelow;
+                        for (NSInteger lookDown = row - 1; lookDown >= 0; lookDown --) {
+                            if (_cookies[column][lookDown]) {
+                                cookieBelow = _cookies[column][lookDown];
+                                break;
+                            }
+                        }
+                        
+                        NSInteger waitingTime = 0;
+                        if (cookieBelow) {
+                            for (id movement in cookieBelow.movements) {
+                                if ([movement isKindOfClass:[BBQStraightMovement class]]) {
+                                    BBQStraightMovement *straightMovement = movement;
+                                    waitingTime = waitingTime + (straightMovement.startRow - straightMovement.destinationRow);
+                                }
+                                else if ([movement isKindOfClass:[BBQDiagonalMovement class]]) {
+                                    waitingTime = waitingTime + 1;
+                                }
+                                else if ([movement isKindOfClass:[BBQPauseMovement class]]) {
+                                    BBQPauseMovement *pause = movement;
+                                    waitingTime = waitingTime + pause.numberOfTileMovementsToPauseFor;
+                                }
+                            }
+                        }
+                        BBQPauseMovement *pauseMovement = [[BBQPauseMovement alloc] init];
+                        pauseMovement.numberOfTileMovementsToPauseFor = waitingTime;
+                        [actualCookieToMove addMovement:pauseMovement];
+
+                        //Create the diagonal movements
+                        _cookies[actualCookieToMove.column][actualCookieToMove.row] = nil;
+                        _cookies[column][row] = actualCookieToMove;
+                        BBQDiagonalMovement *movement = [[BBQDiagonalMovement alloc] initWithDestinationColumn:column row:row];
+                        [actualCookieToMove addMovement:movement];
+                        movement.startColumn = actualCookieToMove.column;
+                        movement.startRow = actualCookieToMove.row;
+                        
+                        actualCookieToMove.column = column;
+                        actualCookieToMove.row = row;
+                        
+                        if ([array containsObject:actualCookieToMove] == NO) {
+                            [array addObject:actualCookieToMove];
+                        }
+                        count++;
+                        
+                    }
+                }
+            }
+        }
+    }
+    return count;
 }
 
 
