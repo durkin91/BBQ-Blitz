@@ -521,8 +521,11 @@
 
 - (BBQCookie *)cookieAboveColumn:(NSInteger)column row:(NSInteger)row {
     BBQCookie *cookieAbove;
-    if (row < NumRows - 1) {
-        cookieAbove = _cookies[column][row + 1];
+    for (NSInteger lookup = row + 1; lookup < NumRows; lookup ++) {
+        if (_tiles[column][lookup].tileType != 0) {
+            cookieAbove = _cookies[column][lookup];
+            break;
+        }
     }
     return cookieAbove;
 }
