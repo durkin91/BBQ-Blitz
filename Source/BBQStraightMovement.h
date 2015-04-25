@@ -17,6 +17,6 @@
 @property (assign, nonatomic) BOOL isNewCookie;
 @property (assign, nonatomic) NSInteger numberOfTilesToPauseForNewCookie;
 
-- (instancetype)initWithDestinationColumn:(NSInteger)column row:(NSInteger)row;
+- (instancetype)initWithStartColumn:(NSInteger)startColumn startRow:(NSInteger)startRow destinationColumn:(NSInteger)destinationColumn destinationRow:(NSInteger)destinationRow;
 
 @end

@@ -10,6 +10,4 @@
 
 @interface BBQPauseMovement : NSObject
 
-@property (assign, nonatomic) NSInteger numberOfTileMovementsToPauseFor;
-
 @end

@@ -10,11 +10,13 @@
 
 @implementation BBQDiagonalMovement
 
-- (instancetype)initWithDestinationColumn:(NSInteger)column row:(NSInteger)row {
+- (instancetype)initWithStartColumn:(NSInteger)startColumn startRow:(NSInteger)startRow destinationColumn:(NSInteger)destinationColumn destinationRow:(NSInteger)destinationRow {
     self = [super init];
     if (self) {
-        _destinationColumn = column;
-        _destinationRow = row;
+        _destinationColumn = destinationColumn;
+        _destinationRow = destinationRow;
+        _startColumn = startColumn;
+        _startRow = startRow;
     }
     return self;
 }

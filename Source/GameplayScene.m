@@ -665,34 +665,28 @@ static const CGFloat TileHeight = 36.0;
         for (NSInteger i = 0; i < [cookie.movements count]; i++) {
             id movement = cookie.movements[i];
             CCAction *action;
-            NSTimeInterval duration = 0;
             if ([movement isKindOfClass:[BBQStraightMovement class]]) {
                 BBQStraightMovement *straightMovement = movement;
                 if (straightMovement.isNewCookie) {
-                    NSInteger startRow = NumRows;
-                    BBQCookieNode *sprite = [self createCookieNodeForCookie:cookie column:straightMovement.destinationColumn row:startRow highlighted:NO];
+                    BBQCookieNode *sprite = [self createCookieNodeForCookie:cookie column:straightMovement.destinationColumn row:straightMovement.startRow highlighted:NO];
                     cookie.sprite = sprite;
                 }
                 
                 CGPoint newPosition = [GameplayScene pointForColumn:straightMovement.destinationColumn row:straightMovement.destinationRow];
                 
-                duration = ((cookie.sprite.position.y - newPosition.y) / TileHeight) * tileDuration;
-                
-                action = [CCActionMoveTo actionWithDuration:duration position:newPosition];
+                action = [CCActionMoveTo actionWithDuration:tileDuration position:newPosition];
             }
             else if ([movement isKindOfClass:[BBQDiagonalMovement class]]) {
                 BBQDiagonalMovement *diagonalMovement = movement;
                 CGPoint newPosition = [GameplayScene pointForColumn:diagonalMovement.destinationColumn row:diagonalMovement.destinationRow];
-                duration = tileDuration;
-                action = [CCActionMoveTo actionWithDuration:duration position:newPosition];
+                action = [CCActionMoveTo actionWithDuration:tileDuration position:newPosition];
             }
             
             else if ([movement isKindOfClass:[BBQPauseMovement class]]) {
-                BBQPauseMovement *pauseMovement = movement;
-                action = [CCActionDelay actionWithDuration:pauseMovement.numberOfTileMovementsToPauseFor * tileDuration];
+                action = [CCActionDelay actionWithDuration:tileDuration];
             }
             
-            totalDuration = totalDuration + duration;
+            totalDuration = totalDuration + tileDuration;
             if (action) {
                 [array addObject:action];
             }
