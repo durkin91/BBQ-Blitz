@@ -454,9 +454,8 @@
             }
         }
     }
-    
-    NSInteger changesCount = [self fillHolesLogic:cookiesToMove numberOfRounds:1];
-    NSInteger numberOfRounds = 2;
+    NSInteger changesCount = 100;
+    NSInteger numberOfRounds = 1;
     while (changesCount > 0) {
         changesCount = [self fillHolesLogic:cookiesToMove numberOfRounds:numberOfRounds];
         numberOfRounds ++;
@@ -477,7 +476,7 @@
                 //First priority: check if there is a cookie above it that can be moved down one tile
                 BBQCookie *cookieAbove = [self cookieAboveColumn:column row:row];
                 if (cookieAbove) {
-                    [self handleCookieAbove:cookieAbove];
+                    [self handleCookieAbove:cookieAbove andPlaceOnRow:row];
                     count++;
                 }
                 
@@ -553,14 +552,14 @@
     cookieDiagonally.row = row;
 }
 
-- (void)handleCookieAbove:(BBQCookie *)cookieAbove {
+- (void)handleCookieAbove:(BBQCookie *)cookieAbove andPlaceOnRow:(NSInteger)row {
     _cookies[cookieAbove.column][cookieAbove.row] = nil;
-    _cookies[cookieAbove.column][cookieAbove.row - 1] = cookieAbove;
+    _cookies[cookieAbove.column][row] = cookieAbove;
     
-    BBQStraightMovement *movement = [[BBQStraightMovement alloc] initWithStartColumn:cookieAbove.column startRow:cookieAbove.row destinationColumn:cookieAbove.column destinationRow:cookieAbove.row - 1];
+    BBQStraightMovement *movement = [[BBQStraightMovement alloc] initWithStartColumn:cookieAbove.column startRow:cookieAbove.row destinationColumn:cookieAbove.column destinationRow:row];
     [cookieAbove addMovement:movement];
     
-    cookieAbove.row = cookieAbove.row - 1;
+    cookieAbove.row = row;
 }
 
 //- (BOOL)cookiesBelowAreAllSettled:(BBQCookie *)cookie {
@@ -1213,7 +1212,31 @@
     return _tiles[column][row];
 }
 
+#pragma mark - Debugging methods
 
+- (void)logCookies {
+    for (NSInteger row = 0; row < NumRows; row ++) {
+        for (NSInteger column = 0; column < NumColumns; column++) {
+            if (_cookies[column][row]) {
+                NSLog(@"(%i, %i) is 1", column, row);
+            }
+            else {
+                NSLog(@"(%i, %i) is 0", column, row);
+            }
+        }
+    }
+}
+
+- (void)logCookiesForColumn:(NSInteger)column {
+    for (NSInteger row = NumRows - 1; row >= 0; row --) {
+        if (_cookies[column][row]) {
+            NSLog(@"(%i, %i) is 1", column, row);
+        }
+        else {
+            NSLog(@"(%i, %i) is 0", column, row);
+        }
+    }
+}
 
 
 
