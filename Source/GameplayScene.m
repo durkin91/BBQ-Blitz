@@ -656,7 +656,7 @@ static const CGFloat TileHeight = 36.0;
 - (NSTimeInterval)animateFallingAndNewCookies:(NSArray *)cookiesToMove completion:(dispatch_block_t)completion {
     
     NSTimeInterval longestDuration = 0;
-    NSTimeInterval tileDuration = 0.2;
+    NSTimeInterval tileDuration = 3.0;
     NSTimeInterval delay = 0.5;
     
     for (BBQCookie *cookie in cookiesToMove) {

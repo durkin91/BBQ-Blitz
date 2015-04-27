@@ -605,11 +605,11 @@
 - (BOOL)isBelowFallingCookiesForColumn:(NSInteger)column row:(NSInteger)row {
     BOOL answer = NO;
     for (NSInteger lookup = row + 1; lookup < NumRows; lookup ++) {
-        if (_cookies[column][lookup] != nil) {
+        if (_tiles[column][lookup].isABlocker == NO) {
             answer = YES;
-            break;
         }
-        else if (_tiles[column][lookup].isABlocker) {
+        else {
+            answer = NO;
             break;
         }
     }
