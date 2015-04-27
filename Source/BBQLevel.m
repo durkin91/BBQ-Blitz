@@ -678,7 +678,7 @@
         for (NSInteger lookdown = row - 1; lookdown >= 0; lookdown --) {
             BBQCookie *cookieBelow = _cookies[column][lookdown];
             if (cookieBelow) {
-                if ([[cookieBelow.movements lastObject] isKindOfClass:[BBQPauseMovement class]]) {
+                if ([self isCookieBelowSettledForColumn:column row:lookdown]) {
                     return YES;
                 }
                 else {
