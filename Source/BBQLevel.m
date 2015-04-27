@@ -484,12 +484,9 @@
                 //Second priority: Can it receive a cookie diagonally?
                 else {
                     BBQCookie *cookieDiagonally = [self diagonalCookieToMoveForColumn:column row:row];
-                    if (cookieDiagonally) {
-                        
-                        if ([self isCookieBelowSettledForColumn:cookieDiagonally.column row:cookieDiagonally.row] && ![self isBelowFallingCookiesForColumn:column row:row]) {
-                            [self handleCookieDiagonally:cookieDiagonally column:column row:row];
-                            count++;
-                        }
+                    if (cookieDiagonally && [self isCookieBelowSettledForColumn:cookieDiagonally.column row:cookieDiagonally.row] && ![self isBelowFallingCookiesForColumn:column row:row]) {
+                        [self handleCookieDiagonally:cookieDiagonally column:column row:row];
+                        count ++;
                     }
                     
                     //Third Priority: Check if it is at the top of the board, and can have a new cookie assigned to it
@@ -676,32 +673,32 @@
 }
 
 - (BOOL)isCookieBelowSettledForColumn:(NSInteger)column row:(NSInteger)row {
-    BOOL isOk = NO;
     if (row > 0) {
-        if (_tiles[column][row - 1].isABlocker) {
-            isOk = YES;
-        }
-        else if ([[_cookies[column][row - 1].movements lastObject] isKindOfClass:[BBQPauseMovement class]]) {
-            isOk = YES;
-        }
-        
-        else {
-            for (NSInteger lookdown = row - 1; lookdown >= 0; lookdown --) {
-                if (_tiles[column][lookdown].tileType == 0) {
-                    isOk = YES;
+        BOOL isOk = YES;
+        for (NSInteger lookdown = row - 1; lookdown >= 0; lookdown --) {
+            BBQCookie *cookieBelow = _cookies[column][lookdown];
+            if (cookieBelow) {
+                if ([[cookieBelow.movements lastObject] isKindOfClass:[BBQPauseMovement class]]) {
+                    return YES;
                 }
                 else {
-                    isOk = NO;
-                    break;
+                    return NO;
                 }
             }
+            else if (_tiles[column][lookdown].isABlocker) {
+                return YES;
+            }
+            
+            else if (_tiles[column][lookdown].requiresACookie && cookieBelow == nil) {
+                return NO;
+            }
         }
-    }
-    else if (row == 0) {
-        isOk = YES;
+        return isOk;
     }
     
-    return isOk;
+    else {
+        return YES;
+    }
 
 }
 
