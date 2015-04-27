@@ -17,6 +17,7 @@
         _destinationRow = destinationRow;
         _startColumn = startColumn;
         _startRow = startRow;
+        _isReEmergingFromGap = NO;
     }
     return self;
 }

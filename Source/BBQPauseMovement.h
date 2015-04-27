@@ -11,5 +11,6 @@
 @interface BBQPauseMovement : NSObject
 
 @property (assign, nonatomic) NSInteger numberOfTilesToPauseFor;
+@property (assign, nonatomic) BOOL isForReEmergingCookie;
 
 @end

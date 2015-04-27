@@ -226,52 +226,52 @@
     NSMutableDictionary *limits = [NSMutableDictionary dictionary];
     
     //look above cookie
-    [limits setObject:cookie forKey:UP];
+    [limits setObject:_tiles[cookie.column][cookie.row] forKey:UP];
     for (NSInteger i = cookie.row + 1; i < NumRows; i++) {
-        BBQCookie *potentialCookie = _cookies[cookie.column][i];
-        if (potentialCookie) {
-            [limits setObject:potentialCookie forKey:UP];
-        }
-        else if (!potentialCookie) {
+        BBQTile *tile = _tiles[cookie.column][i];
+        if (tile.isABlocker || tile.tileType == 0) {
             break;
+        }
+        else {
+            [limits setObject:tile forKey:UP];
         }
     }
     
     
     
     //look below cookie
-    [limits setObject:cookie forKey:DOWN];
+    [limits setObject:_tiles[cookie.column][cookie.row] forKey:DOWN];
     for (NSInteger i = cookie.row - 1; i >= 0; i--) {
-        BBQCookie *potentialCookie = _cookies[cookie.column][i];
-        if (potentialCookie) {
-            [limits setObject:potentialCookie forKey:DOWN];
-        }
-        else if (!potentialCookie) {
+        BBQTile *tile = _tiles[cookie.column][i];
+        if (tile.isABlocker || tile.tileType == 0) {
             break;
+        }
+        else {
+            [limits setObject:tile forKey:DOWN];
         }
     }
     
     //look to left of cookie
-    [limits setObject:cookie forKey:LEFT];
+    [limits setObject:_tiles[cookie.column][cookie.row] forKey:LEFT];
     for (NSInteger i = cookie.column - 1; i >= 0; i--) {
-        BBQCookie *potentialCookie = _cookies[i][cookie.row];
-        if (potentialCookie) {
-            [limits setObject:potentialCookie forKey:LEFT];
-        }
-        else if (!potentialCookie) {
+        BBQTile *tile = _tiles[i][cookie.row];
+        if (tile.isABlocker || tile.tileType == 0) {
             break;
+        }
+        else {
+            [limits setObject:tile forKey:LEFT];
         }
     }
     
     //look to right of cookie
-    [limits setObject:cookie forKey:RIGHT];
+    [limits setObject:_tiles[cookie.column][cookie.row] forKey:RIGHT];
     for (NSInteger i = cookie.column + 1; i < NumColumns; i++) {
-        BBQCookie *potentialCookie = _cookies[i][cookie.row];
-        if (potentialCookie) {
-            [limits setObject:potentialCookie forKey:RIGHT];
-        }
-        else if (!potentialCookie) {
+        BBQTile *tile = _tiles[i][cookie.row];
+        if (tile.isABlocker || tile.tileType == 0) {
             break;
+        }
+        else {
+            [limits setObject:tile forKey:RIGHT];
         }
     }
     
@@ -479,7 +479,6 @@
                 if ([testMovement isKindOfClass:[BBQStraightMovement class]]) {
                     BBQStraightMovement *current = currentMovement;
                     BBQStraightMovement *movementToCombine = testMovement;
-                    
                     current.destinationRow = movementToCombine.destinationRow;
                 }
                 
@@ -488,10 +487,6 @@
                     current.numberOfTilesToPauseFor ++;
                 }
             }
-//            else if ([testMovement isKindOfClass:[BBQDiagonalMovement class]]) {
-//                [consolidatedCookies addObject:testMovement];
-//                currentMovement = testMovement;
-//            }
             
             else {
                 currentMovement = testMovement;

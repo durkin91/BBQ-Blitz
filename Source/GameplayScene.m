@@ -552,27 +552,27 @@ static const CGFloat TileHeight = 36.0;
     [self convertPoint:endPoint toColumn:&columnAdjusted row:&rowAdjusted];
     
     if (endPoint.y > rootPoint.y) {
-        BBQCookie *upperLimitCookie = self.rootCookieLimits[UP];
-        CGPoint upperLimit = [GameplayScene pointForColumn:upperLimitCookie.column row:upperLimitCookie.row];
-        endPoint.y = MIN(endPoint.y, upperLimit.y);
+        BBQTile *upperLimit = self.rootCookieLimits[UP];
+        CGPoint upperLimitPoint = [GameplayScene pointForColumn:upperLimit.column row:upperLimit.row];
+        endPoint.y = MIN(endPoint.y, upperLimitPoint.y);
     }
     
     else if (endPoint.y < rootPoint.y) {
-        BBQCookie *lowerLimitCookie = self.rootCookieLimits[DOWN];
-        CGPoint lowerLimit = [GameplayScene pointForColumn:lowerLimitCookie.column row:lowerLimitCookie.row];
-        endPoint.y = MAX(endPoint.y, lowerLimit.y);
+        BBQTile *lowerLimit = self.rootCookieLimits[DOWN];
+        CGPoint lowerLimitPoint = [GameplayScene pointForColumn:lowerLimit.column row:lowerLimit.row];
+        endPoint.y = MAX(endPoint.y, lowerLimitPoint.y);
     }
     
     else if (endPoint.x > rootPoint.x) {
-        BBQCookie *rightLimitCookie = self.rootCookieLimits[RIGHT];
-        CGPoint rightLimit = [GameplayScene pointForColumn:rightLimitCookie.column row:rightLimitCookie.row];
-        endPoint.x = MIN(endPoint.x, rightLimit.x);
+        BBQCookie *rightLimit = self.rootCookieLimits[RIGHT];
+        CGPoint rightLimitPoint = [GameplayScene pointForColumn:rightLimit.column row:rightLimit.row];
+        endPoint.x = MIN(endPoint.x, rightLimitPoint.x);
     }
     
     else if (endPoint.x < rootPoint.x) {
-        BBQCookie *leftLimitCookie = self.rootCookieLimits[LEFT];
-        CGPoint leftLimit = [GameplayScene pointForColumn:leftLimitCookie.column row:leftLimitCookie.row];
-        endPoint.x = MAX(endPoint.x, leftLimit.x);
+        BBQTile *leftLimit = self.rootCookieLimits[LEFT];
+        CGPoint leftLimitPoint = [GameplayScene pointForColumn:leftLimit.column row:leftLimit.row];
+        endPoint.x = MAX(endPoint.x, leftLimitPoint.x);
     }
     
     BOOL isBacktracking = [self isBacktracking:endPoint rootPoint:rootPoint];
@@ -656,7 +656,7 @@ static const CGFloat TileHeight = 36.0;
 - (NSTimeInterval)animateFallingAndNewCookies:(NSArray *)cookiesToMove completion:(dispatch_block_t)completion {
     
     NSTimeInterval longestDuration = 0;
-    NSTimeInterval tileDuration = 3.0;
+    NSTimeInterval tileDuration = 0.25;
     NSTimeInterval delay = 0.5;
     
     for (BBQCookie *cookie in cookiesToMove) {
