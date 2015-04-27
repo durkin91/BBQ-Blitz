@@ -10,4 +10,12 @@
 
 @implementation BBQPauseMovement
 
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.numberOfTilesToPauseFor = 1;
+    }
+    return self;
+}
+
 @end

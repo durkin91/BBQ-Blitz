@@ -665,28 +665,32 @@ static const CGFloat TileHeight = 36.0;
         for (NSInteger i = 0; i < [cookie.movements count]; i++) {
             id movement = cookie.movements[i];
             CCAction *action;
+            NSTimeInterval duration = 0;
             if ([movement isKindOfClass:[BBQStraightMovement class]]) {
                 BBQStraightMovement *straightMovement = movement;
                 if (straightMovement.isNewCookie) {
                     BBQCookieNode *sprite = [self createCookieNodeForCookie:cookie column:straightMovement.destinationColumn row:straightMovement.startRow highlighted:NO];
                     cookie.sprite = sprite;
                 }
-                
+                duration = (straightMovement.startRow - straightMovement.destinationRow) * tileDuration;
                 CGPoint newPosition = [GameplayScene pointForColumn:straightMovement.destinationColumn row:straightMovement.destinationRow];
                 
-                action = [CCActionMoveTo actionWithDuration:tileDuration position:newPosition];
+                action = [CCActionMoveTo actionWithDuration:duration position:newPosition];
             }
             else if ([movement isKindOfClass:[BBQDiagonalMovement class]]) {
                 BBQDiagonalMovement *diagonalMovement = movement;
                 CGPoint newPosition = [GameplayScene pointForColumn:diagonalMovement.destinationColumn row:diagonalMovement.destinationRow];
                 action = [CCActionMoveTo actionWithDuration:tileDuration position:newPosition];
+                duration = tileDuration;
             }
             
             else if ([movement isKindOfClass:[BBQPauseMovement class]]) {
-                action = [CCActionDelay actionWithDuration:tileDuration];
+                BBQPauseMovement *pause = movement;
+                duration = pause.numberOfTilesToPauseFor * tileDuration;
+                action = [CCActionDelay actionWithDuration:duration];
             }
             
-            totalDuration = totalDuration + tileDuration;
+            totalDuration = totalDuration + duration;
             if (action) {
                 [array addObject:action];
             }

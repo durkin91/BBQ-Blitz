@@ -460,9 +460,46 @@
         changesCount = [self fillHolesLogic:cookiesToMove numberOfRounds:numberOfRounds];
         numberOfRounds ++;
     }
+    
+    [self consolidateCookieMoves:cookiesToMove];
 
     return cookiesToMove;
     
+}
+
+-(void)consolidateCookieMoves:(NSArray *)cookiesToMove {
+    for (BBQCookie *cookie in cookiesToMove) {
+        NSMutableArray *consolidatedMovements = [NSMutableArray array];
+        id currentMovement = [cookie.movements firstObject];
+        [consolidatedMovements addObject:currentMovement];
+        for (NSInteger i = 1; i < [cookie.movements count]; i++) {
+            id testMovement = cookie.movements[i];
+            if ([currentMovement isKindOfClass:[testMovement class]] && [currentMovement isKindOfClass:[BBQDiagonalMovement class]] == NO) {
+                
+                if ([testMovement isKindOfClass:[BBQStraightMovement class]]) {
+                    BBQStraightMovement *current = currentMovement;
+                    BBQStraightMovement *movementToCombine = testMovement;
+                    
+                    current.destinationRow = movementToCombine.destinationRow;
+                }
+                
+                else if ([testMovement isKindOfClass:[BBQPauseMovement class]]) {
+                    BBQPauseMovement *current = currentMovement;
+                    current.numberOfTilesToPauseFor ++;
+                }
+            }
+//            else if ([testMovement isKindOfClass:[BBQDiagonalMovement class]]) {
+//                [consolidatedCookies addObject:testMovement];
+//                currentMovement = testMovement;
+//            }
+            
+            else {
+                currentMovement = testMovement;
+                [consolidatedMovements addObject:currentMovement];
+            }
+        }
+        cookie.movements = consolidatedMovements;
+    }
 }
 
 - (NSInteger)fillHolesLogic:(NSMutableArray *)array numberOfRounds:(NSInteger)numberOfRounds {
