@@ -18,6 +18,7 @@
         _startColumn = startColumn;
         _startRow = startRow;
         _isReEmergingFromGap = NO;
+        _isDisappearingThroughGap = NO;
     }
     return self;
 }

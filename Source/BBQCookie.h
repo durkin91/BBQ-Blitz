@@ -11,6 +11,9 @@
 #import "BBQTile.h"
 #import "BBQPowerup.h"
 
+#define SPRITE @"Sprite"
+#define MOVEMENTS @"Movements"
+
 @class BBQCookieOrder;
 @class BBQCombo;
 @class BBQChain;
@@ -42,5 +45,6 @@ static const NSUInteger NumStartingCookies = 2;
 - (void)setScoreForCookieInChain:(BBQChain *)chain;
 - (void)addCookieOrder:(NSArray *)cookieOrders;
 - (void)addMovement:(id)movement;
+
 
 @end

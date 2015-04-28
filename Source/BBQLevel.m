@@ -445,10 +445,17 @@
 - (NSArray *)fillHoles {
     NSMutableArray *cookiesToMove = [NSMutableArray array];
     
+    //Add all cookies to the cookies to move array, and set up the first dictionary
     for (NSInteger column = 0; column < NumColumns; column ++) {
         for (NSInteger row = 0; row < NumRows; row ++) {
             if (_cookies[column][row]) {
                 [cookiesToMove addObject:_cookies[column][row]];
+                NSMutableDictionary *dictionary = [@{
+                                             SPRITE : _cookies[column][row].sprite,
+                                             MOVEMENTS : [NSMutableArray array],
+                                             } mutableCopy];
+                _cookies[column][row].movements = [NSMutableArray array];
+                [_cookies[column][row].movements addObject:dictionary];
             }
         }
     }
@@ -467,31 +474,39 @@
 
 -(void)consolidateCookieMoves:(NSArray *)cookiesToMove {
     for (BBQCookie *cookie in cookiesToMove) {
-        NSMutableArray *consolidatedMovements = [NSMutableArray array];
-        id currentMovement = [cookie.movements firstObject];
-        [consolidatedMovements addObject:currentMovement];
-        for (NSInteger i = 1; i < [cookie.movements count]; i++) {
-            id testMovement = cookie.movements[i];
-            if ([currentMovement isKindOfClass:[testMovement class]] && [currentMovement isKindOfClass:[BBQDiagonalMovement class]] == NO) {
-                
-                if ([testMovement isKindOfClass:[BBQStraightMovement class]]) {
-                    BBQStraightMovement *current = currentMovement;
-                    BBQStraightMovement *movementToCombine = testMovement;
-                    current.destinationRow = movementToCombine.destinationRow;
+        for (NSMutableDictionary *dictionary in cookie.movements) {
+            NSArray *movements = dictionary[MOVEMENTS];
+            NSMutableArray *consolidatedMovements = [NSMutableArray array];
+            id currentMovement = [movements firstObject];
+            [consolidatedMovements addObject:currentMovement];
+            for (NSInteger i = 1; i < [movements count]; i++) {
+                id testMovement = movements[i];
+                if ([currentMovement isKindOfClass:[testMovement class]] && [currentMovement isKindOfClass:[BBQDiagonalMovement class]] == NO) {
+                    
+                    if ([testMovement isKindOfClass:[BBQStraightMovement class]]) {
+                        BBQStraightMovement *current = currentMovement;
+                        BBQStraightMovement *movementToCombine = testMovement;
+                        current.destinationRow = movementToCombine.destinationRow;
+                        current.isDisappearingThroughGap = movementToCombine.isDisappearingThroughGap;
+                        if (current.isReEmergingFromGap == NO) {
+                            current.isReEmergingFromGap = movementToCombine.isReEmergingFromGap;
+                        }
+                    }
+                    
+                    else if ([testMovement isKindOfClass:[BBQPauseMovement class]]) {
+                        BBQPauseMovement *current = currentMovement;
+                        current.numberOfTilesToPauseFor ++;
+                    }
                 }
                 
-                else if ([testMovement isKindOfClass:[BBQPauseMovement class]]) {
-                    BBQPauseMovement *current = currentMovement;
-                    current.numberOfTilesToPauseFor ++;
+                else {
+                    currentMovement = testMovement;
+                    [consolidatedMovements addObject:currentMovement];
                 }
             }
             
-            else {
-                currentMovement = testMovement;
-                [consolidatedMovements addObject:currentMovement];
-            }
+            [dictionary setObject:consolidatedMovements forKey:MOVEMENTS];
         }
-        cookie.movements = consolidatedMovements;
     }
 }
 
@@ -506,7 +521,7 @@
                 //First priority: check if there is a cookie above it that can be moved down one tile
                 BBQCookie *cookieAbove = [self cookieAboveColumn:column row:row];
                 if (cookieAbove) {
-                    [self handleCookieAbove:cookieAbove andPlaceOnRow:row];
+                    [self handleCookieAbove:cookieAbove andPlaceOnRow:row numberOfRounds:numberOfRounds];
                     count++;
                 }
                 
@@ -560,6 +575,12 @@
     NSInteger newCookieType = arc4random_uniform(NumStartingCookies) + 1;
     BBQCookie *newCookie = [self createCookieAtColumn:topTileInColumn.column row:topTileInColumn.row withType:newCookieType];
     _cookies[topTileInColumn.column][topTileInColumn.row] = newCookie;
+    NSMutableDictionary *dictionary = [@{
+                                 SPRITE : [NSNull null],
+                                 MOVEMENTS : [NSMutableArray array],
+                                 } mutableCopy];
+    newCookie.movements = [NSMutableArray array];
+    [newCookie.movements addObject:dictionary];
     
     //Add in pauses
     for (NSInteger i = numberOfRounds; i > 1; i--) {
@@ -582,12 +603,39 @@
     cookieDiagonally.row = row;
 }
 
-- (void)handleCookieAbove:(BBQCookie *)cookieAbove andPlaceOnRow:(NSInteger)row {
+- (void)handleCookieAbove:(BBQCookie *)cookieAbove andPlaceOnRow:(NSInteger)row numberOfRounds:(NSInteger)numberOfRounds {
+    //Firstly, take care of the model side of things
     _cookies[cookieAbove.column][cookieAbove.row] = nil;
     _cookies[cookieAbove.column][row] = cookieAbove;
     
-    BBQStraightMovement *movement = [[BBQStraightMovement alloc] initWithStartColumn:cookieAbove.column startRow:cookieAbove.row destinationColumn:cookieAbove.column destinationRow:row];
-    [cookieAbove addMovement:movement];
+    //Take care of movement of disappearing sprite if necessary
+    if (cookieAbove.row - row == 1) {
+        BBQStraightMovement *movement = [[BBQStraightMovement alloc] initWithStartColumn:cookieAbove.column startRow:cookieAbove.row destinationColumn:cookieAbove.column destinationRow:row];
+        [cookieAbove addMovement:movement];
+    }
+    else if (cookieAbove.row - row > 1) {
+        
+        //Take care of animating the cookie above sprite
+        BBQStraightMovement *movement = [[BBQStraightMovement alloc] initWithStartColumn:cookieAbove.column startRow:cookieAbove.row destinationColumn:cookieAbove.column destinationRow:cookieAbove.row - 1];
+        movement.isDisappearingThroughGap = YES;
+        [cookieAbove addMovement:movement];
+        
+        //Now take care of creating the new sprite, firstly by calculating the number of pauses needed
+        NSMutableDictionary *newSpritesDictionary = [@{
+                                               SPRITE : [NSNull null],
+                                               MOVEMENTS : [NSMutableArray array],
+                                               } mutableCopy];
+        [cookieAbove.movements addObject:newSpritesDictionary];
+        
+        for (NSInteger i = numberOfRounds; i > 1; i--) {
+            BBQPauseMovement *pause = [[BBQPauseMovement alloc] init];
+            [cookieAbove addMovement:pause];
+        }
+        
+        BBQStraightMovement *newSpriteMovement = [[BBQStraightMovement alloc] initWithStartColumn:cookieAbove.column startRow:row + 1 destinationColumn:cookieAbove.column destinationRow:row];
+        newSpriteMovement.isReEmergingFromGap = YES;
+        [cookieAbove addMovement:newSpriteMovement];
+    }
     
     cookieAbove.row = row;
 }

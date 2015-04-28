@@ -16,6 +16,7 @@
 @property (assign, nonatomic) NSInteger startRow;
 @property (assign, nonatomic) BOOL isNewCookie;
 @property (assign, nonatomic) BOOL isReEmergingFromGap;
+@property (assign, nonatomic) BOOL isDisappearingThroughGap;
 @property (assign, nonatomic) NSInteger numberOfTilesToPauseForNewCookie;
 
 - (instancetype)initWithStartColumn:(NSInteger)startColumn startRow:(NSInteger)startRow destinationColumn:(NSInteger)destinationColumn destinationRow:(NSInteger)destinationRow;

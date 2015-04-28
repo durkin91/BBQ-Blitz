@@ -660,47 +660,64 @@ static const CGFloat TileHeight = 36.0;
     NSTimeInterval delay = 0.5;
     
     for (BBQCookie *cookie in cookiesToMove) {
-        NSMutableArray *array = [NSMutableArray array];
-        NSTimeInterval totalDuration = delay;
-        for (NSInteger i = 0; i < [cookie.movements count]; i++) {
-            id movement = cookie.movements[i];
-            CCAction *action;
-            NSTimeInterval duration = 0;
-            if ([movement isKindOfClass:[BBQStraightMovement class]]) {
-                BBQStraightMovement *straightMovement = movement;
-                if (straightMovement.isNewCookie) {
-                    BBQCookieNode *sprite = [self createCookieNodeForCookie:cookie column:straightMovement.destinationColumn row:straightMovement.startRow highlighted:NO];
-                    cookie.sprite = sprite;
+        for (NSMutableDictionary *dictionary in cookie.movements) {
+            NSArray *movements = dictionary[MOVEMENTS];
+            NSMutableArray *array = [NSMutableArray array];
+            NSTimeInterval totalDuration = delay;
+            for (NSInteger i = 0; i < [movements count]; i++) {
+                id movement = movements[i];
+                CCAction *action;
+                NSTimeInterval duration = 0;
+                CCActionRemove *removeSprite;
+                if ([movement isKindOfClass:[BBQStraightMovement class]]) {
+                    BBQStraightMovement *straightMovement = movement;
+                    if (straightMovement.isNewCookie || straightMovement.isReEmergingFromGap) {
+                        BBQCookieNode *sprite = [self createCookieNodeForCookie:cookie column:straightMovement.destinationColumn row:straightMovement.startRow highlighted:NO];
+                        [dictionary setObject:sprite forKey:SPRITE];
+                    }
+                    else if (straightMovement.isDisappearingThroughGap) {
+                        removeSprite = [CCActionRemove action];
+                    }
+                    
+                    duration = (straightMovement.startRow - straightMovement.destinationRow) * tileDuration;
+                    CGPoint newPosition = [GameplayScene pointForColumn:straightMovement.destinationColumn row:straightMovement.destinationRow];
+                    
+                    action = [CCActionMoveTo actionWithDuration:duration position:newPosition];
+                    
                 }
-                duration = (straightMovement.startRow - straightMovement.destinationRow) * tileDuration;
-                CGPoint newPosition = [GameplayScene pointForColumn:straightMovement.destinationColumn row:straightMovement.destinationRow];
+                else if ([movement isKindOfClass:[BBQDiagonalMovement class]]) {
+                    BBQDiagonalMovement *diagonalMovement = movement;
+                    CGPoint newPosition = [GameplayScene pointForColumn:diagonalMovement.destinationColumn row:diagonalMovement.destinationRow];
+                    action = [CCActionMoveTo actionWithDuration:tileDuration position:newPosition];
+                    duration = tileDuration;
+                }
                 
-                action = [CCActionMoveTo actionWithDuration:duration position:newPosition];
-            }
-            else if ([movement isKindOfClass:[BBQDiagonalMovement class]]) {
-                BBQDiagonalMovement *diagonalMovement = movement;
-                CGPoint newPosition = [GameplayScene pointForColumn:diagonalMovement.destinationColumn row:diagonalMovement.destinationRow];
-                action = [CCActionMoveTo actionWithDuration:tileDuration position:newPosition];
-                duration = tileDuration;
+                else if ([movement isKindOfClass:[BBQPauseMovement class]]) {
+                    BBQPauseMovement *pause = movement;
+                    duration = pause.numberOfTilesToPauseFor * tileDuration;
+                    action = [CCActionDelay actionWithDuration:duration];
+                }
+                
+                totalDuration = totalDuration + duration;
+                if (action) {
+                    [array addObject:action];
+                }
+                if (removeSprite) {
+                    [array addObject:removeSprite];
+                }
             }
             
-            else if ([movement isKindOfClass:[BBQPauseMovement class]]) {
-                BBQPauseMovement *pause = movement;
-                duration = pause.numberOfTilesToPauseFor * tileDuration;
-                action = [CCActionDelay actionWithDuration:duration];
-            }
-            
-            totalDuration = totalDuration + duration;
-            if (action) {
-                [array addObject:action];
+            longestDuration = MAX(longestDuration, totalDuration);
+            if ([array count] > 0) {
+                CCActionSequence *sequence = [CCActionSequence actionWithArray:array];
+                BBQCookieNode *sprite = dictionary[SPRITE];
+                [sprite runAction:sequence];
             }
         }
+        NSDictionary *lastDictionary = [cookie.movements lastObject];
+        BBQCookieNode *lastSprite = lastDictionary[SPRITE];
+        cookie.sprite = lastSprite;
         
-        longestDuration = MAX(longestDuration, totalDuration);
-        if ([array count] > 0) {
-            CCActionSequence *sequence = [CCActionSequence actionWithArray:array];
-            [cookie.sprite runAction:sequence];
-        }
         cookie.movements = nil;
     }
 
