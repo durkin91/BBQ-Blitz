@@ -144,8 +144,7 @@
     if ([direction isEqualToString:UP]) {
         //look above cookie
         for (NSInteger i = cookie.row + 1; i < NumRows; i++) {
-            BBQCookie *potentialCookie = _cookies[cookie.column][i];
-            BOOL isFinished = [self checkIfCookieIsValid:potentialCookie rootCookie:cookie existingChain:existingChain array:array];
+            BOOL isFinished = [self checkIfCookieIsValidForColumn:cookie.column row:i rootCookie:cookie existingChain:existingChain array:array];
             if (isFinished) break;
         }
     }
@@ -153,8 +152,7 @@
     else if ([direction isEqualToString:DOWN]) {
         //look below cookie
         for (NSInteger i = cookie.row - 1; i >= 0; i--) {
-            BBQCookie *potentialCookie = _cookies[cookie.column][i];
-            BOOL isFinished = [self checkIfCookieIsValid:potentialCookie rootCookie:cookie existingChain:existingChain array:array];
+            BOOL isFinished = [self checkIfCookieIsValidForColumn:cookie.column row:i rootCookie:cookie existingChain:existingChain array:array];
             if (isFinished) break;
         }
 
@@ -163,8 +161,7 @@
     else if ([direction isEqualToString:LEFT]) {
         //look to left of cookie
         for (NSInteger i = cookie.column - 1; i >= 0; i--) {
-            BBQCookie *potentialCookie = _cookies[i][cookie.row];
-            BOOL isFinished = [self checkIfCookieIsValid:potentialCookie rootCookie:cookie existingChain:existingChain array:array];
+            BOOL isFinished = [self checkIfCookieIsValidForColumn:i row:cookie.row rootCookie:cookie existingChain:existingChain array:array];
             if (isFinished) break;
         }
 
@@ -173,8 +170,7 @@
     else if ([direction isEqualToString:RIGHT]) {
         //look to right of cookie
         for (NSInteger i = cookie.column + 1; i < NumColumns; i++) {
-            BBQCookie *potentialCookie = _cookies[i][cookie.row];
-            BOOL isFinished = [self checkIfCookieIsValid:potentialCookie rootCookie:cookie existingChain:existingChain array:array];
+            BOOL isFinished = [self checkIfCookieIsValidForColumn:i row:cookie.row rootCookie:cookie existingChain:existingChain array:array];
             if (isFinished) break;
         }
 
@@ -185,9 +181,11 @@
 }
 
 //Returns whether you need to break the for loop and stop looking for cookies
-- (BOOL)checkIfCookieIsValid:(BBQCookie *)potentialCookie rootCookie:(BBQCookie *)rootCookie existingChain:(BBQChain *)existingChain array:(NSMutableArray *)array {
+- (BOOL)checkIfCookieIsValidForColumn:(NSInteger)column row:(NSInteger)row rootCookie:(BBQCookie *)rootCookie existingChain:(BBQChain *)existingChain array:(NSMutableArray *)array {
     
-    if (!potentialCookie) {
+    BBQCookie *potentialCookie = _cookies[column][row];
+    
+    if (_tiles[column][row].isABlocker || _tiles[column][row].tileType == 0) {
         return YES;
     }
     
